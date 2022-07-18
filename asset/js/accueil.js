@@ -54,8 +54,8 @@ let monthByName = {
 }
 
 let token = escapeHTML(document.cookie.split('=')[1]);
-
-//connexion au server et identification du client
+let reportcard = {}
+    //connexion au server et identification du client
 socket.emit('joinRoom', {
     token: token
 });
@@ -65,12 +65,41 @@ socket.on('userInfo', data => {
     if (data.status) {
         document.querySelector('.connection-box').remove();
         mainContainer.classList.remove('hide');
-        if (localStorage.getItem('sidebarItem') == "Accueil") {
-            document.querySelector('.user_name > div').innerText = data.userInfo.username;
-            document.querySelector('.user_avatar > img').src = data.userInfo.avatar;
-            document.querySelector('.share-field-icon-1').src = data.userInfo.avatar;
-            document.querySelector('.share-field-icon-2').src = data.userInfo.avatar;
-            document.querySelector('.is_avatar').src = data.userInfo.avatar;
+
+        //get reportcard
+        fetch('/api/getReportcard', {
+            method: 'GET',
+            headers: {
+                'Application-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(res => res.json()).then(data => {
+            reportcard = JSON.parse(data.reportcardJSON);
+            let offset_mean = 4;
+            document.querySelector('.user_name > p').style.fontSize = ".8em";
+            let dist_mean = Math.round((reportcard.general_student - reportcard.general_class) * -100) / -100;
+            dist_mean > offset_mean ? dist_mean = offset_mean : dist_mean < -offset_mean ? dist_mean = -offset_mean : dist_mean = dist_mean;
+            let r_mean = Math.floor((dist_mean * 2 * 256 / (offset_mean * 2)) - 1);
+            let g_mean = Math.floor(256 - (dist_mean * 2 * 256 / (offset_mean * 2)));
+            document.querySelector('.user_name > p').style.color = "rgb(" + (r_mean) + ", " + (g_mean) + ", 0)";
+            document.querySelector('.user_name > p').innerText = reportcard.general_student.toString().replace('.', ',') + (reportcard.general_student.toString().split('.')[1].length == 1 ? '0' : '') + ' de moyenne';
+        }).catch(err => {
+            console.log(err);
+        });
+
+        document.querySelector('.user_name > div').innerText = data.userInfo.username;
+        document.querySelector('.user_avatar > img').src = data.userInfo.avatar;
+        document.querySelector('.share-field-icon-1').src = data.userInfo.avatar;
+        document.querySelector('.share-field-icon-2').src = data.userInfo.avatar;
+        document.querySelector('.is_avatar').src = data.userInfo.avatar;
+        if (localStorage.getItem('sidebarItem') && localStorage.getItem('sidebarItem') != "Accueil") {
+            sidebarItems.forEach(item => {
+                if (item.querySelector('span').innerHTML == localStorage.getItem('sidebarItem')) {
+                    item.click();
+                }
+            });
+        } else {
+
             fetch('/api/getposts', {
                 method: 'GET',
                 headers: {
@@ -141,15 +170,10 @@ socket.on('userInfo', data => {
 
                     });
                 }
+
             }).catch(err => {
                 console.log(err);
             });
-        } else {
-            // sidebarItems.forEach(item => {
-            //     if (item.querySelector('span').innerHTML == localStorage.getItem('sidebarItem')) {
-            //         item.click();
-            //     }
-            // });
         }
     } else {
         document.querySelector('.connection-box').innerHTML = `<div>Erreur lors de la connexion à e-lyco...</div>`;

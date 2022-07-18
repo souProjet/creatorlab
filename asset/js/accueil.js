@@ -73,108 +73,112 @@ socket.on('userInfo', data => {
                 'Application-Type': 'application/json',
                 'Authorization': 'Bearer ' + token
             }
-        }).then(res => res.json()).then(data => {
-            reportcard = JSON.parse(data.reportcardJSON);
+        }).then(res => res.json()).then(data2 => {
+            reportcard = JSON.parse(data2.reportcardJSON);
             let offset_mean = 4;
             document.querySelector('.user_name > p').style.fontSize = ".8em";
             let dist_mean = Math.round((reportcard.general_student - reportcard.general_class) * -100) / -100;
             dist_mean > offset_mean ? dist_mean = offset_mean : dist_mean < -offset_mean ? dist_mean = -offset_mean : dist_mean = dist_mean;
-            let r_mean = Math.floor((dist_mean * 2 * 256 / (offset_mean * 2)) - 1);
-            let g_mean = Math.floor(256 - (dist_mean * 2 * 256 / (offset_mean * 2)));
+            let g_mean = Math.floor(((dist_mean + offset_mean) * 256 / (offset_mean * 2)) - 1);
+            let r_mean = Math.floor(256 - ((dist_mean + offset_mean) * 256 / (offset_mean * 2)));
             document.querySelector('.user_name > p').style.color = "rgb(" + (r_mean) + ", " + (g_mean) + ", 0)";
-            document.querySelector('.user_name > p').innerText = reportcard.general_student.toString().replace('.', ',') + (reportcard.general_student.toString().split('.')[1].length == 1 ? '0' : '') + ' de moyenne';
+            document.querySelector('.user_name > p').innerText = reportcard.general_student.toString().replace('.', ',') + ' de moyenne';
+
+
+            document.querySelector('.user_name > div').innerText = data.userInfo.username;
+            document.querySelector('.user_avatar > img').src = data.userInfo.avatar;
+            document.querySelector('.share-field-icon-1').src = data.userInfo.avatar;
+            document.querySelector('.share-field-icon-2').src = data.userInfo.avatar;
+            document.querySelector('.is_avatar').src = data.userInfo.avatar;
+            if (localStorage.getItem('sidebarItem') && localStorage.getItem('sidebarItem') != "Accueil") {
+                sidebarItems.forEach(item => {
+                    if (item.querySelector('span').innerHTML == localStorage.getItem('sidebarItem')) {
+                        item.click();
+                    }
+                });
+            } else {
+
+                fetch('/api/getposts', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    }
+                }).then(res => res.json()).then(data => {
+                    if (data.status) {
+                        data.posts.forEach(post => {
+                            let postContainer = document.querySelector('.post-container');
+                            postContainer.innerHTML += `
+                        <div class="card lg:mx-0 uk-animation-slide-bottom-small post" id="${post.token}">
+                            <div class="flex justify-between items-center lg:p-4 p-2.5">
+                                <div class="flex flex-1 items-center space-x-4">
+                                    <a>
+                                        <img src="${post.userInfo.avatar}" class="bg-gray-200 border border-white rounded-full w-10 h-10">
+                                    </a>
+                                    <div class="flex-1 font-semibold">
+                                        <a class="text-black dark:text-gray-100">${post.userInfo.name}</a>
+                                        <div class="text-gray-700 flex items-center space-x-2">
+                                            ${calculateTimeBetweenDateAndToday(new Date(parseInt(post.created.split('-')[0]), parseInt(post.created.split('-')[1]) - 1, parseInt(post.created.split('-')[2].split(' ')[0]), parseInt(post.created.split(' ')[1].split(":")[0]), parseInt(post.created.split(":")[1])))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                ` + (post.userInfo.isYou ? `
+                                <a href="#" aria-expanded="false" class="">
+                                    <i class="uil-trash-alt text-2xl hover:bg-gray-200 rounded-full p-2 transition -mr-1 dark:hover:bg-gray-700"></i>
+                                </a>
+                                <div class="bg-white w-56 shadow-md mx-auto p-2 mt-12 rounded-md text-gray-500 hidden text-base border border-gray-100 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 uk-drop uk-drop-bottom-right" uk-drop="mode: click;pos: bottom-right;animation: uk-animation-slide-bottom-small" style="left: 279.703px; top: 2.5px;">
+    
+                                    <ul class="space-y-1">
+                                        <li>
+                                            <a href onclick="deletePost(event, '${post.token}')" class="flex items-center px-3 py-2 text-red-500 hover:bg-red-100 hover:text-red-500 rounded-md dark:hover:bg-red-600">
+                                                <i class="uil-trash-alt mr-1"></i> Supprimer
+                                            </a>
+                                        </li>
+                                    </ul>
+    
+                                </div>
+                                ` : ``) + `
+                            </div>
+                                       
+                            </div>
+    
+    
+                            <div class="p-5 pt-0 border-b dark:border-gray-700">
+                                ${post.content}
+                            </div>
+    
+    
+                            <div class="p-4 space-y-3">
+    
+                                <div class="flex space-x-4 lg:font-bold">
+                                    <a href onclick="likePost(this, event, '${post.token}')" class="flex items-center space-x-2 ${post.likeInfo.isLiked ? 'text-blue-500' : ''}">
+                                        <div class="p-2 rounded-full  text-${post.likeInfo.isLiked ? 'blue' : 'gray'} lg:bg-${post.likeInfo.isLiked ? 'blue' : 'gray'}-100 dark:bg-${post.likeInfo.isLiked ? 'blue' : 'gray'}-600 ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="22" height="22" class="dark:text-gray-100">
+                                                <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>Aimer</div>
+                                        <span>${post.likeInfo.nbrLikes}</span>
+                                    </a>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>`;
+
+                        });
+                    }
+
+                }).catch(err => {
+                    console.log(err);
+                });
+            }
+
         }).catch(err => {
             console.log(err);
         });
 
-        document.querySelector('.user_name > div').innerText = data.userInfo.username;
-        document.querySelector('.user_avatar > img').src = data.userInfo.avatar;
-        document.querySelector('.share-field-icon-1').src = data.userInfo.avatar;
-        document.querySelector('.share-field-icon-2').src = data.userInfo.avatar;
-        document.querySelector('.is_avatar').src = data.userInfo.avatar;
-        if (localStorage.getItem('sidebarItem') && localStorage.getItem('sidebarItem') != "Accueil") {
-            sidebarItems.forEach(item => {
-                if (item.querySelector('span').innerHTML == localStorage.getItem('sidebarItem')) {
-                    item.click();
-                }
-            });
-        } else {
 
-            fetch('/api/getposts', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                }
-            }).then(res => res.json()).then(data => {
-                if (data.status) {
-                    data.posts.forEach(post => {
-                        let postContainer = document.querySelector('.post-container');
-                        postContainer.innerHTML += `
-                    <div class="card lg:mx-0 uk-animation-slide-bottom-small post" id="${post.token}">
-                        <div class="flex justify-between items-center lg:p-4 p-2.5">
-                            <div class="flex flex-1 items-center space-x-4">
-                                <a>
-                                    <img src="${post.userInfo.avatar}" class="bg-gray-200 border border-white rounded-full w-10 h-10">
-                                </a>
-                                <div class="flex-1 font-semibold">
-                                    <a class="text-black dark:text-gray-100">${post.userInfo.name}</a>
-                                    <div class="text-gray-700 flex items-center space-x-2">
-                                        ${calculateTimeBetweenDateAndToday(new Date(parseInt(post.created.split('-')[0]), parseInt(post.created.split('-')[1]) - 1, parseInt(post.created.split('-')[2].split(' ')[0]), parseInt(post.created.split(' ')[1].split(":")[0]), parseInt(post.created.split(":")[1])))}
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                            ` + (post.userInfo.isYou ? `
-                            <a href="#" aria-expanded="false" class="">
-                                <i class="uil-trash-alt text-2xl hover:bg-gray-200 rounded-full p-2 transition -mr-1 dark:hover:bg-gray-700"></i>
-                            </a>
-                            <div class="bg-white w-56 shadow-md mx-auto p-2 mt-12 rounded-md text-gray-500 hidden text-base border border-gray-100 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 uk-drop uk-drop-bottom-right" uk-drop="mode: click;pos: bottom-right;animation: uk-animation-slide-bottom-small" style="left: 279.703px; top: 2.5px;">
-
-                                <ul class="space-y-1">
-                                    <li>
-                                        <a href onclick="deletePost(event, '${post.token}')" class="flex items-center px-3 py-2 text-red-500 hover:bg-red-100 hover:text-red-500 rounded-md dark:hover:bg-red-600">
-                                            <i class="uil-trash-alt mr-1"></i> Supprimer
-                                        </a>
-                                    </li>
-                                </ul>
-
-                            </div>
-                            ` : ``) + `
-                        </div>
-                                   
-                        </div>
-
-
-                        <div class="p-5 pt-0 border-b dark:border-gray-700">
-                            ${post.content}
-                        </div>
-
-
-                        <div class="p-4 space-y-3">
-
-                            <div class="flex space-x-4 lg:font-bold">
-                                <a href onclick="likePost(this, event, '${post.token}')" class="flex items-center space-x-2 ${post.likeInfo.isLiked ? 'text-blue-500' : ''}">
-                                    <div class="p-2 rounded-full  text-${post.likeInfo.isLiked ? 'blue' : 'gray'} lg:bg-${post.likeInfo.isLiked ? 'blue' : 'gray'}-100 dark:bg-${post.likeInfo.isLiked ? 'blue' : 'gray'}-600 ">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="22" height="22" class="dark:text-gray-100">
-                                            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>Aimer</div>
-                                    <span>${post.likeInfo.nbrLikes}</span>
-                                </a>
-                                </a>
-                            </div>
-                        </div>
-                    </div>`;
-
-                    });
-                }
-
-            }).catch(err => {
-                console.log(err);
-            });
-        }
     } else {
         document.querySelector('.connection-box').innerHTML = `<div>Erreur lors de la connexion à e-lyco...</div>`;
         document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';

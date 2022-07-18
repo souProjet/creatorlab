@@ -3,7 +3,7 @@ let sidebarItemSchedule = document.querySelector('.sidebar_inner ul li:nth-child
 const timeTemplate = ['08h05', '08h30', '09h00', '9h30', '10h15', '10h45', '11h10', '11h40', '12h05', '12h30', '13h00', '13h30', '13h55', '14h25', '14h50', '15h20', '16h05', '16h35', '17h00', '17h30', '17h55'];
 const dayTemplate = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
 let scheduleJSON;
-sidebarItemSchedule.addEventListener('click', async function() {
+sidebarItemSchedule.addEventListener('click', function() {
     fetch('/api/getSchedule', {
             method: 'GET',
             headers: {

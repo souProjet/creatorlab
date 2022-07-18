@@ -9047,11 +9047,6 @@ input[type="submit"].dark1 {
         height: 68px;
         overflow: visible;
     }
-    .responsive-nav ul {
-        /* reset mobile style */
-        display: block;
-        padding: 0;
-    }
     .responsive-nav li {
         /* reset mobile style */
         float: none;
@@ -10358,4 +10353,29 @@ a.res-link:hover {
         width: 140%;
         margin: auto -20%;
     }
+}
+
+.reportcard-nav {
+    overflow-y: hidden !important;
+    overflow-x: scroll !important;
+}
+
+.reportcard-nav li {
+    display: inline-block !important;
+    flex-shrink: 0 !important;
+}
+
+.reportcard-nav li a {
+    cursor: pointer;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    transition: all 0.3s ease-in-out;
+}
+
+.reportcard-nav li a:hover {
+    background-color: #e6f7ff;
+}
+
+.reportcard-nav::-webkit-scrollbar {
+    height: 5px;
 }

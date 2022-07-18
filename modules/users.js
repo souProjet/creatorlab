@@ -155,7 +155,8 @@ let User = class User {
                                     evaluation.push({
                                         date: testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(2)').innerHTML,
                                         class: parseFloat(testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(3)').innerHTML.split(':')[1].trim().replace(',', '.')),
-                                        student: parseFloat(testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(1) div').innerHTML.trim().replace(',', '.'))
+                                        student: parseFloat(testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(1) div').innerHTML.trim().replace(',', '.')),
+                                        of: testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(1) div span') ? parseFloat(testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(1) div span').innerHTML.replace('/', '')) : 20
                                     });
                                 }
                             }

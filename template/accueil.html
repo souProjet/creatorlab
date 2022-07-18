@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CREATOR LAB</title>
+    <meta name="description" content="Une toute nouvelle interface pour e-lyco avec plein d'autre fonction !">
+    <meta name="keywords" content="accueil, creatorlab, scolaire, design, pratique, outils">
+    <meta name="author" content="Sou - Rufus">
+    <link rel="icon" href="./public/images/favicon.ico" type="image/icon">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="./public/css/icons.css">
+    <link rel="stylesheet" href="./public/css/uikit.css">
+    <link rel="stylesheet" href="./public/css/accueil.css">
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+</head>
+
+<body>
+    <div class="connection-box absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        Connexion à e-lyco...
+        <img src='./public/images/loader-waiting2.svg'>
+    </div>
+    <div id="wrapper">
+
+        <!-- Header -->
+        <header>
+            <div class="header_wrap">
+                <div class="header_inner mcontainer">
+                    <div class="left_side">
+
+                        <span class="slide_menu" uk-toggle="target: #wrapper ; cls: is-collapse is-active">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                                <path d="M3 4h18v2H3V4zm0 7h12v2H3v-2zm0 7h18v2H3v-2z" fill="currentColor"></path>
+                            </svg>
+                        </span>
+
+                        <div id="logo">
+                            <a href="/">
+                                <img src="./public/images/favicon.ico" alt="">
+                                <img src="./public/images/favicon.ico" class="logo_mobile" alt="">
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- search icon for mobile -->
+                    <!-- <div class="header-search-icon" uk-toggle="target: #wrapper ; cls: show-searchbox"> </div>
+                    <div class="header_search"><i class="uil-search-alt"></i>
+                        <input value="" type="text" class="form-control" placeholder="Recherchez un article, une personne, un cours..." autocomplete="off">
+
+                    </div> -->
+
+                    <div class="right_side">
+
+                        <div class="header_widgets">
+                            <a href="#" class="is_icon notif-btn" uk-tooltip="title: Notifications">
+                                <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z">
+                                    </path>
+                                </svg>
+                                <!-- <span>3</span> -->
+                            </a>
+                            <div uk-drop="mode: click" class="header_dropdown">
+                                <div class="dropdown_scrollbar" data-simplebar>
+                                    <div class="drop_headline">
+                                        <h4>Notifications </h4>
+                                    </div>
+                                    <ul class="notification-box">
+                                        <div class="drop_text">
+                                            <p>Aucune notification pour le moment
+                                            </p>
+                                        </div>
+                                        <!-- <li>
+                                            <a href="#">
+                                                <div class="drop_avatar">
+                                                    <img src="assets/images/avatars/avatar-1.jpg" alt="">
+                                                </div>
+                                                <span class="drop_icon bg-gradient-primary">
+                                                    <i class="icon-feather-thumbs-up"></i>
+                                                </span>
+                                                <div class="drop_text">
+                                                    <p>
+                                                        <strong>Adrian Mohani</strong> Like Your Comment On Video
+                                                        <span class="text-link">Learn Prototype Faster </span>
+                                                    </p>
+                                                    <time> 2 hours ago </time>
+                                                </div>
+                                            </a>
+                                        </li> -->
+                                    </ul>
+                                </div>
+                            </div>
+
+
+                            <!-- Message -->
+                            <a href="#" class="is_icon message-btn" uk-tooltip="title: Message">
+                                <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                        d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                                <!-- <span>4</span> -->
+                            </a>
+                            <div uk-drop="mode: click" class="header_dropdown is_message">
+                                <div class="drop_headline">
+                                    <h4>Messages </h4>
+                                </div>
+                                <div class="dropdown_scrollbar" data-simplebar>
+
+                                    <ul class="message-box">
+                                        <div class="drop_text">
+                                            <p>Aucun message pour le moment</p>
+                                        </div>
+                                        <!-- <li class="un-read">
+                                            <a href="#">
+                                                <div class="drop_avatar"> <img src="assets/images/avatars/avatar-7.jpg" alt="">
+                                                </div>
+                                                <div class="drop_text">
+                                                    <strong> Stella Johnson </strong> <time>12:43 PM</time>
+                                                    <p> Alex will explain you how ... </p>
+                                                </div>
+                                            </a>
+                                        </li> -->
+
+                                    </ul>
+                                </div>
+                            </div>
+
+
+                            <a href="#">
+                                <img src="./public/images/favicon.ico" class="is_avatar" alt="">
+                            </a>
+                            <div uk-drop="mode: click;offset:5" class="header_dropdown profile_dropdown">
+
+                                <a class="user" style="cursor: default;">
+                                    <div class="user_avatar">
+                                        <img src="./public/images/favicon.ico" alt="">
+                                    </div>
+                                    <div class="user_name">
+                                        <div></div>
+                                    </div>
+                                </a>
+                                <hr>
+                                <!-- <a>
+                                    <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd"
+                                            d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>Mon compte
+                                </a> -->
+                                <a class="disconnected-btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                                        </path>
+                                    </svg>Se déconnecter
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- sidebar -->
+        <div class="sidebar">
+
+            <div class="sidebar_inner" data-simplebar>
+
+                <ul>
+                    <li class="active">
+                        <a href="/">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="text-blue-600">
+                                <path
+                                    d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                            </svg>
+                            <span>Accueil</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="text-red-500">
+                                <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
+                            </svg>
+                            <span>Mes cours</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a>
+                            <svg class="text-green-500" id="veiw-more" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span>Mon cloud</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="text-pink-500">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                              </svg>
+                            <span>Emplois du temps</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="text-purple-500">
+                                <path fill-rule="evenodd" d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" clip-rule="evenodd"></path>
+                                <path d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z"></path>
+                            </svg>
+                            <span>Boîte mail</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- sidebar overly for mobile -->
+            <div class="side_overly" uk-toggle="target: #wrapper ; cls: is-collapse is-active"></div>
+
+        </div>
+
+        <!-- Main Contents -->
+        <div class="main_content hide">
+            <div class="mcontainer">
+
+                <!--  Feeds  -->
+                <div class="lg:flex lg:space-x-10">
+                    <div class="lg:w-full lg:px-20 space-y-7 post-container">
+
+
+                        <!-- create post -->
+                        <div class="card lg:mx-0 p-4" uk-toggle="target: #create-post-modal">
+                            <div class="flex space-x-3">
+                                <img src="./public/images/favicon.ico" class="w-10 h-10 rounded-full share-field-icon-1">
+                                <input placeholder="Une information à partager ?" class="bg-gray-100 hover:bg-gray-200 flex-1 h-10 px-6 rounded-full">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- create post modal -->
+    <div id="create-post-modal" class="create-post is-story" uk-modal>
+        <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical rounded-lg p-0 lg:w-5/12 relative shadow-2xl uk-animation-slide-bottom-small">
+
+            <div class="text-center py-3 border-b">
+                <h3 class="text-lg font-semibold"> Créer une publication </h3>
+                <button class="uk-modal-close-default bg-gray-100 rounded-full p-2.5 right-2" type="button" uk-close uk-tooltip="title: Close ; pos: bottom ;offset:7"></button>
+            </div>
+            <div class="flex flex-1 items-start space-x-4 p-5">
+                <img src="./public/images/favicon.ico" class="bg-gray-200 border border-white rounded-full w-11 h-11 share-field-icon-2">
+                <div class="flex-1 pt-2">
+                    <textarea class="uk-textare text-black shadow-none focus:shadow-none text-xl font-medium resize-none share-field-textarea" rows="5" placeholder="Une information à partager ?"></textarea>
+                </div>
+
+            </div>
+            <div class="bsolute bottom-0 p-4 space-x-4 w-full">
+                <div class="flex bg-gray-50 border border-purple-100 rounded-2xl p-2 shadow-sm items-center">
+                    <div class="flex share-field-image-box overflow-x-scroll"></div>
+                    <div class="flex flex-1 items-center lg:justify-end justify-center space-x-2">
+                        <input type="file" name="shareimage" id="shareimage" class="hidden input-file-image-share-field" multiple>
+                        <svg class="bg-blue-100 h-9 p-1.5 rounded-full text-blue-600 w-9 cursor-pointer share-field-addimage" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center w-full justify-between border-t p-3">
+
+                <div class="flex space-x-2">
+                    <a href class="cursor-pointer bg-blue-600 flex h-9 items-center justify-center rounded-md text-white px-5 font-medium share-button">
+                        Partager pour toute la classe</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/delimiter@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/link@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/paragraph@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/warning@latest"></script>
+
+    <script src=" /socket.io/socket.io.js "></script>
+    <script src="./public/js/uikit.js "></script>
+    <script src="./public/js/simplebar.js "></script>
+    <script src="./public/js/accueil.js "></script>
+    <script src="./public/js/profile.js "></script>
+    <script src="./public/js/courses.js "></script>
+    <script src="./public/js/cloud.js "></script>
+    <script src="./public/js/schedule.js "></script>
+</body>
+
+</html>

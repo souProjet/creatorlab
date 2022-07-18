@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CREATOR LAB | Connexion</title>
+    <meta name="description" content="Connexion à votre compte">
+    <meta name="keywords" content="connexion, compte, accueil, accueil, creatorlab">
+    <meta name="author" content="Sou - Rufus">
+    <link rel="icon" href="./public/images/favicon.ico" type="image/icon">
+
+    <!-- CSS -->
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./public/css/login.css">
+
+
+</head>
+
+<body>
+    <div class="lg:flex max-w-5xl min-h-screen mx-auto p-6 py-10">
+        <div class="flex flex-col items-center lg: lg:flex-row lg:space-x-10">
+            <div class="lg:mb-12 flex-1 lg:text-left text-center">
+                <img src="./public/images/favicon.ico" alt="" class="lg:mx-0 lg:w-52 mx-auto w-40">
+                <p class="font-medium lg:mx-0 md:text-2xl mt-6 mx-auto sm:w-3/4 text-xl">Utilisez vos identifiants FranceConnect pour vous connecter et rentrer dans creatorlab.</p>
+            </div>
+            <div class="lg:mt-0 lg:w-96 md:w-1/2 sm:w-2/3 mt-10 w-full">
+                <form class="p-6 space-y-4 relative bg-white shadow-lg rounded-lg">
+                    <input type="text" placeholder="Nom d'utilisateur" class="with-border">
+                    <input type="password" placeholder="Mot de passe" class="with-border">
+                    <button type="button" class="bg-blue-600 font-semibold p-3 rounded-md text-center text-white w-full">
+                        Connexion
+                    </button>
+                    <span class="error-span text-red-600"></span>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script src="./public/js/login.js"></script>
+</body>
+
+</html>

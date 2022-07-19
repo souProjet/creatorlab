@@ -1,6 +1,7 @@
 let Cloud = class Cloud {
-    constructor(fs) {
+    constructor(fs, utf8) {
         this.fs = fs;
+        this.utf8 = utf8;
     }
     generateToken(length = 8) {
         let token = "";
@@ -210,7 +211,10 @@ let Cloud = class Cloud {
         let fileExtension = file.name.split('.')[file.name.split('.').length - 1];
         let acceptedExtensions = ['json', 'png', 'jpg', 'jpeg', 'gif', 'txt', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'zip', 'rar', '7z', 'bz2', 'mp4', 'mp3', 'avi', 'flv', 'mpg', 'mpeg', 'mkv', 'mov', 'wmv', '3gp', '3g2', 'webm', 'ogg'];
         if (acceptedExtensions.indexOf(fileExtension) == -1) {
-            return false;
+            return {
+                success: false,
+                error: "Sorry, " + file.name + " : Ce format n'est pas autorisé"
+            }
         }
         let arch = this.fs.readFileSync('./userdata/' + token + '/arch.json');
         arch = JSON.parse(arch);
@@ -222,9 +226,13 @@ let Cloud = class Cloud {
             id: fileId,
             size: file.size,
         });
-        this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
+        this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify(arch), { encoding: "utf8" }, (error) => {
             if (error) {
                 console.log(error);
+                return {
+                    success: false,
+                    error: "Échec de l'upload de " + file.name
+                }
             } else {
                 // console.log("File uploaded in arch : " + token);
             }
@@ -232,8 +240,16 @@ let Cloud = class Cloud {
         this.fs.writeFileSync('./userdata/' + token + '/data/' + fileId + '.' + fileExtension, file.data, (error) => {
             if (error) {
                 console.log(error);
+                return {
+                    success: false,
+                    error: "Échec de l'upload de " + file.name
+                }
             }
         });
+        return {
+            success: true,
+            error: null
+        }
     }
 }
 

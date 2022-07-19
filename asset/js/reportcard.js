@@ -2,13 +2,9 @@ mainContent = document.querySelector('.main_content .mcontainer');
 let sidebarItemReportcard = document.querySelector('.sidebar_inner ul li:nth-child(5)');
 
 sidebarItemReportcard.addEventListener('click', function() {
-            console.log(reportcard)
-
-
             let navBarMatters = ``;
             for (let i = 0; i < reportcard.matters.length; i++) {
-                navBarMatters += `
-        <li onclick="showNoteForMatter(this, ${i})" class="${i == 0 ? `active` : ``}">
+                navBarMatters += `<li onclick="showNoteForMatter(this, ${i})" class="${i == 0 ? `active` : ``}">
             <a  class="lg:px-2">
                 ${reportcard.matters[i].name}
                 <span>${reportcard.matters[i].mean.toString().replace('.', ',')}</span>

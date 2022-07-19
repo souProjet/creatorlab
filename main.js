@@ -13,6 +13,7 @@ const { Cluster } = require('puppeteer-cluster');
 const config = require('./utils/config.json')
 const fetch = require('node-fetch')
 const fs = require('fs');
+const utf8 = require('utf8');
 
 const db = mysql.createConnection({
     host: config.host,
@@ -45,7 +46,7 @@ const notif = new Notif(fetch);
 const message = new Message(fetch);
 const courses = new Courses(fetch);
 const infos = new Infos(fetch, io, bdd);
-const cloud = new Cloud(fs)
+const cloud = new Cloud(fs, utf8)
 
 //fonctions outils 
 function escapeHTML(html) {
@@ -395,16 +396,26 @@ app.post('/api/\*', async(req, res) => {
                             let parentId2 = req.body.parentId ? escapeHTML(req.body.parentId) : null;
                             let filesUpload = req.files;
                             let nbrFiles = req.body.nbrFiles;
+
                             if (filesUpload) {
+                                let success = true;
+                                let error = '';
                                 for (let i = 0; i < nbrFiles; i++) {
                                     let file = filesUpload["file" + i];
-                                    if (file.size < 20971520) {
-                                        cloud.upload(token, parentId2, file);
+                                    file.name = utf8.decode(file.name);
+
+                                    if (file.size < 100000000) {
+                                        let returnState = cloud.upload(token, parentId2, file);
+                                        success = returnState.success;
+                                        error += (returnState.error != null ? returnState.error + "\n" : "");
+                                    } else {
+                                        success = false;
+                                        error += "Sorry, 100Mo max pour " + file.name + "\n";
                                     }
                                 }
-                                res.send({ success: true });
+                                res.send({ success: success, error: error });
                             } else {
-                                res.send({ success: false });
+                                res.send({ success: false, error: "Aucun fichier n'a été uploadé." });
                             }
                             break;
 

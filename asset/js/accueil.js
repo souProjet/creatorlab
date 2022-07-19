@@ -530,25 +530,25 @@ shareButton.addEventListener('click', (e) => {
     e.preventDefault();
 });
 
-shareFieldAddImage.addEventListener('click', (e) => {
-    e.preventDefault();
-    inputFileImageShareField.click();
-});
+// shareFieldAddImage.addEventListener('click', (e) => {
+//     e.preventDefault();
+//     inputFileImageShareField.click();
+// });
 
-inputFileImageShareField.addEventListener('change', (e) => {
-    e.preventDefault();
-    let files = e.target.files;
-    let acceptedFiles = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp', 'image/webp', 'image/svg+xml', 'image/tiff'];
-    shareFieldImageBox.innerHTML = '';
-    if (files) {
-        for (let i = 0; i < files.length; i++) {
-            if (acceptedFiles.indexOf(files[i].type) != -1) {
-                shareFieldImageBox.innerHTML += `<div class="share-field-image-box-item" title="${files[i].name}"><img src="${URL.createObjectURL(files[i])}" alt=""></div>`;
-            }
+// inputFileImageShareField.addEventListener('change', (e) => {
+//     e.preventDefault();
+//     let files = e.target.files;
+//     let acceptedFiles = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp', 'image/webp', 'image/svg+xml', 'image/tiff'];
+//     shareFieldImageBox.innerHTML = '';
+//     if (files) {
+//         for (let i = 0; i < files.length; i++) {
+//             if (acceptedFiles.indexOf(files[i].type) != -1) {
+//                 shareFieldImageBox.innerHTML += `<div class="share-field-image-box-item" title="${files[i].name}"><img src="${URL.createObjectURL(files[i])}" alt=""></div>`;
+//             }
 
-        }
-    }
-});
+//         }
+//     }
+// });
 
 
 

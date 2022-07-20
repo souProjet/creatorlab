@@ -20,11 +20,11 @@ Il vous faudra crée un dossier `utils` à la racine et y crée à l'intérieur 
 y contenant les identifiants de votre base de donnée mysql et autre sous cette forme : 
 ```json
 {
-	"port": "3000", // port de l'application
-	"host": "localhost", //host de la base de donnée
-	"user": "user", //nom d'utilisateur de la base de donnée
-	"password": "password", //mot de passe de la base de donnée
-	"database": "creatorlab" //nom de la base de donnée
+	"port": "3000", /* port de l'application */
+	"host": "localhost", /* host de la base de donnée */
+	"user": "user", /* nom d'utilisateur de la base de donnée */
+	"password": "password", /* mot de passe de la base de donnée */
+	"database": "creatorlab" /* nom de la base de donnée */
 }
 ```
 Enfin il vous sera nécessaire de crée un dossier `userdata` à la racine du projet, ce dossier contiendra les élements du cloud ainsi que les fichiers JSON contenant les notes et l'emploie du temps

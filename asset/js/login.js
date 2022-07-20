@@ -5,6 +5,7 @@ let username = document.querySelector('input[type="text"]');
 let password = document.querySelector('input[type="password"]');
 
 loginBtn.addEventListener('click', () => {
+    initMorpion();
     loginBtn.innerHTML = 'récupération des informations <img class="loader-waiting"  src="./public/images/loader-waiting.svg">';
     if (username.value.length > 0 && password.value.length > 0) {
         fetch('/api/login', {

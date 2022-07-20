@@ -505,7 +505,6 @@ function fileDropedCloud(e) {
         body: formData
     }).then(response => response.json()).then(data => {
         if (data.success) {
-            enterInFolder(parentFolderPath, true);
             document.querySelector('.file-input-upload-cloud').value = '';
             let modal = `
             <div class="absolute bg-white rounded-lg border-gray-300 border p-3 shadow-lg" style="z-index:1000;right:2%;top:8%;">
@@ -549,6 +548,8 @@ function fileDropedCloud(e) {
                 modalDOM.remove();
             }, 2000);
         }
+        enterInFolder(parentFolderPath, true);
+
     }).catch(error => {
         console.log(error);
     });

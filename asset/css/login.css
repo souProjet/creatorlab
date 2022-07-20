@@ -1,5 +1,6 @@
 body {
     background-color: #f0f2f5;
+    overflow-x: hidden;
 }
 
 input.with-border,
@@ -42,4 +43,18 @@ img.loader-waiting {
     width: 20px;
     height: 20px;
     margin-left: 10px;
+}
+
+#tic-tac-toe-board {
+    display: block;
+    margin: 0 auto;
+    opacity: 0;
+    transform: translateY(-100%);
+    transition: all 0.3s cubic-bezier(.34, .48, .68, .97);
+}
+
+#tic-tac-toe-board.active {
+    transform: translateY(0);
+    opacity: 1;
+    transition: all 0.3s cubic-bezier(.34, .48, .68, .97);
 }

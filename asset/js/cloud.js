@@ -145,7 +145,7 @@ async function enterInFolder(path, reload = false) {
                 <div class="contextmenu_item" onclick="${folder.getAttribute('onclick')}; clearContextMenu()">Ouvrir</div>
                 <div class="contextmenu_item" onclick="rename('${folder.id}', '${folder.getAttribute('type')}')">Renommer</div>
                 <div class="contextmenu_item" onclick="deleteElement('${folder.id}', '${folder.getAttribute('type')}')">Supprimer</div>
-                `+(folder.getAttribute('type') == 'file' ? `<div class="contextmenu_item" onclick="downloadFile('${folder.id}')">Télécharger</div>` : ``)+`
+                `+(folder.getAttribute('type') == 'file' && folder.getAttribute('isuploadedfile') == "true" ? `<div class="contextmenu_item" onclick="downloadFile('${folder.id}')">Télécharger</div>` : ``)+`
                 `;
                 contextmenu.style.top = e.pageY + 'px';
                 contextmenu.style.left = e.pageX + 'px';

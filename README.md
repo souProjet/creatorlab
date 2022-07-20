@@ -65,4 +65,8 @@ CREATE TABLE `likes` (
 ```
 
 ## Crédit
+<<<<<<< HEAD
 Ce projet à pour but d'aider un maximum de personne et se tronvant juridiquement dans une zone grise merci d'en profiter tout en le respectant !
+=======
+Ce projet à pour bute d'aider un maximum de personne et se tranvant juridiquement dans une zone grise merci d'en profiter tout en le respectant !
+>>>>>>> master

@@ -24,8 +24,6 @@ let Cloud = class Cloud {
         this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
             if (error) {
                 console.log(error);
-            } else {
-                // console.log("Folder created : " + token);
             }
         });
 
@@ -46,15 +44,11 @@ let Cloud = class Cloud {
         this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
             if (error) {
                 console.log(error);
-            } else {
-                // console.log("File created in arch : " + token);
             }
         });
         this.fs.writeFileSync('./userdata/' + token + '/data/' + fileId + '.json', JSON.stringify({ name: 'Nouveau fichier', content: {} }), (error) => {
             if (error) {
                 console.log(error);
-            } else {
-                // console.log("File created : " + token);
             }
         });
         return fileId;
@@ -71,8 +65,6 @@ let Cloud = class Cloud {
             this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
                 if (error) {
                     console.log(error);
-                } else {
-                    // console.log("Folder deleted : " + token);
                 }
             });
 
@@ -106,8 +98,6 @@ let Cloud = class Cloud {
         this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
             if (error) {
                 console.log(error);
-            } else {
-                // console.log("Folder renamed : " + token);
             }
         });
         if (isFile) {
@@ -131,8 +121,6 @@ let Cloud = class Cloud {
                 this.fs.writeFileSync('./userdata/' + token + '/data/' + id + '.json', JSON.stringify(data), (error) => {
                     if (error) {
                         console.log(error);
-                    } else {
-                        // console.log("File renamed : " + token);
                     }
                 });
             }
@@ -147,21 +135,16 @@ let Cloud = class Cloud {
         this.fs.mkdir('./userdata/' + token, (error) => {
             if (error) {
                 console.log(error);
-            } else {
-                this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify([]), (error) => {
-                    if (error) {
-                        console.log(error);
-                    } else {
-                        this.fs.mkdir('./userdata/' + token + '/data', (error) => {
-                            if (error) {
-                                console.log(error);
-                            } else {
-                                console.log("Userdata profile created : " + token);
-
-                            }
-                        });
-                    }
-                });
+            }
+        });
+        this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify([]), (error) => {
+            if (error) {
+                console.log(error);
+            }
+        });
+        this.fs.mkdir('./userdata/' + token + '/data', (error) => {
+            if (error) {
+                console.log(error);
             }
         });
     }
@@ -184,8 +167,6 @@ let Cloud = class Cloud {
         this.fs.writeFileSync('./userdata/' + token + '/data/' + id + '.json', JSON.stringify(data), (error) => {
             if (error) {
                 console.log(error);
-            } else {
-                // console.log("File saved : " + token);
             }
         });
 
@@ -200,8 +181,6 @@ let Cloud = class Cloud {
         this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
             if (error) {
                 console.log(error);
-            } else {
-                // console.log("File size updated : " + token);
             }
         });
     }
@@ -233,8 +212,6 @@ let Cloud = class Cloud {
                     success: false,
                     error: "Échec de l'upload de " + file.name
                 }
-            } else {
-                // console.log("File uploaded in arch : " + token);
             }
         });
         this.fs.writeFileSync('./userdata/' + token + '/data/' + fileId + '.' + fileExtension, file.data, (error) => {

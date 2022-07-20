@@ -7,6 +7,35 @@ let mainContainer = document.querySelector('.main_content');
 let sidebarItems = document.querySelectorAll('.sidebar_inner ul li');
 
 //fonctions outils
+
+function createModal(msg, error = false) {
+    let modal = `
+    <div class="absolute bg-white rounded-lg border-gray-300 border p-3 shadow-lg" style="z-index:2000;right:2%;top:8%;">
+        <div class="flex flex-row">
+            <div class="px-2">
+            ${error ? `
+            <svg height="24" width="24" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">
+                <circle style="fill:#D75A4A;" cx="25" cy="25" r="25" />
+                <polyline style="fill:none;stroke:#FFFFFF;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;" points="16,34 25,25 34,16 " />
+                <polyline style="fill:none;stroke:#FFFFFF;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;" points="16,16 25,25 34,34 " />
+            </svg>` : 
+            `<svg width="24" height="24" viewBox="0 0 1792 1792" fill="#44C997" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1299 813l-422 422q-19 19-45 19t-45-19l-294-294q-19-19-19-45t19-45l102-102q19-19 45-19t45 19l147 147 275-275q19-19 45-19t45 19l102 102q19 19 19 45t-19 45zm141 83q0-148-73-273t-198-198-273-73-273 73-198 198-73 273 73 273 198 198 273 73 273-73 198-198 73-273zm224 0q0 209-103 385.5t-279.5 279.5-385.5 103-385.5-103-279.5-279.5-103-385.5 103-385.5 279.5-279.5 385.5-103 385.5 103 279.5 279.5 103 385.5z"></path>
+            </svg>`}
+            </div>
+            <div class="ml-2 mr-6">
+                <span class="font-semibold">${msg}</span>
+            </div>
+        </div>
+    </div>`;
+    let modalDOM = document.createElement('div');
+    modalDOM.innerHTML = modal;
+    document.body.insertBefore(modalDOM, document.body.firstChild);
+    setTimeout(() => {
+        modalDOM.remove();
+    }, 3000);
+}
+
 function escapeHTML(html) {
     return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }

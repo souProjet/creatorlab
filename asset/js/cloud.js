@@ -145,6 +145,7 @@ async function enterInFolder(path, reload = false) {
                 <div class="contextmenu_item" onclick="${folder.getAttribute('onclick')}; clearContextMenu()">Ouvrir</div>
                 <div class="contextmenu_item" onclick="rename('${folder.id}', '${folder.getAttribute('type')}')">Renommer</div>
                 <div class="contextmenu_item" onclick="deleteElement('${folder.id}', '${folder.getAttribute('type')}')">Supprimer</div>
+                `+(folder.getAttribute('type') == 'file' ? `<div class="contextmenu_item" onclick="downloadFile('${folder.id}')">Télécharger</div>` : ``)+`
                 `;
                 contextmenu.style.top = e.pageY + 'px';
                 contextmenu.style.left = e.pageX + 'px';
@@ -152,6 +153,52 @@ async function enterInFolder(path, reload = false) {
             });
         });
     }
+}
+function b64toBlob(data, type){
+    var sliceSize = 512;
+    var byteCharacters = atob(data);
+    var byteArrays = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        var byteNumbers = new Array(slice.length);
+        for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        var byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+
+    var blob = new Blob(byteArrays, {type: type});
+    return blob;
+}
+let inDlOrAction = false;
+function downloadFile(fileId){
+    inDlOrAction = true;
+    fetch('/api/cloud/getFile', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            token: token,
+            fileId: fileId,
+            isUploadedFile: document.getElementById(fileId) ? document.getElementById(fileId).getAttribute('isuploadedfile') : false,
+            ext: document.getElementById(fileId) ? document.getElementById(fileId).querySelector('h1').innerHTML.split('.').length > 1 ? (document.getElementById(fileId).querySelector('h1').innerHTML.split('.')[document.getElementById(fileId).querySelector('h1').innerHTML.split('.').length - 1]) : null : null
+        })
+    }).then(response => response.json()).then(file => {
+        let ext = file.ext;
+        let data = file.data;
+        let blob = b64toBlob(data, `${ext}`);
+        let link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `${document.querySelector('#'+fileId + ' h1').innerText}`;
+        link.click();
+        inDlOrAction = false;
+    }).catch(err => console.log(err));
+
 }
 function enterInEditor(fileId, parentFolderId){
     mainContent.id = "editorjs";
@@ -172,21 +219,93 @@ function enterInEditor(fileId, parentFolderId){
         if(!file.content){
             let ext = file.ext;
             let data = file.data;
-            let acceptedExtensionsImages = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff', 'svg', 'ico'];
-            let acceptedExtensionsVideos = ['mp4', 'webm', 'ogg', 'ogv', 'mov', 'wmv', 'flv', 'swf', 'avi', 'mpg', 'mpeg', '3gp', '3g2'];
-            let acceptedExtensionsDocuments = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'pdf', 'rtf', 'txt', 'tex', 'csv', 'tsv', 'html', 'htm', 'xml', 'xsl', 'yml', 'yaml', 'json', 'js', 'css', 'php', 'java', 'py', 'c', 'cpp', 'cs', 'csharp', 'go', 'h'];
-            if(acceptedExtensionsImages.includes(ext)){
-                //convert buffer into image
-                // let binary = Array.from(new Uint8Array(data));
-                // let imgData = new Blob([binary], {type: 'application/octet-binary'});
-                // let link = URL.createObjectURL(imgData);
-                // let img = new Image();
-                // img.onload = () => URL.revokeObjectURL(link);
-                // img.src = link;
-                // img.style.width = "100%";
-                // img.style.height = "100%";
-                // mainContent.innerHTML = "";
-                // mainContent.appendChild(img);
+            let acceptedExtensionsImages = ['png', 'jpg', 'jpeg', 'gif'];
+            let acceptedExtensionsVideos = ['mp4', 'webm', 'ogg'];
+            let acceptedExtensionsAudios = ['mp3', 'wav', 'ogg'];
+            if(!inDlOrAction){
+                if(acceptedExtensionsImages.includes(ext)){
+                    inDlOrAction = true;
+                    let contentType = 'image/' + ext;
+                    let b64Data = data;
+                    let blob = b64toBlob(b64Data, contentType);
+                    let url = URL.createObjectURL(blob);
+                    mainContent.innerHTML += `
+                    <div class="visualisator-cloud" style="background:url(${url}); background-size:contain;background-repeat:no-repeat;background-position:center;">
+                        <svg width="100%" height="100%" viewBox="0 0 2000 2000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;fill:#565656;">
+                            <path fill="black" id="path4582" d="M505.116,1000c0,-14.799 5.657,-27.857 16.974,-39.172l792.381,-792.383c11.317,-11.316 24.375,-16.974 39.174,-16.974c14.798,0 27.855,5.658 39.172,16.974l85.093,85.093c11.317,11.317 16.974,24.374 16.974,39.173c0,14.799 -5.657,27.856 -16.974,39.173l-668.117,668.116l668.117,668.116c11.317,11.317 16.974,24.374 16.974,39.172c0,14.8 -5.657,27.857 -16.974,39.174l-85.093,85.093c-11.317,11.315 -24.374,16.974 -39.172,16.974c-14.799,0 -27.857,-5.659 -39.174,-16.974l-792.381,-792.383c-11.317,-11.316 -16.974,-24.374 -16.974,-39.172Z" style="fill-rule:nonzero;" />
+                        </svg>
+                    </div>`;
+                    let visuaCloud =  document.querySelector('.visualisator-cloud');
+                    setTimeout(() => {
+                        visuaCloud.classList.add('active');
+                        visuaCloud.querySelector('svg').addEventListener('click', () => {
+                            visuaCloud.classList.remove('active');
+                            setTimeout(() => {
+                                visuaCloud.remove();
+                                inDlOrAction = false;
+                            }, 300);
+                        });
+                    }, 100);
+                }else if(acceptedExtensionsVideos.includes(ext)){
+                    inDlOrAction = true;
+                    let contentType = 'video/' + ext;
+                    let b64Data = data;
+                    let blob = b64toBlob(b64Data, contentType);
+                    let url = URL.createObjectURL(blob);
+                    mainContent.innerHTML += `
+                    <div class="visualisator-cloud" >
+                        <svg width="100%" height="100%" viewBox="0 0 2000 2000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;fill:#565656;">
+                            <path fill="black" id="path4582" d="M505.116,1000c0,-14.799 5.657,-27.857 16.974,-39.172l792.381,-792.383c11.317,-11.316 24.375,-16.974 39.174,-16.974c14.798,0 27.855,5.658 39.172,16.974l85.093,85.093c11.317,11.317 16.974,24.374 16.974,39.173c0,14.799 -5.657,27.856 -16.974,39.173l-668.117,668.116l668.117,668.116c11.317,11.317 16.974,24.374 16.974,39.172c0,14.8 -5.657,27.857 -16.974,39.174l-85.093,85.093c-11.317,11.315 -24.374,16.974 -39.172,16
+                        c-14.799,0 -27.857,-5.659 -39.174,-16.974l-792.381,-792.383c-11.317,-11.316 -16.974,-24.374 -16.974,-39.172Z" style="fill-rule:nonzero;" />
+                        </svg>
+                        <video autoplay>
+                            <source src="${url}" type="video/${ext}">
+                        </video>
+
+                    </div>`;
+                    let visuaCloud =  document.querySelector('.visualisator-cloud');
+                    setTimeout(() => {
+                        visuaCloud.classList.add('active');
+                        visuaCloud.querySelector('svg').addEventListener('click', () => {
+                            visuaCloud.classList.remove('active');
+                            setTimeout(() => {
+                                visuaCloud.remove();
+                                inDlOrAction = false;
+                            }, 300);
+                        });
+                        createModal('Lecture de '+ document.querySelector('#'+fileId + ' h1').innerText);
+                    }, 100);
+                }
+                else if(acceptedExtensionsAudios.includes(ext)){
+                    inDlOrAction = true;
+                    let contentType = 'audio/' + ext;
+                    let b64Data = data;
+                    let blob = b64toBlob(b64Data, contentType);
+                    let url = URL.createObjectURL(blob);
+                    mainContent.innerHTML += `
+                    <div class="visualisator-cloud" >
+                        <svg width="100%" height="100%" viewBox="0 0 2000 2000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;fill:#565656;">
+                            <path fill="black" id="path4582" d="M505.116,1000c0,-14.799 5.657,-27.857 16.974,-39.172l792.381,-792.383c11.317,-11.316 24.375,-16.974 39.174,-16.974c14.798,0 27.855,5.658 39.172,16.974l85.093,85.093c11.317,11.317 16.974,24.374 16.974,39.173c0,14.799 -5.657,27.856 -16.974,39.173l-668.117,668.116l668.117,668.116c11.317,11.317 16.974,24.374 16.974,39.172c0,14.8 -5.657,27.857 -16.974,39.174l-85.093,85.093c-11.317,11.315 -24.374,16.974 -39.172,16.974c-14.799,0 -27.857,-5.659 -39.174,-16.974l-792.381,-792.383c-11.317,-11.316 -16.974,-24.374 -16.974,-39.172Z" style="fill-rule:nonzero;" />
+                        </svg>
+                        <audio autoplay controls>
+                            <source src="${url}" type="audio/${ext}">
+                        </audio>
+                    </div>`;
+                    let visuaCloud =  document.querySelector('.visualisator-cloud');
+                    setTimeout(() => {
+                        visuaCloud.classList.add('active');
+                        visuaCloud.querySelector('svg').addEventListener('click', () => {
+                            visuaCloud.classList.remove('active');
+                            setTimeout(() => {
+                                visuaCloud.remove();
+                                inDlOrAction = false;
+                            }, 300);
+                        });
+                        createModal('Lecture de '+ document.querySelector('#'+fileId + ' h1').innerText);
+                    }, 100);
+                } else{
+                    createModal('Creatorlab ne peut pas encore lire ce type de fichier, mais vous pouvez le télécharger.', true);
+                }
             }
 
         }else{
@@ -353,7 +472,6 @@ function enterInEditor(fileId, parentFolderId){
 
 }
 
-
 function createFolder() {
     clearContextMenu();
     let createFolderPath = headerPath.querySelectorAll('span')[headerPath.querySelectorAll('span').length - 1].getAttribute('onclick') != "enterInFolder()" ? headerPath.querySelectorAll('span')[headerPath.querySelectorAll('span').length - 1].getAttribute('onclick').split('\(\'')[1].replace('\'\)', '') : null;
@@ -427,7 +545,7 @@ function deleteElement(id, type) {
             console.log(error);
         });
     }else{
-        alert("Vous ne pouvez pas supprimer un dossier qui contient des fichiers ou dossiers");
+        createModal("Cet élément contient des fichiers, vous devez les supprimer avant de pouvoir supprimer cet élément", true);
     }
 }
 
@@ -475,17 +593,17 @@ function octetToString(octet) {
     if(octetString == null){
         return false;
     }else{
-    if (octetString > 1024 * 1024 * 1024) {
-        octetString = (octetString / 1024 / 1024 / 1024).toFixed(2) + ' Go';
-    } else if (octetString > 1024 * 1024) {
-        octetString = (octetString / 1024 / 1024).toFixed(2) + ' Mo';
-    } else if (octetString > 1024) {
-        octetString = (octetString / 1024).toFixed(2) + ' Ko';
-    } else {
-        octetString = octetString + ' octet';
+        if (octetString > 1024 * 1024 * 1024) {
+            octetString = (octetString / 1024 / 1024 / 1024).toFixed(2) + ' Go';
+        } else if (octetString > 1024 * 1024) {
+            octetString = (octetString / 1024 / 1024).toFixed(2) + ' Mo';
+        } else if (octetString > 1024) {
+            octetString = (octetString / 1024).toFixed(2) + ' Ko';
+        } else {
+            octetString = octetString + ' octet';
+        }
+        return octetString;
     }
-    return octetString;
-}
 }
 
 
@@ -506,47 +624,9 @@ function fileDropedCloud(e) {
     }).then(response => response.json()).then(data => {
         if (data.success) {
             document.querySelector('.file-input-upload-cloud').value = '';
-            let modal = `
-            <div class="absolute bg-white rounded-lg border-gray-300 border p-3 shadow-lg" style="z-index:1000;right:2%;top:8%;">
-                <div class="flex flex-row">
-                    <div class="px-2">
-                        <svg width="24" height="24" viewBox="0 0 1792 1792" fill="#44C997" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1299 813l-422 422q-19 19-45 19t-45-19l-294-294q-19-19-19-45t19-45l102-102q19-19 45-19t45 19l147 147 275-275q19-19 45-19t45 19l102 102q19 19 19 45t-19 45zm141 83q0-148-73-273t-198-198-273-73-273 73-198 198-73 273 73 273 198 198 273 73 273-73 198-198 73-273zm224 0q0 209-103 385.5t-279.5 279.5-385.5 103-385.5-103-279.5-279.5-103-385.5 103-385.5 279.5-279.5 385.5-103 385.5 103 279.5 279.5 103 385.5z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-2 mr-6">
-                        <span class="font-semibold">Fichier uploadé</span>
-                    </div>
-                </div>
-            </div>`;
-            let modalDOM = document.createElement('div');
-            modalDOM.innerHTML = modal;
-            document.body.insertBefore(modalDOM, document.body.firstChild);
-            setTimeout(() => {
-                modalDOM.remove();
-            }, 2000);
+            createModal("Fichier uploadé");
         }else{
-            let modal = `
-            <div class="absolute bg-white rounded-lg border-gray-300 border p-3 shadow-lg" style="z-index:1000;right:2%;top:8%;">
-                <div class="flex flex-row">
-                    <div class="px-2">
-                        <svg height="24" width="24" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">
-                            <circle style="fill:#D75A4A;" cx="25" cy="25" r="25" />
-                            <polyline style="fill:none;stroke:#FFFFFF;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;" points="16,34 25,25 34,16 " />
-                            <polyline style="fill:none;stroke:#FFFFFF;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;" points="16,16 25,25 34,34 " />
-                        </svg>
-                    </div>
-                    <div class="ml-2 mr-6">
-                        <span class="font-semibold">${data.error}</span>
-                    </div>
-                </div>
-            </div>`;
-            let modalDOM = document.createElement('div');
-            modalDOM.innerHTML = modal;
-            document.body.insertBefore(modalDOM, document.body.firstChild);
-            setTimeout(() => {
-                modalDOM.remove();
-            }, 2000);
+           createModal(data.error, true);
         }
         enterInFolder(parentFolderPath, true);
 

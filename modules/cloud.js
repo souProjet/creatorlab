@@ -153,7 +153,7 @@ let Cloud = class Cloud {
         if (isUploadedFile) {
             return {
                 ext: ext,
-                data: this.fs.readFileSync('./userdata/' + token + '/data/' + id + '.' + ext)
+                data: this.fs.readFileSync('./userdata/' + token + '/data/' + id + '.' + ext).toString('base64')
             }
         } else {
             return JSON.parse(this.fs.readFileSync('./userdata/' + token + '/data/' + id + '.json'));

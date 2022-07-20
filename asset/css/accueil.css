@@ -10726,3 +10726,44 @@ a.res-link:hover {
 .reportcard-nav::-webkit-scrollbar {
     height: 5px;
 }
+
+.visualisator-cloud {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(0);
+    z-index: 500;
+    height: calc(80vh - 70px);
+    border-radius: 20px;
+    width: 70%;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(.85, 1.43, .34, 1.09);
+}
+
+.visualisator-cloud.active {
+    opacity: .95;
+    transform: translateX(-50%);
+    transition: all 0.3s cubic-bezier(.85, 1.43, .34, 1.09);
+}
+
+.visualisator-cloud svg {
+    position: absolute;
+    height: 60px;
+    width: 60px;
+    left: 0;
+    top: 1%;
+    z-index: 501;
+    transform: translateX(-100%);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(.85, 1.43, .34, 1.09);
+}
+
+.visualisator-cloud svg:hover {
+    transform: translateX(-100%) scale(1.1);
+}
+
+.visualisator-cloud video {
+    border-radius: 10px;
+    margin-left: 59%;
+    transform: translateX(-50%);
+}

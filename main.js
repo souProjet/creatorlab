@@ -645,4 +645,5 @@ setInterval(() => {
 //start the server on port 3000
 server.listen(config.port, () => {
     console.log(`[CREATOR LAB] is running on port ${config.port}`);
+    //console.log(fs.readFileSync('./utils/ascii.txt', 'utf8'));
 });

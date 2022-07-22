@@ -135,13 +135,15 @@ let Cloud = class Cloud {
         this.fs.mkdir('./userdata/' + token, (error) => {
             if (error) {
                 console.log(error);
+            } else {
+                this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify([]), (error) => {
+                    if (error) {
+                        console.log(error);
+                    }
+                });
             }
         });
-        this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify([]), (error) => {
-            if (error) {
-                console.log(error);
-            }
-        });
+
         this.fs.mkdir('./userdata/' + token + '/data', (error) => {
             if (error) {
                 console.log(error);
@@ -188,7 +190,7 @@ let Cloud = class Cloud {
     upload(token, parentId, file) {
         let fileId = this.generateToken();
         let fileExtension = file.name.split('.')[file.name.split('.').length - 1];
-        let acceptedExtensions = ['json', 'png', 'jpg', 'jpeg', 'gif', 'txt', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'zip', 'rar', '7z', 'bz2', 'mp4', 'mp3', 'avi', 'flv', 'mpg', 'mpeg', 'mkv', 'mov', 'wmv', '3gp', '3g2', 'webm', 'ogg'];
+        let acceptedExtensions = ['aac', 'json', 'png', 'jpg', 'jpeg', 'gif', 'txt', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'zip', 'rar', '7z', 'bz2', 'mp4', 'mp3', 'avi', 'flv', 'mpg', 'mpeg', 'mkv', 'mov', 'wmv', '3gp', '3g2', 'webm', 'ogg'];
         if (acceptedExtensions.indexOf(fileExtension) == -1) {
             return {
                 success: false,

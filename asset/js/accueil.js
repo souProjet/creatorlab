@@ -542,7 +542,7 @@ sidebarItems.forEach(sidebarItem => {
         localStorage.setItem('sidebarItem', sidebarItem.querySelector('span').innerHTML);
         mainContainer.classList.add('hide');
         if (sidebarItem.querySelector('span').innerHTML == 'Accueil') {
-            window.location.href = '/';
+            //window.location.href = "/";
         } else {
             sidebarItems.forEach(sidebarItem => sidebarItem.classList.remove('active'));
             sidebarItem.classList.add('active');
@@ -587,10 +587,10 @@ shareButton.addEventListener('click', (e) => {
     if (shareFieldTextarea.value != '') {
         let formData = new FormData();
         formData.append('text', shareFieldTextarea.value);
-        formData.append('nbrImages', inputFileImageShareField.files.length);
-        for (let i = 0; i < inputFileImageShareField.files.length; i++) {
-            formData.append('image' + i, inputFileImageShareField.files[i]);
-        }
+        //formData.append('nbrImages', inputFileImageShareField.files.length);
+        // for (let i = 0; i < inputFileImageShareField.files.length; i++) {
+        //     formData.append('image' + i, inputFileImageShareField.files[i]);
+        // }
         fetch('/api/share', {
                 method: 'POST',
                 body: formData,
@@ -617,7 +617,7 @@ shareButton.addEventListener('click', (e) => {
                             <img src="${document.querySelector('.is_avatar').src}" class="bg-gray-200 border border-white rounded-full w-10 h-10">
                         </a>
                         <div class="flex-1 font-semibold capitalize">
-                            <a class="text-black dark:text-gray-100">${document.querySelector('.user_name').innerText}</a>
+                            <a class="text-black dark:text-gray-100">${document.querySelector('.user_name').innerText.split('\n')[1].trim()}</a>
                             <div class="text-gray-700 flex items-center space-x-2">
                                 à l'instant
                             </div>
@@ -661,7 +661,7 @@ shareButton.addEventListener('click', (e) => {
             </div>`;
                     document.querySelector('.card').parentNode.insertBefore(postElement, document.querySelector('.post'));
                     shareFieldTextarea.value = '';
-                    shareFieldImageBox.innerHTML = '';
+                    //shareFieldImageBox.innerHTML = '';
                     document.querySelector('.uk-close').click()
                 }
             }).catch(err => {
@@ -722,6 +722,5 @@ function likePost(element, e, postToken) {
 }
 socket.on('disconnected', () => {
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
-
     window.location.href = '/login';
 });

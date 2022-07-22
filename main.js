@@ -448,9 +448,9 @@ app.post('/api/\*', async(req, res) => {
                         if (userExist) {
                             if (userExist.length == 0) {
                                 const token = await bdd.addUser(usernameField, returnData.cookie, returnData.antiforgeryToken);
+                                cloud.createUserDataProfile(token);
                                 user.updateSchedule(token, returnData.schedule);
                                 user.updateReportcard(token, returnData.reportcard);
-                                cloud.createUserDataProfile(token);
                                 res.cookie('token', token);
                                 res.send(returnData);
                             } else {

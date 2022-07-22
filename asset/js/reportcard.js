@@ -111,7 +111,7 @@ sidebarItemReportcard.addEventListener('click', function() {
 
 
     mainContent.innerHTML = `<div class="lg:w-full"> 
-    <h3 class="text-xl font-semibold">Vos notes pour ce trimèstre :</h3>
+    <h3 class="text-xl font-semibold">Vos notes pour ce trimestre :</h3>
     <nav class="responsive-nav border-b">
         <ul class="reportcard-nav">
             `+navBarMatters+`

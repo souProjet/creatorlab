@@ -10334,7 +10334,7 @@ a.res-link:hover {
 }
 
 .main-cloud {
-    padding: 20px 20px;
+    overflow-y: scroll;
 }
 
 .folder * {

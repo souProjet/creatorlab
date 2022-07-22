@@ -29,8 +29,8 @@ function initcloudApp() {
             let contextmenu = document.createElement('div');
             contextmenu.classList.add('contextmenu');
             contextmenu.innerHTML = `
-                <div class="contextmenu_item" onclick="createFolder()">Crée un dossier</div>
-                <div class="contextmenu_item" onclick="createFile()">Crée un fichier texte</div>
+                <div class="contextmenu_item" onclick="createFolder()">Créer un dossier</div>
+                <div class="contextmenu_item" onclick="createFile()">Créer un fichier texte</div>
                 <div class="contextmenu_item" onclick="document.querySelector('.file-input-upload-cloud').click()">Upload un fichier</div>
             `;
             contextmenu.style.top = e.pageY + 'px';

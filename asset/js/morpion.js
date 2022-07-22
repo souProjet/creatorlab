@@ -149,7 +149,7 @@ function Afficher(liste) {
 }
 
 function jouer(liste, k) {
-    if (Victoire(liste) == 1 || liste.length > 8) { window.location.reload() } else {
+    if (Victoire(liste) == 1 || liste.length > 8) { replay(); } else {
         k = parseFloat(k);
         if (ListeReste(liste).indexOf(k) != -1) {
             liste.push(k);

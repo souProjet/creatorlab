@@ -544,6 +544,7 @@ sidebarItems.forEach(sidebarItem => {
         if (sidebarItem.querySelector('span').innerHTML == 'Accueil') {
             //window.location.href = "/";
         } else {
+            document.getElementById('wrapper').classList.remove('is-active');
             sidebarItems.forEach(sidebarItem => sidebarItem.classList.remove('active'));
             sidebarItem.classList.add('active');
         }

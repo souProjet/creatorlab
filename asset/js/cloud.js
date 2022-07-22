@@ -11,7 +11,37 @@ function initcloudApp() {
         <div class="header-cloud">
             <h1><span onclick="enterInFolder()" class="title-for-cloud">Accueil</span></h1>
         </div>
-
+        <div class="mail-icons">
+            <svg uk-tooltip="title: Créer un dossier" onclick="createFolder();" width="24" height="24" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M14.5 2H7.71l-.85-.85L6.51 1h-5l-.5.5v11l.5.5H7v-1H1.99V6h4.49l.35-.15.86-.86H14v1.5l-.001.51h1.011V2.5L14.5 2zm-.51 2h-6.5l-.35.15-.86.86H2v-3h4.29l.85.85.36.15H14l-.01.99zM13 16h-1v-3H9v-1h3V9h1v3h3v1h-3v3z" />
+            </svg>
+            <svg uk-tooltip="title: Créer un fichier texte" onclick="createFile();" width="24" height="24" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 275.836 275.836" style="enable-background:new 0 0 275.836 275.836;" xml:space="preserve">
+                <g fill="blue">
+                    <path d="M191.344,20.922l-95.155,95.155c-0.756,0.756-1.297,1.699-1.565,2.734l-8.167,31.454c-0.534,2.059,0.061,4.246,1.565,5.751
+                    c1.14,1.139,2.671,1.757,4.242,1.757c0.503,0,1.009-0.063,1.508-0.192l31.454-8.168c1.035-0.269,1.979-0.81,2.734-1.565
+                    l95.153-95.153c0.002-0.002,0.004-0.003,0.005-0.004s0.003-0.004,0.004-0.005l19.156-19.156c2.344-2.343,2.344-6.142,0.001-8.484
+                    L218.994,1.758C217.868,0.632,216.343,0,214.751,0c-1.591,0-3.117,0.632-4.242,1.758l-19.155,19.155
+                    c-0.002,0.002-0.004,0.003-0.005,0.004S191.346,20.921,191.344,20.922z M120.631,138.208l-19.993,5.192l5.191-19.993l89.762-89.762
+                    l14.801,14.802L120.631,138.208z M214.751,14.485l14.801,14.802l-10.675,10.675L204.076,25.16L214.751,14.485z" />
+                    <path d="M238.037,65.022c-3.313,0-6,2.687-6,6v192.813H43.799V34.417h111.063c3.313,0,6-2.687,6-6s-2.687-6-6-6H37.799
+                    c-3.313,0-6,2.687-6,6v241.419c0,3.313,2.687,6,6,6h200.238c3.313,0,6-2.687,6-6V71.022
+                    C244.037,67.709,241.351,65.022,238.037,65.022z" />
+                </g>
+            </svg>
+            <svg uk-tooltip="title: Upload un fichier" onclick="document.querySelector('.file-input-upload-cloud').click();" width="24" height="24" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 384.97 384.97" style="enable-background:new 0 0 384.97 384.97;" xml:space="preserve">
+                <g fill="blue">
+                    <g id="Upload">
+                        <path d="M372.939,264.641c-6.641,0-12.03,5.39-12.03,12.03v84.212H24.061v-84.212c0-6.641-5.39-12.03-12.03-12.03
+                        S0,270.031,0,276.671v96.242c0,6.641,5.39,12.03,12.03,12.03h360.909c6.641,0,12.03-5.39,12.03-12.03v-96.242
+                        C384.97,270.019,379.58,264.641,372.939,264.641z" />
+                        <path d="M117.067,103.507l63.46-62.558v235.71c0,6.641,5.438,12.03,12.151,12.03c6.713,0,12.151-5.39,12.151-12.03V40.95
+                        l63.46,62.558c4.74,4.704,12.439,4.704,17.179,0c4.74-4.704,4.752-12.319,0-17.011l-84.2-82.997
+                        c-4.692-4.656-12.584-4.608-17.191,0L99.888,86.496c-4.752,4.704-4.74,12.319,0,17.011
+                        C104.628,108.211,112.327,108.211,117.067,103.507z" />
+                    </g>
+                </g>
+            </svg>
+        </div>
         <main class="main-cloud" >
         </main>
     </div>`;
@@ -48,24 +78,24 @@ function initcloudApp() {
     document.querySelector('.app-cloud').addEventListener('dragenter', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        document.querySelector('.main-cloud').innerHTML += `
-        <div type="file" class="folder file-drag-and-drop">
-            <i class="material-icons">description</i>
-        </div>`;
+
+        document.querySelector('.main-cloud').style.backgroundImage = 'url(/public/images/dropfile.png)';
+
     });
     document.querySelector('.app-cloud').addEventListener('dragleave', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        document.querySelectorAll('div.file-drag-and-drop').forEach(box => box.remove());
     });
+
     document.querySelector('.app-cloud').addEventListener('dragover', (e) => {
         e.preventDefault();
         e.stopPropagation();
     });
+
     document.querySelector('.app-cloud').addEventListener('drop', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        document.querySelectorAll('div.file-drag-and-drop').forEach(box => box.remove());
+        document.querySelector('.main-cloud').style.backgroundImage = 'none';
         fileDropedCloud(e);
     });
 

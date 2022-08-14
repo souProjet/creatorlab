@@ -313,7 +313,8 @@ app.get('/', (req, res) => {
         res.sendFile(__dirname + '/template/accueil.html');
     } else {
         //utilisateur non connecté
-        res.redirect('/login');
+        res.sendFile(__dirname + '/template/index.html');
+        //res.redirect('/login');
     }
 });
 app.get('/login', async(req, res) => {

@@ -32,9 +32,15 @@ let User = class User {
             }
         });
         this.cluster.on('taskerror', (err, data, willRetry) => {
-            if (willRetry) console.warn(`Erreur de scraping, réessai prévu : `);
+            if (willRetry) {
+                console.warn(`Erreur de scraping, réessai prévu : `);
+            }
             //traitement de l'erreur
-            else console.error(`Erreur de scraping :`);
+            else {
+                this.returnData.status = false;
+                this.returnData.message = "Erreur de scraping";
+                console.error(`Erreur de scraping :`);
+            }
             console.log(err);
 
         });
@@ -82,8 +88,12 @@ let User = class User {
                         console.log(err);
                     });
 
+                //#############################################
+                // CONNEXION À PRONOTE
+                //#############################################
+
                 await page.goto('https://servicesexternes.itslfr-aws.com/Default.cshtml?itsl_auth=%7b%22TermId%22%3anull%2c%22TermSyncKey%22%3anull%2c%22CourseId%22%3anull%2c%22CourseSyncKey%22%3anull%2c%22LaunchUrl%22%3a%22https%3a%2f%2fservicesexternes.itslfr-aws.com%2fDefault.cshtml%22%2c%22TimeStamp%22%3a%222022-07-15T13%3a48%3a36%22%2c%22PostTo%22%3a%22%22%2c%22CustomerId%22%3a%22200026%22%2c%22PersonId%22%3a%22455511%22%2c%22Language%22%3a%22fr-FR%22%2c%22Country%22%3a%22FR%22%2c%22EducationalLevel%22%3a%22Secondary%22%2c%22Role%22%3a%22Learner%22%2c%22EditReference%22%3anull%2c%22Prefix%22%3a%22%22%2c%22FirstName%22%3a%22Swann%22%2c%22LastName%22%3a%22BOUGOUIN%22%2c%22OAuthToken%22%3a%22af1bfd2f-97c0-4752-835e-80010d9ed644%22%2c%22OAuthTokenSecret%22%3a%22645173cf-8aa2-42f1-96a4-9929f3c80c39%22%2c%22ItslearningSection%22%3a%22TopMenu%22%7d&itsl_sign=ad7fad4845d3ea180b2c69d6f1c142d3');
-                await page.waitForTimeout(1000);
+                await page.waitForTimeout(2000);
                 await page.evaluate(() => {
                     document.querySelector('li:nth-child(2)').setAttribute('onclick', document.querySelector('li:nth-child(2)').getAttribute('onclick').replace('window.open', 'document.location=').replace('(', '').replace(')', ''))
                 })
@@ -93,6 +103,10 @@ let User = class User {
                     document.querySelectorAll('.menu-principal_niveau1')[3].querySelector('li').click();
                 });
                 await page.waitForTimeout(2000);
+
+                //#############################################
+                // RECUPERATION DE L'EMPLOI DU TEMPS
+                //#############################################
                 let schedule = await page.evaluate(() => {
                     let timeTemplate = ['08h05', '08h30', '09h00', '9h30', '10h15', '10h45', '11h10', '11h40', '12h05', '12h30', '13h00', '13h30', '13h55', '14h25', '14h50', '15h20', '16h05', '16h35', '17h00', '17h30', '17h55'];
                     let dayTemplate = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
@@ -135,6 +149,10 @@ let User = class User {
                     document.querySelectorAll('.label-menu_niveau0')[2].click();
                 });
                 await page.waitForTimeout(2000);
+
+                //#############################################
+                // RECUPERATION DES NOTES
+                //#############################################
                 let reportcard = await page.evaluate(() => {
                     let reportcardDom = document.createElement('div');
                     reportcardDom.innerHTML = document.querySelector('.EspaceGauche.EspaceHaut tr').innerHTML;

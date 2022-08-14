@@ -1,0 +1,1145 @@
+/* X-Large devices (large desktops, 1200px and up) */
+@media only screen and (min-width: 1200px) and (max-width: 1700px) {
+  /* -----------------------------------------
+        Home CSS
+    ----------------------------------------- */
+  .home-banner-area .shape img.shape-1 {
+    top: 27%;
+    left: 15%;
+    max-width: 25px;
+  }
+  .home-banner-area .shape img.shape-2 {
+    top: 52%;
+    left: 15%;
+    max-width: 35px;
+  }
+  .home-banner-area .shape img.shape-3 {
+    top: 50%;
+    left: 30%;
+    max-width: 20px;
+  }
+  .home-banner-area .shape img.shape-4 {
+    top: 38%;
+    right: 19%;
+    max-width: 20px;
+  }
+  .home-banner-area .shape img.shape-5 {
+    top: 50%;
+    right: 31%;
+    max-width: 35px;
+  }
+  .home-banner-area .shape img.shape-6 {
+    top: 58%;
+    right: 12%;
+    max-width: 20px;
+  }
+  /* -----------------------------------------
+        Features CSS
+    ----------------------------------------- */
+  .features-area .section-gap {
+    padding-top: 210px;
+    padding-bottom: 300px;
+  }
+  .features-area .section-gap::after {
+    top: -5%;
+  }
+  /* -----------------------------------------
+        Overview CSS
+    ----------------------------------------- */
+  .overview-area {
+    margin-top: -210px;
+  }
+  /* -----------------------------------------
+        Blog CSS
+    ----------------------------------------- */
+  .blog-area .section-gap {
+    padding-top: 265px;
+  }
+  /* -----------------------------------------
+        Fun Fact CSS
+    ----------------------------------------- */
+  .fun-fact-area.fun-fact-2 {
+    margin-bottom: -360px;
+  }
+  /* -----------------------------------------
+        Testimonial CSS
+    ----------------------------------------- */
+}
+
+/* Medium devices (tablets, laptops between 992px to 1200px) */
+@media only screen and (min-width: 992px) and (max-width: 1199.98px) {
+  body {
+    font-size: 15px;
+  }
+  h1 {
+    font-size: 45px;
+  }
+  h2 {
+    font-size: 38px;
+  }
+  h3 {
+    font-size: 20px;
+  }
+  .ptb-120 {
+    padding-top: 100px;
+    padding-bottom: 100px;
+  }
+  .pt-120 {
+    padding-top: 100px;
+  }
+  .pb-120 {
+    padding-bottom: 100px;
+  }
+  .ptb-90 {
+    padding-top: 70px;
+    padding-bottom: 70px;
+  }
+  .pt-90 {
+    padding-top: 70px;
+  }
+  .pb-90 {
+    padding-bottom: 70px;
+  }
+  .section-title {
+    margin-bottom: 40px;
+  }
+  .section-title .title {
+    font-size: 38px;
+  }
+  /* -----------------------------------------
+        Home CSS
+    ----------------------------------------- */
+  .home-banner-area {
+    padding-top: 100px;
+    background-size: cover;
+  }
+  .home-banner-area .banner-content .tag {
+    margin-bottom: 31px;
+  }
+  .home-banner-area .banner-content .title {
+    margin-top: -8px;
+  }
+  .home-banner-area .banner-image.image-bottom {
+    margin-bottom: -50px;
+  }
+  .home-banner-area .shape img.shape-1 {
+    top: 27%;
+    left: 15%;
+    max-width: 25px;
+  }
+  .home-banner-area .shape img.shape-2 {
+    top: 52%;
+    left: 15%;
+    max-width: 35px;
+  }
+  .home-banner-area .shape img.shape-3 {
+    top: 50%;
+    left: 30%;
+    max-width: 20px;
+  }
+  .home-banner-area .shape img.shape-4 {
+    top: 38%;
+    right: 19%;
+    max-width: 20px;
+  }
+  .home-banner-area .shape img.shape-5 {
+    top: 50%;
+    right: 31%;
+    max-width: 35px;
+  }
+  .home-banner-area .shape img.shape-6 {
+    top: 58%;
+    right: 12%;
+    max-width: 20px;
+  }
+  .home-banner-area.banner-2 {
+    padding-bottom: 70px;
+  }
+  .home-banner-area.banner-4 {
+    padding-bottom: 630px;
+  }
+  .home-banner-area.banner-5 {
+    padding-bottom: 100px;
+  }
+  .home-banner-area.banner-9 {
+    padding-top: 100px;
+  }
+  .home-banner-area.banner-9 .banner-content {
+    padding-top: 40px;
+  }
+  /* -----------------------------------------
+        Choose CSS
+    ----------------------------------------- */
+  .choose-area.choose-2 {
+    padding-top: 200px;
+    padding-bottom: 70px;
+    margin-top: -100px;
+  }
+  /* -----------------------------------------
+        Features CSS
+    ----------------------------------------- */
+  .features-area .section-gap {
+    padding-top: 148px;
+    padding-bottom: 100px;
+  }
+  .features-area .section-gap::after {
+    top: -9%;
+  }
+  /* -----------------------------------------
+        Overview CSS
+    ----------------------------------------- */
+  .overview-area {
+    margin-top: -30px;
+  }
+  .overview-area.overview-3 {
+    padding-top: 630px;
+    padding-bottom: 151px;
+  }
+  /* -----------------------------------------
+        Blog CSS
+    ----------------------------------------- */
+  .blog-area.blog-with-shape {
+    margin-top: -200px;
+  }
+  .blog-area .section-gap {
+    padding-top: 210px;
+    padding-bottom: 50px;
+  }
+  /* -----------------------------------------
+        Sidebar CSS
+    ----------------------------------------- */
+  .sidebar-widget-area .widget {
+    padding: 20px;
+  }
+  /* -----------------------------------------
+        Fun Fact CSS
+    ----------------------------------------- */
+  .fun-fact-area.fun-fact-2 {
+    -webkit-transform: none;
+            transform: none;
+    margin: 0;
+    padding-top: 100px;
+  }
+  /* -----------------------------------------
+        Testimonial CSS
+    ----------------------------------------- */
+  .testimonial-area.testimonial-2 {
+    padding-top: 70px;
+  }
+  .testimonial-area.testimonial-4 {
+    padding-top: 70px;
+  }
+  /* -----------------------------------------
+        Pricing Plan CSS
+    ----------------------------------------- */
+  .pricing-plan-area .item-single {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .page-title-area {
+    padding: 100px 0;
+  }
+  .services-area .item-single {
+    padding: 20px;
+  }
+}
+
+/* Medium devices (tablets, Between 768px to 992px) */
+@media only screen and (min-width: 768px) and (max-width: 991.98px) {
+  h1 {
+    font-size: 48px;
+  }
+  h2 {
+    font-size: 34px;
+  }
+  h3 {
+    font-size: 22px;
+  }
+  .ptb-120 {
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+  .pt-120 {
+    padding-top: 80px;
+  }
+  .pb-120 {
+    padding-bottom: 80px;
+  }
+  .ptb-90 {
+    padding-top: 50px;
+    padding-bottom: 50px;
+  }
+  .pt-90 {
+    padding-top: 50px;
+  }
+  .pb-90 {
+    padding-bottom: 50px;
+  }
+  .mb-sm-30 {
+    margin-bottom: 30px;
+  }
+  .section-title {
+    margin-bottom: 40px;
+    margin-top: -6px;
+  }
+  .section-title .title {
+    font-size: 36px;
+  }
+  /* -----------------------------------------
+        Home Banner CSS
+    ----------------------------------------- */
+  .home-banner-area {
+    background-size: cover;
+    padding-top: 82px;
+  }
+  .home-banner-area .banner-content {
+    text-align: center;
+    z-index: 2;
+  }
+  .home-banner-area .banner-content .tag {
+    margin-bottom: 33px;
+  }
+  .home-banner-area .banner-content .title {
+    font-size: 48px;
+    margin-top: -6px;
+  }
+  .home-banner-area .banner-content .text {
+    max-width: 575px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .home-banner-area .shape img.shape-1 {
+    left: 18%;
+  }
+  .home-banner-area .shape img.shape-4 {
+    right: 18%;
+  }
+  .home-banner-area .banner-image {
+    max-width: 80%;
+  }
+  .home-banner-area .banner-image.image-bottom {
+    margin-bottom: -36px;
+  }
+  .home-banner-area .banner-image.image-right {
+    margin-top: 30px;
+  }
+  .home-banner-area .banner-image.image-right img {
+    border-radius: 10px;
+  }
+  .home-banner-area .banner-image.banner-image {
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .home-banner-area.banner-2 {
+    padding-bottom: 50px;
+  }
+  .home-banner-area.banner-2 .bg-shape.bg-shape-1 {
+    max-width: 40%;
+  }
+  .home-banner-area.banner-3 {
+    padding-bottom: 0;
+    margin-bottom: -30px;
+  }
+  .home-banner-area.banner-4 {
+    padding-bottom: 50px;
+  }
+  .home-banner-area.banner-5 {
+    padding-bottom: 80px;
+  }
+  .home-banner-area.banner-9 {
+    padding-top: 0;
+  }
+  .home-banner-area.banner-9 .banner-content {
+    padding-top: 60px;
+  }
+  .home-banner-area.banner-9 .info-list {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .home-banner-area.banner-9 .image-right {
+    margin-top: -38px;
+  }
+  /* -----------------------------------------
+        Integration CSS
+    ----------------------------------------- */
+  .integration-area .item-single .content {
+    padding-left: 12px;
+  }
+  .integration-area.integration-2 .item-single, .integration-area.integration-3 .item-single {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    text-align: center;
+    padding: 30px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+  }
+  .integration-area.integration-2 .item-single .content, .integration-area.integration-3 .item-single .content {
+    padding: 0;
+    margin-top: 15px;
+  }
+  .integration-area.integration-2 .item-single .content h3, .integration-area.integration-3 .item-single .content h3 {
+    margin-bottom: 5px;
+  }
+  /* -----------------------------------------
+        Choose CSS
+    ----------------------------------------- */
+  .choose-area .section-title {
+    -webkit-margin-start: 0;
+            margin-inline-start: 0;
+  }
+  .choose-area.choose-2 {
+    margin-top: -340px;
+    padding-bottom: 0;
+  }
+  .services-area .item-single.mt-30 {
+    margin-top: 0;
+  }
+  /* -----------------------------------------
+        Features CSS
+    ----------------------------------------- */
+  .features-area .section-gap {
+    padding-top: 160px;
+    padding-bottom: 50px;
+  }
+  .features-area .section-gap::after {
+    top: -9%;
+  }
+  .features-area.features-3 {
+    margin-top: 0;
+  }
+  .features-area.features-3 .section-title {
+    text-align: center;
+  }
+  .features-area.features-3 .mt-30 {
+    margin-top: 0;
+  }
+  .features-area.features-3 .mb-sm-30 {
+    margin-bottom: 30px;
+  }
+  .main-features-area .item-single {
+    padding: 30px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+    background-color: #fff;
+  }
+  /* -----------------------------------------
+        Overview CSS
+    ----------------------------------------- */
+  .overview-area {
+    margin-top: 0;
+  }
+  .overview-area .section-title {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .overview-area > div {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .overview-area .section-title {
+    text-align: center;
+    max-width: 676px;
+  }
+  .overview-area .content {
+    margin-bottom: 40px;
+  }
+  .overview-area.overview-3 {
+    padding-top: 610px;
+    padding-bottom: 130px;
+  }
+  /* -----------------------------------------
+        Testimonial CSS
+    ----------------------------------------- */
+  .testimonial-area .slider-item {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    text-align: center;
+  }
+  .testimonial-area .slider-item .image {
+    margin-bottom: 20px;
+  }
+  .testimonial-area .slider-item .content {
+    padding: 0;
+  }
+  .testimonial-area.testimonial-2 {
+    padding-top: 50px;
+  }
+  .testimonial-area.testimonial-4 {
+    padding-top: 50px;
+  }
+  /* -----------------------------------------
+        Blog CSS
+    ----------------------------------------- */
+  .blog-area.blog-with-shape {
+    margin-top: -200px;
+  }
+  .blog-area .item-single .content {
+    padding: 25px;
+  }
+  .blog-area .section-gap {
+    padding-top: 288px;
+    padding-bottom: 50px;
+  }
+  /* -----------------------------------------
+        Faq CSS
+    ----------------------------------------- */
+  .faq-area .section-title {
+    -webkit-margin-start: 0;
+            margin-inline-start: 0;
+  }
+  /* -----------------------------------------
+        Fun Fact CSS
+    ----------------------------------------- */
+  .fun-fact-area.fun-fact-2 {
+    margin: 0;
+    -webkit-transform: none;
+            transform: none;
+    padding-top: 50px;
+  }
+  /* -----------------------------------------
+        Pricing Plan CSS
+    ----------------------------------------- */
+  .pricing-plan-area .section-top {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+  }
+  .pricing-plan-area .section-top .section-title {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+  }
+  /* -----------------------------------------
+        Promo CSS
+    ----------------------------------------- */
+  .promo-area .content {
+    text-align: center;
+  }
+  /* -----------------------------------------
+        Page Title CSS
+    ----------------------------------------- */
+  .page-title-area {
+    padding: 80px 0;
+  }
+  /* -----------------------------------------
+        Pagination CSS
+    ----------------------------------------- */
+  .pagination {
+    padding-top: 0;
+  }
+}
+
+/* Small devices (landscape phones, less than 768px) */
+@media only screen and (max-width: 767.98px) {
+  /* Reset CSS */
+  body {
+    font-size: 15px;
+  }
+  h1 {
+    font-size: 35px;
+  }
+  h2 {
+    font-size: 24px;
+  }
+  h3 {
+    font-size: 20px;
+  }
+  h4 {
+    font-size: 17px;
+  }
+  h5 {
+    font-size: 16px;
+  }
+  h6 {
+    font-size: 15px;
+  }
+  .ptb-120 {
+    padding-top: 60px;
+    padding-bottom: 60px;
+  }
+  .pt-120 {
+    padding-top: 60px;
+  }
+  .pb-120 {
+    padding-bottom: 60px;
+  }
+  .ptb-90 {
+    padding-top: 30px;
+    padding-bottom: 30px;
+  }
+  .pt-90 {
+    padding-top: 30px;
+  }
+  .pb-90 {
+    padding-bottom: 30px;
+  }
+  .mb-sm-30 {
+    margin-bottom: 30px;
+  }
+  .btn {
+    padding: 12px 20px;
+    font-size: 12px;
+  }
+  .icon-btn {
+    padding: 12px 15px;
+  }
+  .section-title {
+    margin-bottom: 40px;
+    margin-top: -5px;
+  }
+  .section-title .tag {
+    font-size: 14px;
+  }
+  .section-title .title {
+    font-size: 28px;
+  }
+  /* -----------------------------------------
+        Home Banner CSS
+    ----------------------------------------- */
+  .home-banner-area {
+    background-size: cover;
+    padding-top: 60px;
+  }
+  .home-banner-area .banner-content {
+    margin-bottom: 40px;
+  }
+  .home-banner-area .banner-content .tag {
+    font-size: 12px;
+    padding: 4px 20px;
+    margin-bottom: 26px;
+  }
+  .home-banner-area .banner-content .tag .icon {
+    width: 30px;
+    height: 20px;
+    line-height: 20px;
+    font-size: 10px;
+  }
+  .home-banner-area .banner-content .title {
+    font-size: 35px;
+    margin-bottom: 15px;
+    margin-top: -6px;
+  }
+  .home-banner-area .banner-content .text {
+    max-width: 440px;
+    font-size: 15px;
+    margin-bottom: 20px;
+  }
+  .home-banner-area .banner-content .cta-btns .btn {
+    margin-bottom: 20px;
+  }
+  .home-banner-area .banner-image.image-bottom {
+    margin-bottom: -16px;
+  }
+  .home-banner-area .banner-image.image-right {
+    margin-top: 5px;
+  }
+  .home-banner-area .banner-image.image-right img {
+    border-radius: 10px;
+  }
+  .home-banner-area .shape {
+    display: none;
+  }
+  .home-banner-area.banner-1 .banner-content p {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .home-banner-area.banner-2 {
+    padding-bottom: 20px;
+  }
+  .home-banner-area.banner-2 .bg-shape.bg-shape-1 {
+    display: none;
+  }
+  .home-banner-area.banner-3 {
+    padding-bottom: 0;
+    margin-bottom: -30px;
+  }
+  .home-banner-area.banner-3 .banner-image .video-btn {
+    width: 70px;
+    height: 70px;
+  }
+  .home-banner-area.banner-4 {
+    padding-bottom: 30px;
+  }
+  .home-banner-area.banner-5, .home-banner-area.banner-8 {
+    padding-bottom: 30px;
+  }
+  .home-banner-area.banner-8.banner-bg {
+    background-position: center;
+  }
+  .home-banner-area.banner-8 .banner-content {
+    max-width: 510px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .home-banner-area.banner-9 {
+    padding-top: 0;
+  }
+  .home-banner-area.banner-9 .banner-content {
+    padding-top: 60px;
+  }
+  .home-banner-area.banner-9 .info-list li {
+    -webkit-box-flex: 100%;
+        -ms-flex: 100%;
+            flex: 100%;
+  }
+  .home-banner-area.banner-9 .image-right {
+    margin-top: -38px;
+  }
+  /* -----------------------------------------
+        Integration CSS
+    ----------------------------------------- */
+  .integration-area .item-single {
+    padding: 25px 20px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-align: start;
+        -ms-flex-align: start;
+            align-items: flex-start;
+  }
+  .integration-area .item-single .content {
+    margin-top: 15px;
+    -webkit-padding-start: 0;
+            padding-inline-start: 0;
+  }
+  .integration-area .item-single .icon {
+    max-width: 54px;
+  }
+  .integration-area.integration-2 .item-single, .integration-area.integration-3 .item-single {
+    -webkit-box-align: start;
+        -ms-flex-align: start;
+            align-items: flex-start;
+  }
+  .integration-area.integration-2 .item-single .content, .integration-area.integration-3 .item-single .content {
+    margin-top: 15px;
+    -webkit-padding-start: 0;
+            padding-inline-start: 0;
+  }
+  .integration-area.integration-4 .item-single {
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  .integration-area.integration-4 .item-single .content {
+    margin-top: 0;
+    text-align: left;
+    -webkit-padding-start: 5px !important;
+            padding-inline-start: 5px !important;
+  }
+  .integration-area.integration-4 .images {
+    width: 300px;
+    height: 300px;
+  }
+  .integration-area.integration-4 .images::after {
+    width: calc(100% - 40px);
+    height: calc(100% - 40px);
+  }
+  .integration-area.integration-4 .images .image {
+    width: 60px;
+    height: 60px;
+  }
+  .integration-area.integration-4 .images .image img {
+    max-width: 35px;
+  }
+  /* -----------------------------------------
+        Choose CSS
+    ----------------------------------------- */
+  .choose-area .item-single {
+    padding: 25px 20px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+    background-color: #fff;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+  }
+  .choose-area .item-single .content {
+    margin-top: 15px;
+    -webkit-padding-start: 0;
+            padding-inline-start: 0;
+  }
+  .choose-area.choose-2 {
+    padding-top: 160px;
+    padding-bottom: 30px;
+    margin-top: -100px;
+  }
+  .choose-area.choose-3 .item-single {
+    background-color: transparent;
+    border-color: #2b304e;
+  }
+  /* -----------------------------------------
+        Features CSS
+    ----------------------------------------- */
+  .features-area .section-gap {
+    padding-top: 110px;
+    padding-bottom: 262px;
+  }
+  .features-area .section-gap::after {
+    top: -12%;
+  }
+  .features-area .item-single {
+    padding-top: 30px;
+    padding-bottom: 30px;
+  }
+  .features-area.features-3 {
+    margin-top: 0;
+  }
+  .features-area.features-3 .section-title {
+    margin: 0;
+    max-width: 676px;
+  }
+  .features-area.features-3 .section-title p {
+    margin-top: 15px;
+    margin-bottom: 25px;
+  }
+  .main-features-area .item-single {
+    padding: 30px 20px 25px 20px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+    background-color: #fff;
+  }
+  .main-features-area.main-features-2 .item-single .icon {
+    width: 80px;
+    height: 80px;
+  }
+  /* -----------------------------------------
+        Pricing Plan CSS
+    ----------------------------------------- */
+  .pricing-plan-area .section-top {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+  }
+  .pricing-plan-area .section-top .section-title {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+  }
+  .pricing-plan-area .nav-tabs-navigation .nav .nav-link {
+    padding: 12px 20px;
+    font-size: 12px;
+  }
+  .pricing-plan-area.pricing-plan-2 .item-single .content .price {
+    font-size: 34px;
+  }
+  .pricing-area .item-single .content .price {
+    font-size: 34px;
+  }
+  /* -----------------------------------------
+        Overview CSS
+    ----------------------------------------- */
+  .overview-area > div {
+    max-width: 540px;
+    margin: 0 auto;
+  }
+  .overview-area .content {
+    margin-bottom: 40px;
+  }
+  .overview-area .section-title p {
+    margin-top: 20px;
+    margin-bottom: 25px;
+  }
+  .overview-area.overview-3 {
+    padding-top: 60px;
+    padding-bottom: 30px;
+    margin: 0;
+    background-size: cover;
+  }
+  /* -----------------------------------------
+        Fun Fact CSS
+    ----------------------------------------- */
+  .fun-fact-area .item-single {
+    margin-top: -2px;
+  }
+  .fun-fact-area .item-single h3 {
+    font-size: 45px;
+  }
+  .fun-fact-area.fun-fact-2 {
+    -webkit-transform: none;
+            transform: none;
+    margin: 0;
+  }
+  /* -----------------------------------------
+        Testimonial CSS
+    ----------------------------------------- */
+  .testimonial-area .slider-item {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .testimonial-area .slider-item .image {
+    margin-bottom: 20px;
+  }
+  .testimonial-area .slider-item .content {
+    padding: 0;
+  }
+  .testimonial-area .slider-item .content .text {
+    margin-bottom: 15px;
+  }
+  .testimonial-area.testimonial-2 {
+    padding-top: 30px;
+  }
+  .testimonial-area.testimonial-4 {
+    padding-top: 30px;
+  }
+  .feedback-area .slider-item .slider-item-inner {
+    padding: 30px 20px;
+  }
+  .feedback-area .slider-item .slider-item-inner .quote {
+    top: 10px;
+    right: 20px;
+    opacity: .2;
+  }
+  .feedback-area.feedback-2 .slider-item .slider-item-inner .content {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .feedback-area.feedback-2 .slider-item .slider-item-inner .content .text {
+    font-size: 16px;
+  }
+  .feedback-area.feedback-4 .slider-item .slider-item-inner .content {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .feedback-area.feedback-4 .slider-item .slider-item-inner .content .text {
+    font-size: 16px;
+  }
+  .feedback-area .section-top {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+  }
+  .feedback-area .section-top .section-title {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+  }
+  .feedback-area .section-top .section-title .icon {
+    margin-left: auto !important;
+    margin-right: auto;
+  }
+  /* -----------------------------------------
+        Blog CSS
+    ----------------------------------------- */
+  .blog-area .item-single .content {
+    padding: 25px;
+  }
+  .blog-area.blog-with-shape {
+    margin-top: 0;
+  }
+  .blog-area.blog-with-shape::after {
+    top: -16%;
+  }
+  .blog-area.blog-with-shape .section-gap {
+    padding-top: 56px;
+    padding-bottom: 30px;
+  }
+  .blog-area.blog-with-shape .image img {
+    width: 100%;
+  }
+  .blog-area.blog-2 {
+    margin-top: -20px;
+  }
+  .blog-area.blog-with-sidebar .item-single .content {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  .blog-area.blog-with-sidebar .item-single .content .info-list li {
+    font-size: 12px;
+    -webkit-margin-end: 6px;
+            margin-inline-end: 6px;
+  }
+  .blog-area.blog-with-sidebar .item-single .content .info-list li i {
+    -webkit-margin-end: 5px;
+            margin-inline-end: 5px;
+    font-size: 10px;
+  }
+  /* -----------------------------------------
+        Faq CSS
+    ----------------------------------------- */
+  .faq-area .accordion-item .accordion-header .accordion-button {
+    padding-bottom: 15px;
+    font-size: 16px;
+  }
+  .faq-area .accordion-item .accordion-body {
+    padding-top: 10px;
+  }
+  .faq-area.faq-3 .accordion-item, .faq-area.faq-4 .accordion-item {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  /* -----------------------------------------
+        Promo CSS
+    ----------------------------------------- */
+  .promo-area .content .title {
+    margin-bottom: 20px;
+  }
+  .promo-area .content p {
+    margin-bottom: 20px;
+  }
+  /* -----------------------------------------
+        Services CSS
+    ----------------------------------------- */
+  .services-area .section-title .title {
+    margin-bottom: 20px;
+  }
+  .services-area .section-title p {
+    margin-bottom: 25px;
+  }
+  .services-area.services-2 .item-single {
+    padding: 25px 20px 20px 20px;
+  }
+  /* -----------------------------------------
+        Blog Details CSS
+    ----------------------------------------- */
+  .blog-details-area .item-single .content {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  .blog-details-area .item-single .content .info-list li {
+    font-size: 12px;
+    -webkit-margin-end: 8px;
+            margin-inline-end: 8px;
+  }
+  .blog-details-area .item-single .content .info-list li i {
+    -webkit-margin-end: 5px;
+            margin-inline-end: 5px;
+    font-size: 10px;
+  }
+  .blog-details-area .item-single .content .blockquote {
+    padding: 15px;
+  }
+  .blog-details-area .item-single .content .blockquote p {
+    margin-top: 0;
+    font-size: 16px;
+  }
+  .blog-details-area .comments .comment-list .comment .comment-body .comment-content p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .blog-details-area .comments .comment-list .comment .children .comment-body {
+    -webkit-padding-start: 25px;
+            padding-inline-start: 25px;
+  }
+  /* -----------------------------------------
+        Sidebar CSS
+    ----------------------------------------- */
+  .sidebar-widget-area .widget {
+    padding: 30px 20px;
+  }
+  /* -----------------------------------------
+        Coming Soon CSS
+    ----------------------------------------- */
+  .coming-soon-area .coming-soon-box {
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .coming-soon-area .coming-soon-box .count {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  .pagination {
+    padding-top: 0;
+  }
+  .page-title-area {
+    padding: 60px 0;
+  }
+  .go-top {
+    width: 40px;
+    height: 40px;
+  }
+  .video-btn {
+    width: 70px;
+    height: 70px;
+  }
+  .video-btn i {
+    font-size: 20px;
+  }
+  .newsletter-form .input-group .form-control {
+    padding-left: 15px;
+    padding-right: 10px;
+  }
+}
+
+@media only screen and (min-width: 576px) and (max-width: 767.98px) {
+  /* -----------------------------------------
+        Banner CSS
+    ----------------------------------------- */
+  .banner-image.image-bottom {
+    margin-bottom: -27px;
+  }
+  .home-banner-area.banner-9 .info-list li {
+    -webkit-box-flex: 50%;
+        -ms-flex: 50%;
+            flex: 50%;
+  }
+  /* -----------------------------------------
+        Services CSS
+    ----------------------------------------- */
+  .services-area .mt-30 {
+    margin-top: 0;
+  }
+  /* -----------------------------------------
+        Features CSS
+    ----------------------------------------- */
+  .features-area .item-single {
+    padding: 30px 20px;
+  }
+  .features-area .section-gap {
+    padding-top: 110px;
+    padding-bottom: 262px;
+  }
+  .features-area .section-gap::after {
+    top: -12%;
+  }
+  .features-area.features-3 .mt-30 {
+    margin-top: 0;
+  }
+  /* -----------------------------------------
+        Pricing CSS
+    ----------------------------------------- */
+  .pricing-area .item-single {
+    padding: 30px 20px;
+  }
+}
+/*# sourceMappingURL=responsive.css.map */

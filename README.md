@@ -56,13 +56,6 @@ CREATE TABLE `notes` (
   PRIMARY KEY (`id`)
 )
 ```
-- table likes :
-```sql
-CREATE TABLE `likes` (
-  `private_key` varchar(255) DEFAULT NULL,
-  `note_id` varchar(255) DEFAULT NULL
-) 
-```
 
 ## Crédit
 Ce projet à pour but d'aider un maximum de personne et se tronvant juridiquement dans une zone grise merci d'en profiter tout en le respectant!

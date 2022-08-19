@@ -6438,7 +6438,14 @@ template {
 .sidebar .sidebar_inner {
     padding: 0 12px;
     height: calc(100% - 40px);
+    opacity: 1;
+    transition: all .5s ease-in-out;
     /*footer links */
+}
+
+.sidebar .sidebar_inner.hide {
+    opacity: 0;
+    transition: all .5s ease-in-out;
 }
 
 .sidebar .sidebar_inner ul {
@@ -10368,6 +10375,9 @@ a.res-link:hover {
 }
 
 .folder i {
+    background-position: -50px;
+    height: 100px;
+    width: 100px;
     margin: 0;
     font-size: 100px;
     color: #b2bdc4;
@@ -11481,4 +11491,10 @@ a.res-link:hover {
         transform: translateY(76px) scale(0.92);
         opacity: 0;
     }
+}
+
+img.loader-waiting {
+    width: 20px;
+    height: 20px;
+    margin-left: 10px;
 }

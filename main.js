@@ -9,642 +9,701 @@ const io = new Server(server);
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const puppeteer = require('puppeteer');
-const { Cluster } = require('puppeteer-cluster');
-const config = require('./utils/config.json')
+const config = require('./utils/config.json') // Configuration du serveur web et de la base de données MySQL
 const fetch = require('node-fetch')
 const fs = require('fs');
 const utf8 = require('utf8');
 
+//#############################################################################################################################
+//                                               CONNEXION A LA BASE DE DONNEES
+//#############################################################################################################################
 const db = mysql.createConnection({
     host: config.host,
     user: config.user,
     password: config.password,
     database: config.database
-
 });
 db.connect(function(err) {
     if (err) throw err;
-    console.log("Connecté à la base de données MySQL!");
+    console.log("[CREATOR LAB] Connexion à la base de données mysql réussie");
 });
+
+//#############################################################################################################################
+//                                               CONFIGURATION DU SERVEUR WEB
+//#############################################################################################################################
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileupload());
 app.use(cookieParser());
 app.use('/public', express.static(__dirname + '/asset'));
 
-//Importer les modules
-const { User, Bdd, Users } = require('./modules/users.js');
-const { Notif, Message, Courses } = require('./modules/utils.js');
-const { Infos } = require('./modules/automations.js');
-const Cloud = require('./modules/cloud.js');
+//#############################################################################################################################
+//                                               IMPORT DES MODULES
+//#############################################################################################################################
+const Login = require('./modules/login');
+const Cloud = require('./modules/cloud');
+const Privatemessage = require('./modules/privatemessage');
+const User = require('./modules/user');
+const Notification = require('./modules/notification');
+const Course = require('./modules/course');
+const Note = require('./modules/note');
 
-//Instancier les modules
-const user = new User(puppeteer, Cluster, fetch, fs);
-const users = new Users(fetch);
-const bdd = new Bdd(db);
-const notif = new Notif(fetch);
-const message = new Message(fetch);
-const courses = new Courses(fetch);
-const infos = new Infos(fetch, io, bdd);
-const cloud = new Cloud(fs, utf8)
+//#############################################################################################################################
+//                                               INSTANCIATION DES MODULES
+//#############################################################################################################################
+const login = new Login(puppeteer, db, fetch);
+const cloud = new Cloud(fs, utf8);
+const privatemessage = new Privatemessage();
+const user = new User(db);
+const notification = new Notification(fetch);
+const course = new Course(fetch);
+const note = new Note(db);
 
-//fonctions outils 
-function escapeHTML(html) {
-    return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/\//g, '&#x2F;');
+//#############################################################################################################################
+//                                               FONCTION ECHAPPEMENT DE CARACTERES HTML
+//#############################################################################################################################
+function escapeHTML(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;")
+        .replace(/\//g, '&#x2F;')
 }
 
+//#############################################################################################################################
+//                                               DÉCLARATION DE VARIABLES
+//#############################################################################################################################
+let elycoState = false;
+let pronoteState = false;
 
-//webSocket
+//#############################################################################################################################
+//                                               WEB SOCKET
+//#############################################################################################################################
 io.on('connection', socket => {
 
-    socket.on('joinRoom', async({ token }) => {
-        //user.join(socket.id, username, clientId);
-        //socket.emit('message', 'Bienvenu dans le jeu !');
-        let userInfo = {
-            status: false
-        }
-        let userInfoBdd = await bdd.getUser(token);
-        if (userInfoBdd) {
-            if (userInfoBdd.length > 0) {
-                userInfo = await user.getUserInfo(userInfoBdd[0].clientId);
-                if (userInfoBdd[0].avatar == '' || userInfoBdd[0].name == '') {
-                    bdd.updateUser(token, userInfo.content.username, userInfo.content.avatar, socket.id);
-                }
-                bdd.setSocketIdUser(token, socket.id);
+    //utilisation des websockets:
+    // - nouvelles notifications aux utilisateurs connectés
+    // - nouveaux messages privés aux utilisateurs connectés
+    // - nouveaux post dans le feed
 
-                let nbrUnSeen = await infos.getUnSeen(userInfoBdd[0].clientId);
-                if (nbrUnSeen) {
-                    socket.emit('unseen', {
-                        nbrUnSeenNotif: nbrUnSeen.notifs,
-                        nbrUnSeenMessage: nbrUnSeen.messages
-                    })
+    socket.on('join', async(data) => {
+        let token = escapeHTML(data.token);
+        socket.join(socket.id);
+        //on vérifie si le token est valide pour cela il faut déjà récupérer le sessionId associé au token
+        let returnData = await login.getSessionId(token);
+        if (returnData.status) {
+            //on récupère le sessionId
+            let sessionId = returnData.sessionId;
+            //vérifier si le sessionId est valide
+            returnData = await login.checkSessionId(sessionId);
+            if (returnData.status) {
+                let name = returnData.name;
+                let avatar = returnData.avatar;
+                //ajouter le socketId de l'utilisateur dans la base de données et on l'ajoute dans la liste des utilisateurs connectés au websocket
+                returnData = await login.updateSocketId(token, socket.id);
+                if (returnData.status) {
+                    io.to(socket.id).emit('join', { status: true, message: 'Vous êtes connecté', username: name, avatar: avatar });
+                    //une fois l'utilisateur connecté, on lui envoie les notifications et les messages privés ainsi que les informations sur l'utilisateur
+
+                } else {
+                    io.to(socket.id).emit('join', { status: false, message: returnData.message });
                 }
+            } else {
+                io.to(socket.id).emit('join', { status: false, message: returnData.message });
             }
         } else {
-            //y'a un bleme avec la requete
+            io.to(socket.id).emit('join', { status: false, message: returnData.message });
         }
-        //les infos de l'utilisateur récupérées sur e-lyco
-        socket.emit('userInfo', {
-            status: userInfo.status,
-            userInfo: userInfo.content
-        });
-
-
-    });
-    //demande d'acquisition des notifications
-    socket.on('getNotifs', async({ token }) => {
-        let notifsInfo = {
-            status: false
-        }
-        let userInfoBdd = await bdd.getUser(token);
-        if (userInfoBdd) {
-            if (userInfoBdd.length > 0) {
-                let notifs = await notif.getNotif(userInfoBdd[0].clientId);
-                if (notifs) {
-                    let formatedNotifs = notif.format(notifs);
-                    notifsInfo = {
-                        status: true,
-                        content: formatedNotifs
-                    }
-                }
-            }
-        } else {
-            //y'a un bleme avec la requete
-        }
-        //envoyer les notifs trouvées
-        socket.emit('notifs', {
-            status: notifsInfo.status,
-            notifs: notifsInfo.content
-        })
-    });
-    //demande d'acquisition des messages
-    socket.on('getMessages', async({ token, pageIndex }) => {
-        let messagesInfo = {
-            status: false
-        }
-        let userInfoBdd = await bdd.getUser(token);
-        if (userInfoBdd) {
-            if (userInfoBdd.length > 0) {
-                let messages = await message.getMessage(userInfoBdd[0].clientId, pageIndex);
-                if (messages) {
-                    let formatedMessages = message.formatMessagePreview(messages);
-                    messagesInfo = {
-                        status: true,
-                        content: formatedMessages
-                    }
-                }
-            }
-        } else {
-            //y'a toujours un bleme avec la requete
-        }
-        //envoyer les messages trouvés
-        socket.emit('messages', {
-            status: messagesInfo.status,
-            messages: messagesInfo.content
-        })
-    });
-
-    //demande d'acquisition d'une conversation
-    socket.on('getConv', async({ token, convId, pageIndex }) => {
-        let convInfo = {
-            status: false
-        }
-        let userInfoBdd = await bdd.getUser(token);
-        if (userInfoBdd) {
-            if (userInfoBdd.length > 0) {
-                let conv = await message.getMessage(userInfoBdd[0].clientId, pageIndex);
-                if (conv) {
-                    let formatedConv = message.formatConv(conv, convId);
-                    convInfo = {
-                        status: true,
-                        content: formatedConv
-                    }
-                }
-            }
-        } else {
-            //y'a toujours un bleme avec la requete
-        }
-        //envoyer les messages trouvés
-        socket.emit('conv', {
-            status: convInfo.status,
-            conv: convInfo.content
-        })
-    });
-
-    //demande d'acquisition d'un profile
-    socket.on('getProfile', async({ token, id, avatar, name }) => {
-        let profileInfo = {
-            status: false
-        }
-        let userInfoBdd = await bdd.getUser(token);
-        if (userInfoBdd) {
-            if (userInfoBdd.length > 0) {
-                let profile = await users.getProfile(userInfoBdd[0].clientId, id);
-                if (profile) {
-                    profileInfo = {
-                        status: true,
-                        content: {
-                            profile: profile,
-                            avatar: avatar,
-                            name: name
-                        }
-                    }
-                }
-            }
-        } else {
-            //y'a toujours un bleme avec la requete
-        }
-        //envoyer le profile trouvé
-        socket.emit('profile', {
-            status: profileInfo.status,
-            profile: profileInfo.content,
-        })
-    });
-
-    socket.on('sendMessage', async({ token, convId, text }) => {
-        let userInfoBdd = await bdd.getUser(token);
-        if (userInfoBdd) {
-            if (userInfoBdd.length > 0) {
-                let sendMessage = await message.sendMessage(userInfoBdd[0].clientId, userInfoBdd[0]['antiforgery_token'], convId, escapeHTML(text));
-                socket.emit('messageSent', {
-                    status: sendMessage
-                })
-
-            }
-        }
-    });
-
-    socket.on('getCourses', async({ token }) => {
-        let coursesInfo = {
-            status: false
-        }
-        let userInfoBdd = await bdd.getUser(token);
-        if (userInfoBdd) {
-            if (userInfoBdd.length > 0) {
-                let coursesPreview = await courses.getCoursesPreview(userInfoBdd[0].clientId);
-                if (coursesPreview) {
-                    coursesPreview = courses.formatCoursesPreview(coursesPreview);
-                    coursesInfo = {
-                        status: true,
-                        content: coursesPreview
-                    }
-                }
-            }
-        } else {
-            //y'a toujours un bleme avec la requete
-        }
-        //envoyer les courses trouvées
-        socket.emit('courses', {
-            status: coursesInfo.status,
-            courses: coursesInfo.content
-        })
-    });
-
-    socket.on('viewCourse', async({ token, courseId }) => {
-        let userInfoBdd = await bdd.getUser(token);
-        if (userInfoBdd) {
-            if (userInfoBdd.length > 0) {
-                let viewCourse = await courses.getCourses(userInfoBdd[0].clientId, courseId);
-                if (viewCourse) {
-                    viewCourse = courses.formatCourse(viewCourse);
-                    socket.emit('coursedetails', {
-                        status: true,
-                        course: {
-                            course: viewCourse,
-                            courseId: courseId
-                        }
-                    })
-                }
-            }
-        }
-    });
-
-    socket.on('getplandetails', async({ token, courseId, planId }) => {
-        let planInfo = {
-            status: false
-        }
-        let userInfoBdd = await bdd.getUser(token);
-        if (userInfoBdd) {
-            if (userInfoBdd.length > 0) {
-                let plan = await courses.getPlanDetails(userInfoBdd[0].clientId, courseId, planId);
-                if (plan) {
-                    plan = courses.formatPlanDetails(plan, courseId, userInfoBdd[0].clientId);
-                    planInfo = {
-                        status: true,
-                        content: plan
-                    }
-                }
-            }
-        } else {
-            //y'a toujours un bleme avec la requete
-        }
-        //envoyer les plans trouvés
-        socket.emit('plandetails', {
-            status: planInfo.status,
-            plan: planInfo.content,
-            planId: planId,
-            courseId: courseId
-        })
-    });
-
-    socket.on('getdoc', async({ token, link }) => {
-        let iframeLink = "";
-        let userInfoBdd = await bdd.getUser(token);
-        if (userInfoBdd) {
-            if (userInfoBdd.length > 0) {
-                iframeLink = await courses.getDoc(userInfoBdd[0].clientId, link);
-            }
-        }
-        socket.emit('doc', {
-            status: true,
-            iframeLink: iframeLink
-        })
     });
 
     socket.on('disconnect', () => {
-        bdd.removeSocketIdUser(socket.id);
+        //une fois l'utilisateur déconnecté, on supprime son socketId de la base de données et on le supprime de la liste des utilisateurs connectés au websocket
+        socket.leave(socket.id);
     });
 });
 
-//rooter
+
+//#############################################################################################################################
+//                                               ROUTES
+//#############################################################################################################################
+//requêtes GET sur la racine du site
 app.get('/', (req, res) => {
-    //vérifier si l'utilisateur est connecté
-    if (req.cookies.token) {
+    //Vérifier si l'utilisateur a le cookie "token"
+    let token = req.cookies.token;
+    if (token) {
+        //si oui, cela ne veux pas forcément être un utilisateur connecté, on lui renvoie la page d'accueil et le traitement de son token se fera dans le module login
         res.sendFile(__dirname + '/template/accueil.html');
     } else {
-        //utilisateur non connecté
+        //si non, c'est surement la première connexion de l'utilisateur ou il a viré le cookie, on lui renvoie la page index (Landing Page)
         res.sendFile(__dirname + '/template/index.html');
-        //res.redirect('/login');
     }
 });
-app.get('/login', async(req, res) => {
-    if (req.cookies.token) {
+//requête sur le manifest.json
+app.get('/manifest.json', (req, res) => {
+    res.sendFile(__dirname + '/manifest.json');
+});
+//requête sur le sw.js
+app.get('/sw.js', (req, res) => {
+    res.sendFile(__dirname + '/sw.js');
+});
+//requête sur la page offline.html
+app.get('/offline', (req, res) => {
+    res.sendFile(__dirname + '/template/offline.html');
+});
+
+//requêtes GET sur la page de connexion
+app.get('/login', (req, res) => {
+    //vérifier si l'utilisateur a le cookie "token"
+    let token = req.cookies.token;
+    if (token) {
+        //si oui, cela ne veux pas forcément être un utilisateur connecté, on le redirige vers la page d'accueil et le traitement de son token se fera dans le module login
         res.redirect('/');
     } else {
+        //si non, c'est surement la première connexion de l'utilisateur ou il a viré le cookie, on lui renvoie la page de connexion
         res.sendFile(__dirname + '/template/login.html');
     }
 });
 
-//API
+//#############################################################################################################################
+//                                               ROUTES DE L'API
+//#############################################################################################################################
+//requêtes en POST sur l'API
 app.post('/api/\*', async(req, res) => {
-    let url = req.url.split('/')[2];
-    let params = []
+    //l'utilisation du POST est résérvée aux requêtes qui ont un body (donc une requête avec un corps)
+    let params = [];
     for (let i = 2; i < req.url.split('/').length; i++) {
         params.push(req.url.split('/')[i]);
     }
-    if (params.length > 1) {
-        let method = params[1];
-        if (params[0] == 'cloud') {
-            let token = escapeHTML(req.body.token);
-            let userInfoBdd = await bdd.getUser(token);
-            if (userInfoBdd) {
-                if (userInfoBdd.length == 1) {
-                    switch (method) {
-                        case 'getAllFiles':
-                            let files = cloud.getAllFiles(token);
-                            res.send(files);
-                            break;
-                        case 'createFolder':
-                            let path = req.body.path ? escapeHTML(req.body.path) : null;
-                            cloud.createFolder(token, path);
-                            res.send({ success: true });
-                            break;
-                        case 'delete':
-                            let id = req.body.id ? escapeHTML(req.body.id) : null;
-                            let isFile = !!req.body.isFile;
-                            let ext = req.body.ext ? escapeHTML(req.body.ext) : null;
-                            let isUploadedFile = req.body.isUploadedFile ? JSON.parse(req.body.isUploadedFile) : null;
-                            cloud.delete(token, id, isFile, isUploadedFile, ext);
-                            res.send({ success: true });
-                            break;
-                        case 'rename':
-                            let id2 = req.body.id ? escapeHTML(req.body.id) : null;
-                            let newName = req.body.newName ? escapeHTML(req.body.newName) : null;
-                            let isUploadedFile2 = req.body.isUploadedFile ? JSON.parse(req.body.isUploadedFile) : null;
-                            let isFile2 = !!req.body.isFile;
-                            if (newName) {
-                                cloud.rename(token, id2, newName, isFile2, isUploadedFile2);
-                                res.send({ success: true });
-                            } else {
-                                res.send({ success: false });
-                            }
-                            break;
-                        case 'createFile':
-                            let parentId = req.body.parentId ? escapeHTML(req.body.parentId) : null;
-                            let fileId = cloud.createFile(token, parentId);
-                            res.send({ success: true, fileId: fileId });
-                            break;
-                        case 'getFile':
-                            let fileId2 = req.body.fileId ? escapeHTML(req.body.fileId) : null;
-                            let ext2 = req.body.ext ? escapeHTML(req.body.ext) : null;
-                            let isUploadedFile3 = req.body.isUploadedFile ? JSON.parse(req.body.isUploadedFile) : null;
-                            let file = cloud.getFile(token, fileId2, isUploadedFile3, ext2);
-                            res.send(file);
-                            break;
-                        case 'saveFile':
-                            let fileId3 = req.body.fileId ? escapeHTML(req.body.fileId) : null;
-                            let content = req.body.content
-                            if (content) {
-                                if (fileId3) {
-                                    cloud.saveFile(token, fileId3, content);
-                                    res.send({ success: true });
-                                } else {
-                                    res.send({ success: false });
-                                }
-                            }
-                            break;
-                        case 'upload':
-                            let parentId2 = req.body.parentId ? escapeHTML(req.body.parentId) : null;
-                            let filesUpload = req.files;
-                            let nbrFiles = req.body.nbrFiles;
-
-                            if (filesUpload) {
-                                let success = true;
-                                let error = '';
-                                for (let i = 0; i < nbrFiles; i++) {
-                                    let file = filesUpload["file" + i];
-                                    file.name = utf8.decode(file.name);
-
-                                    if (file.size < 100000000) {
-                                        let returnState = cloud.upload(token, parentId2, file);
-                                        success = returnState.success;
-                                        error += (returnState.error != null ? returnState.error + "\n" : "");
-                                    } else {
-                                        success = false;
-                                        error += "Sorry, 100Mo max pour " + file.name + "\n";
-                                    }
-                                }
-                                res.send({ success: success, error: error });
-                            } else {
-                                res.send({ success: false, error: "Aucun fichier n'a été uploadé." });
-                            }
-                            break;
-
-                    }
-                } else {
-                    res.send({ success: false });
-                }
-            } else {
-                res.send({ success: false });
-            }
-
-        }
-    } else {
-        switch (url) {
-            case 'login':
-                //récupérer les infos et connecter l'utilisateur
-
-                let usernameField = escapeHTML(req.body.username);
-                let passwordField = escapeHTML(req.body.password);
-                if (usernameField && passwordField && usernameField.length > 0 && passwordField.length > 0) {
-                    const returnData = await user.login(usernameField, passwordField);
-                    if (returnData.status) {
-                        // res.cookie('clientId', returnData.cookie);
-                        let userExist;
-                        if (req.cookies.token) {
-                            userExist = await bdd.getUser(req.cookies.token);
-                        } else {
-                            userExist = await bdd.getUserByUsername(usernameField);
-                        }
-                        if (userExist) {
-                            if (userExist.length == 0) {
-                                const token = await bdd.addUser(usernameField, returnData.cookie, returnData.antiforgeryToken);
-                                cloud.createUserDataProfile(token);
-                                user.updateSchedule(token, returnData.schedule);
-                                user.updateReportcard(token, returnData.reportcard);
-                                res.cookie('token', token);
-                                res.send(returnData);
-                            } else {
-                                if (req.cookies.token) {
-                                    bdd.updateClientIdUser(req.cookies.token, returnData.cookie);
-                                    bdd.updateAntiforgeryTokenUser(req.cookies.token, returnData.antiforgeryToken);
-                                } else {
-                                    bdd.updateClientIdUserByUsername(usernameField, returnData.cookie);
-                                    bdd.updateAntiforgeryTokenUserByUsername(usernameField, returnData.antiforgeryToken);
-                                }
-                                user.updateSchedule(userExist[0].token, returnData.schedule);
-                                user.updateReportcard(userExist[0].token, returnData.reportcard);
-                                res.cookie('token', userExist[0].token);
-
-                                res.send(returnData);
-                            }
-                        }
-                        delete returnData.cookie;
-
+    switch (params[0]) {
+        case 'login':
+            //requête de connexion avec dans le body le login et le mot de passe
+            let username = escapeHTML(req.body.username);
+            let password = escapeHTML(req.body.password);
+            if (username && password && username.length > 0 && password.length > 0) {
+                let returnData = await login.loginToFranceConnect(username, password);
+                if (returnData.status) {
+                    let sessionId = returnData.sessionId;
+                    //si l'id est valide, on regarde si l'utilisateur est déjà enregistré dans la base de données
+                    let userWithSameUsername = await login.getUserByUsername(username);
+                    if (userWithSameUsername.length > 0) {
+                        //si oui, cela veux dire que l'utilisateur est déjà enregistré on le met donc à jour
+                        let returnData = await login.updateUserSessionIdByUsername(username, sessionId);
+                        res.cookie('token', returnData.token);
                     } else {
-                        res.send(returnData);
+                        //si non, cela veux dire que l'utilisateur n'est pas enregistré on l'enregistre
+                        let returnData = await login.createUser(username, sessionId);
+                        if (returnData.status) {
+                            cloud.createUserDataProfile(returnData.token);
+                            res.cookie('token', returnData.token);
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: returnData.message
+                            });
+                        }
                     }
+                    res.status(200).send({
+                        status: true,
+                        message: 'Connexion réussie'
+                    });
+
                 } else {
-                    res.send({
+                    //si l'id n'est pas valide, on renvoie une erreur
+                    res.status(200).send({
                         status: false,
-                        message: 'Veuillez remplir tous les champs'
+                        message: 'Identifiant ou mot de passe incorrect'
                     });
                 }
-                break;
-            case 'upload':
-                let uploadDestination = escapeHTML(req.headers.destination);
-                if (uploadDestination == 'elyco') {
-                    //uploader un fichier sur elyco
-                    let file = req.files.fileAttachment;
-                    let fileName = file.name;
-                    let fileSize = file.size;
-                    let fileExtension = fileName.split('.').pop().toLowerCase();
-                    let tokenSended = escapeHTML(req.headers.authorization.split(' ')[1]);
-                    let userInfoBdd = await bdd.getUser(tokenSended);
-                    if (userInfoBdd) {
-                        if (userInfoBdd.length > 0) {
-                            let acceptedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'json', 'xml', 'txt', 'csv', 'xls', 'xlsx', 'doc', 'docx', 'ppt', 'pptx', 'pdf', 'mp3', 'mp4', 'ogg', 'wav', 'flac', 'aac', 'm4a', 'm4v', 'mov', 'wmv', 'avi', 'mpg', 'mpeg', '3gp', '3g2', 'mkv', 'webm', 'zip', 'rar', '7z', 'gz', 'tar', 'bz2', 'tgz', 'iso', 'dmg', 'exe', 'msi', 'bin', 'deb', 'rpm', 'cab', 'apk', 'ipa', 'app', 'exe', 'msi', 'bin', 'deb', 'rpm', 'cab', 'apk', 'ipa', 'app'];
-                            if (acceptedExtensions.indexOf(fileExtension) > -1) {
-                                if (fileSize < 10000000) {
-                                    let antiforgeryToken = userInfoBdd[0]['antiforgery_token'];
-                                    let fileInfo = await message.uploadFile(tokenSended, antiforgeryToken, file);
-                                    res.send(fileInfo);
+            } else {
+                //si l'utilisateur n'a pas rentré de login ou de mot de passe, on renvoie une erreur
+                res.status(200).send({
+                    status: false,
+                    message: 'Veuillez entrer un login et un mot de passe'
+                });
+            }
+            break;
+        case 'connect':
+            //récupérer le token dans l'entête de la requête
+            let token = escapeHTML(req.headers.authorization.split(' ')[1]);
+            let resultData = await login.getSessionId(token);
+            if (resultData.status) {
+                let sessionId = resultData.sessionId;
+                //soit E-lyco (/api/connect/elyco) soit Pronote (/api/connect/pronote)
+                let instance = params[1];
+                if (instance == 'elyco') {
+                    //si c'est E-lyco, on récupère l'antiforgeryToken et on le met à jour dans la base de données
+                    let resultData = await login.updateAntiforgeryToken(token);
+                    if (resultData.status) {
+                        //vérifier si on a accàs aux cours de l'utilisateur
+                        let coursesAccessReturnedData = await login.checkCoursesAccess(sessionId);
+                        if (coursesAccessReturnedData.status) {
+                            elycoState = true;
+                            res.status(200).send({
+                                status: true,
+                                message: 'Connexion à E-lyco réussie'
+                            });
+                            //Envoyer les notifications et les messages privés à l'utilisateur
+                            //On commence par récuperer le socketId de l'utilisateur pour pourvoir envoyer les notifications et les messages privés via websocket
+                            resultData = await user.getSocketIdByToken(token);
+                            if (resultData.status) {
+                                let socketId = resultData.socketId;
+                                //on récupère les notifications via E-lyco
+                                notificationReturnedData = await notification.getNotifications(sessionId);
+                                if (notificationReturnedData.status) {
+                                    //il faut formater les notifications reçu pour avoir un beau JSON contenant les notifications
+                                    let notifications = notificationReturnedData.message;
+                                    let formatReturnedData = notification.formatNotifications(notifications);
+                                    if (formatReturnedData.status) {
+                                        //on envoie les notifications à l'utilisateur via websocket
+                                        // io.to(socketId).emit('notifications', {
+                                        //     status: true,
+                                        //     notifications: formatReturnedData.notifications
+                                        // });
+                                    } else {
+                                        io.to(socketId).emit('notifications', {
+                                            status: false,
+                                            message: 'Erreur lors de la récupération des notifications'
+                                        });
+                                    }
                                 } else {
-                                    res.send({
+                                    io.to(socketId).emit('notification', {
                                         status: false,
-                                        message: 'Le fichier est trop volumineux'
+                                        message: 'Erreur lors de la récupération des notifications'
+                                    });
+                                }
+
+                            } else {
+                                //Il y a eu une erreur lors de la récupération du socketId de l'utilisateur
+                            }
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: 'Connxion  à E-lyco échouée'
+                            });
+                        }
+                    } else {
+                        res.status(200).send({
+                            status: false,
+                            message: 'Connexion à E-lyco échouée'
+                        });
+                    }
+                } else if (instance == 'pronote') {
+                    //si c'est Pronote, on lance un scraping puppeteer pour récupérer les informations de l'utilisateur comme l'emploi du temps et les notes
+                    let resultData = await login.connectToPronote(sessionId);
+                    if (resultData.status) {
+                        pronoteState = true;
+                        res.status(200).send({
+                            status: true,
+                            message: 'Connexion à Pronote réussie'
+                        });
+                    } else {
+                        res.status(200).send({
+                            status: false,
+                            message: 'Connexion à Pronote échouée'
+                        });
+                    }
+                } else {
+                    res.status(200).send({
+                        status: false,
+                        message: 'Instance inconnue'
+                    });
+                }
+            } else {
+                res.status(200).send({
+                    status: false,
+                    message: 'Token invalide'
+                });
+            }
+            break;
+        case 'cloud':
+            //récupérer le token dans l'entête de la requête
+            let token2 = escapeHTML(req.headers.authorization.split(' ')[1]);
+            let resultData2 = await login.getSessionId(token2);
+            if (resultData2.status) {
+                let sessionId = resultData2.sessionId;
+                //déterminer la sous-action de la requête
+                let subAction = params[1];
+                if (subAction == 'get') {
+                    let filter = req.body.filter;
+                    if (filter == false) {
+                        let dataReturnedData = cloud.get(token2, false);
+                        if (dataReturnedData.status) {
+                            res.status(200).send({
+                                status: true,
+                                data: dataReturnedData.data
+                            });
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: dataReturnedData.message
+                            });
+                        }
+                    } else {
+                        res.status(200).send({
+                            status: false,
+                            message: 'Filtre non supporté pour l\'instant'
+                        });
+                    }
+                } else if (subAction == 'getfile') {
+                    let fileId = req.body.fileId ? escapeHTML(req.body.fileId) : null;
+                    let ext = req.body.ext ? escapeHTML(req.body.ext) : null;
+                    let isUploadedFile = req.body.isUploadedFile ? JSON.parse(req.body.isUploadedFile) : null;
+                    let file = cloud.getFile(token2, fileId, isUploadedFile, ext);
+                    if (file.status) {
+                        res.status(200).send({
+                            status: true,
+                            file: file.file,
+                            ext: file.ext ? file.ext : null
+                        });
+                    } else {
+                        res.status(200).send({
+                            status: false,
+                            message: file.message
+                        });
+                    }
+                } else if (subAction == 'createfolder') {
+                    let path = req.body.path ? escapeHTML(req.body.path) : null;
+                    let isSuccess = cloud.createFolder(token2, path);
+                    res.status(200).send({
+                        status: isSuccess,
+                        message: isSuccess ? 'Dossier créé' : 'Erreur lors de la création du dossier'
+                    });
+                } else if (subAction == 'delete') {
+                    let id = req.body.id ? escapeHTML(req.body.id) : null;
+                    let isFile = !!req.body.isFile;
+                    let ext = req.body.ext ? escapeHTML(req.body.ext) : null;
+                    let isUploadedFile = req.body.isUploadedFile ? JSON.parse(req.body.isUploadedFile) : null;
+                    let isSuccess = cloud.delete(token2, id, isFile, isUploadedFile, ext);
+                    res.status(200).send({
+                        status: isSuccess,
+                        message: isSuccess ? 'suppression effectuée' : 'Erreur lors de la suppression'
+                    });
+                } else if (subAction == 'createfile') {
+                    let parentId = req.body.parentId ? escapeHTML(req.body.parentId) : null;
+                    let fileId = cloud.createFile(token2, parentId);
+                    if (fileId.status) {
+                        res.status(200).send({
+                            status: true,
+                            fileId: fileId.fileId
+                        });
+                    } else {
+                        res.status(200).send({
+                            status: false,
+                            message: fileId.message
+                        });
+                    }
+                } else if (subAction == 'rename') {
+                    let id = req.body.id ? escapeHTML(req.body.id) : null;
+                    let newName = req.body.newName ? escapeHTML(req.body.newName) : null;
+                    let isUploadedFile = req.body.isUploadedFile ? JSON.parse(req.body.isUploadedFile) : null;
+                    let isFile = !!req.body.isFile;
+                    if (newName) {
+                        let isSuccess = cloud.rename(token2, id, newName, isFile, isUploadedFile);
+                        res.send({
+                            status: isSuccess,
+                            message: isSuccess ? 'Renommage effectué' : 'Erreur lors du renommage'
+                        });
+                    } else {
+                        res.send({
+                            status: false,
+                            message: 'Nom de fichier invalide'
+                        });
+                    }
+                } else if (subAction == 'savefile') {
+                    let fileId = req.body.fileId ? escapeHTML(req.body.fileId) : null;
+                    let content = req.body.content
+                    if (content) {
+                        if (fileId) {
+                            let isSuccess = cloud.saveFile(token2, fileId, content);
+                            res.send({
+                                status: isSuccess,
+                                message: isSuccess ? 'Sauvegarde effectuée' : 'Erreur lors de la sauvegarde'
+                            });
+                        } else {
+                            res.send({
+                                status: false,
+                                message: 'Id de fichier invalide'
+                            });
+                        }
+                    }
+                } else if (subAction == 'upload') {
+                    let parentId = req.body.parentId ? escapeHTML(req.body.parentId) : null;
+                    let filesUpload = req.files;
+                    let nbrFiles = req.body.nbrFiles;
+
+                    if (filesUpload) {
+                        let success = true;
+                        let error = '';
+                        for (let i = 0; i < nbrFiles; i++) {
+                            let file = filesUpload["file" + i];
+                            file.name = utf8.decode(file.name);
+
+                            if (file.size < 100000000) {
+                                let totalSize = cloud.getTotalSize(token2).size + file.size;
+                                //5Go = 5000000000 octets
+                                if (totalSize <= 5000000000) {
+                                    let returnState = cloud.upload(token2, parentId, file);
+                                    success = returnState.status;
+                                    error += (returnState.message != null ? returnState.message + "\n" : "");
+                                } else {
+                                    success = false;
+                                    error += "Vous ne pouvez pas dépasser 5Go de stockage total";
+                                }
+                            } else {
+                                success = false;
+                                error += "Sorry, 100Mo max pour " + file.name + "\n";
+                            }
+                        }
+                        res.send({
+                            status: success,
+                            message: error
+                        });
+                    } else {
+                        res.send({
+                            status: false,
+                            message: 'Aucun fichier n\'a été uploadé'
+                        });
+                    }
+                } else if (subAction == 'uploadthumbnail') {
+                    let file = req.body.file;
+                    let fileId = req.body.fileId ? escapeHTML(req.body.fileId) : null;
+                    let base64Data = new Buffer.from(file.replace(/^data:image\/\w+;base64,/, ""), 'base64');
+                    let isSuccess = cloud.uploadThumbnail(token2, fileId, base64Data);
+                    res.send({
+                        status: isSuccess,
+                        message: isSuccess ? 'Upload effectué' : 'Erreur lors de l\'upload'
+                    });
+                } else if (subAction == 'getthumbnail') {
+                    let fileId = req.body.fileId ? escapeHTML(req.body.fileId) : null;
+                    let isSuccess = cloud.getThumbnail(token2, fileId);
+                    if (isSuccess.status) {
+                        res.status(200).send({
+                            status: true,
+                            thumbnail: isSuccess.thumbnail
+                        });
+                    } else {
+                        res.status(200).send({
+                            status: false,
+                            message: isSuccess.message
+                        });
+                    }
+
+                } else if (subAction == 'totalsize') {
+                    let totalSize = cloud.getTotalSize(token2);
+                    res.send({
+                        status: true,
+                        size: totalSize.size
+                    });
+                } else {
+                    res.status(200).send({
+                        status: false,
+                        message: subAction + ' method inconnue'
+                    });
+                }
+            } else {
+                res.status(200).send({
+                    status: false,
+                    message: 'Token invalide'
+                });
+            }
+            break;
+        case 'note':
+            //récupérer le token présent dans l'entête de la requête
+            let token3 = escapeHTML(req.headers.authorization.split(' ')[1]);
+
+            let resultData3 = await login.getSessionId(token3);
+            if (resultData3.status) {
+                let sessionId = resultData3.sessionId;
+                //déterminer la sous-action de la requête
+                let subAction = params[1];
+                if (subAction == 'add') {
+                    let content = req.body.content ? escapeHTML(req.body.content) : null;
+                    let date = req.body.date ? escapeHTML(req.body.date) : null;
+                    if (content && date && content.length > 0 && date.length > 0) {
+                        let isSuccess = note.add(token3, content, date);
+                        res.send({
+                            status: isSuccess,
+                            message: isSuccess ? 'Note ajoutée' : 'Erreur lors de l\'ajout de la note'
+                        });
+                    } else {
+                        res.send({
+                            status: false,
+                            message: 'Données invalides'
+                        });
+                    }
+                } else {
+                    res.status(200).send({
+                        status: false,
+                        message: subAction + ' method inconnue'
+                    });
+                }
+            } else {
+                res.status(200).send({
+                    status: false,
+                    message: 'Token invalide'
+                });
+            }
+
+
+            break;
+        case 'privatemessage':
+            break;
+    }
+
+
+});
+//requêtes en GET sur l'API
+app.get('/api/\*', async(req, res) => {
+    let params = [];
+    for (let i = 2; i < req.url.split('/').length; i++) {
+        params.push(req.url.split('/')[i]);
+    }
+    switch (params[0]) {
+        case 'courses':
+            if (elycoState) {
+
+                //récupérer le token dans l'entête de la requête
+                let token = escapeHTML(req.headers.authorization.split(' ')[1]);
+
+                //déterminer la sous-action de la requête
+                let subAction = params[1];
+                let resultData = await login.getSessionId(token);
+                if (resultData.status) {
+                    let sessionId = resultData.sessionId;
+                    if (subAction == 'preview') {
+
+                        //on récupère les cours via E-lyco
+                        coursesReturnedData = await course.getCoursesPreview(sessionId);
+                        if (coursesReturnedData.status) {
+                            //il faut formater les cours reçu pour avoir un beau JSON contenant les cours
+                            let courses = coursesReturnedData.message;
+                            let formatReturnedData = course.formatCoursesPreview(courses);
+                            if (formatReturnedData.status) {
+                                //on envoie les cours à l'utilisateur en response
+                                res.status(200).send({
+                                    status: true,
+                                    courses: formatReturnedData.courses
+                                });
+                            } else {
+                                res.status(200).send({
+                                    status: false,
+                                    message: 'Aucun cours disponible'
+                                });
+                            }
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: 'Erreur lors de la récupération des cours'
+                            });
+                        }
+
+                    } else if (subAction == 'detail') {
+                        let courseID = escapeHTML(params[2]);
+                        //on récupère les détails des cours via E-lyco
+                        if (courseID) {
+                            coursesReturnedData = await course.getCourseDetail(sessionId, courseID);
+                            if (coursesReturnedData.status) {
+                                //il faut formater les cours reçu pour avoir un beau JSON contenant les cours
+                                let courses = coursesReturnedData.message;
+                                let formatReturnedData = course.formatCourseDetail(courses);
+                                if (formatReturnedData.status) {
+                                    //on envoie les cours à l'utilisateur en response
+                                    res.status(200).send({
+                                        status: true,
+                                        course: {
+                                            course: formatReturnedData.course,
+                                            courseId: courseID
+                                        }
+                                    });
+                                } else {
+                                    res.status(200).send({
+                                        status: false,
+                                        message: 'Aucun cours disponible'
                                     });
                                 }
                             } else {
-                                res.send({
+                                res.status(200).send({
                                     status: false,
-                                    message: 'Le fichier n\'est pas un fichier valide'
+                                    message: 'Erreur lors de la récupération des cours'
                                 });
                             }
-                        }
-                    }
-                }
-                break;
-
-            case 'share':
-                let token = escapeHTML(req.headers.authorization.split(' ')[1]);
-                let userInfoBdd = await bdd.getUser(token);
-                if (userInfoBdd) {
-                    if (userInfoBdd.length > 0) {
-                        let text = escapeHTML(req.body.text);
-                        let images = req.files;
-                        let nbrFiles = req.body.nbrFiles;
-                        let imagesUpload = [];
-                        if (text) {
-                            for (let i = 0; i < nbrFiles; i++) {
-                                let file = images["file" + i];
-                                if (file.size < 20971520) {
-                                    imagesUpload.push(file);
-                                }
-                            }
-                            let postToken = bdd.addPost(userInfoBdd[0]['private_key'], escapeHTML(text), imagesUpload);
-                            res.send({
-                                status: true,
-                                token: postToken
-                            });
-
-                        }
-                    }
-                }
-                break;
-
-            case 'deletepost':
-                let token3 = escapeHTML(req.headers.authorization.split(' ')[1]);
-                let userInfoBdd3 = await bdd.getUser(token3);
-                if (userInfoBdd3) {
-                    if (userInfoBdd3.length > 0) {
-                        let postToken = escapeHTML(req.body.postToken);
-                        if (postToken) {
-                            bdd.deletePost(postToken, userInfoBdd3[0]['private_key']);
-                            res.send({
-                                status: true
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: 'Identifiant de cours manquant'
                             });
                         }
-                    }
-                }
-                break;
 
-            case 'likepost':
-                let token2 = escapeHTML(req.headers.authorization.split(' ')[1]);
-                let userInfoBdd2 = await bdd.getUser(token2);
-                if (userInfoBdd2) {
-                    if (userInfoBdd2.length > 0) {
-                        let postToken = escapeHTML(req.body.postToken);
-                        if (postToken) {
-                            bdd.likePost(postToken, userInfoBdd2[0]['private_key']);
-                            res.send({
-                                status: true
-                            });
+
+                    } else if (subAction == 'plan') {
+                        let courseID = escapeHTML(params[2]);
+                        let planID = escapeHTML(params[3]);
+                        if (courseID && planID) {
+                            // //on récupère le plan via E-lyco
+                            // planReturnedData = await course.getPlan(sessionId, courseID, planID);
+                            // if (planReturnedData.status) {
+                            //     //il faut formater le plan reçu pour avoir un beau JSON contenant le plan
+                            //     let plan = planReturnedData.message;
+                            //     let formatReturnedData = course.formatPlan(plan);
+                            //     if (formatReturnedData.status) {
+                            //         //on envoie le plan à l'utilisateur en response
+                            //         res.status(200).send({
+                            //             status: true,
+                            //             plan: formatReturnedData.plan
+                            //         });
+                            //     } else {
+                            //         res.status(200).send({
+                            //             status: false,
+                            //             message: 'Aucun plan disponible'
+                            //         });
+                            //     }
+                            // } else {
+                            //     res.status(200).send({
+                            //         status: false,
+                            //         message: 'Erreur lors de la récupération du plan'
+                            //     });
+                            // }
                         }
-                    }
-                }
-                break;
-        }
-    }
-});
-
-app.get('/api/\*', async(req, res) => {
-    let url = req.url.split('/')[2];
-    let params = []
-    for (let i = 2; i < req.url.split('/').length; i++) {
-        params.push(req.url.split('/')[i]);
-    }
-    if (params.length > 1) {
-        let method = params[1];
-    } else {
-        switch (url) {
-            case 'getposts':
-                let token2 = escapeHTML(req.headers.authorization.split(' ')[1]);
-                let userInfoBdd2 = await bdd.getUser(token2);
-                if (userInfoBdd2) {
-                    if (userInfoBdd2.length > 0) {
-                        let posts = await bdd.getPosts(userInfoBdd2[0]['private_key']);
-                        posts = await bdd.getUserInfoPosts(posts, userInfoBdd2[0]['private_key']);
-                        posts = await bdd.getLikeInfoPosts(posts, userInfoBdd2[0]['private_key']);
-                        res.send({
-                            status: true,
-                            posts: posts
+                    } else {
+                        res.status(200).send({
+                            status: false,
+                            message: subAction + ' : methode inconnue'
                         });
                     }
+                } else {
+                    res.status(200).send({
+                        status: false,
+                        message: 'Token invalide'
+                    });
                 }
-                break;
-            case 'getSchedule':
-                let token3 = escapeHTML(req.headers.authorization.split(' ')[1]);
-                let userInfoBdd3 = await bdd.getUser(token3);
-                if (userInfoBdd3) {
-                    if (userInfoBdd3.length > 0) {
-                        let scheduleJSON = fs.readFileSync('./userdata/' + token3 + '/schedule.json', 'utf8');
-                        res.send({
-                            status: true,
-                            scheduleJSON: scheduleJSON
-                        });
-                    }
-                }
-                break;
-            case 'getReportcard':
-                let token4 = escapeHTML(req.headers.authorization.split(' ')[1]);
-                let userInfoBdd4 = await bdd.getUser(token4);
-                if (userInfoBdd4) {
-                    if (userInfoBdd4.length > 0) {
-                        let reportcardJSON = fs.readFileSync('./userdata/' + token4 + '/reportcard.json', 'utf8');
-                        res.send({
-                            status: true,
-                            reportcardJSON: reportcardJSON
-                        });
-                    }
-                }
-                break;
-        }
+            } else {
+                res.status(200).send({
+                    status: false,
+                    message: 'Vous n\'êtes pas connecté à E-lyco'
+                });
+            }
+            break;
+        case 'posts':
+            break;
+        case 'schedule':
+            break;
+        case 'reportcard':
+            break;
+        case 'privatemessage':
+            break;
+        case 'notification':
+            break;
+        case 'user':
+            break;
     }
 });
 
 
-
-//Automation scripts
-setInterval(() => {
-    //vérifier si l'utilisateur n'a pas de notification
-    infos.unSeen();
-    infos.ping();
-}, 30000);
-
-
-//start the server on port 3000
+//#############################################################################################################################
+//                                               LANCEMENT DU SERVEUR SUR LE PORT 3000
+//#############################################################################################################################
 server.listen(config.port, () => {
-    console.log(`[CREATOR LAB] is running on port ${config.port}`);
-    //console.log(fs.readFileSync('./utils/ascii.txt', 'utf8'));
+    console.log(`[CREATOR LAB] Le serveur est lancé sur le port ${config.port}`);
 });

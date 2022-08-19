@@ -44,14 +44,14 @@ CREATE TABLE `users` (
   `antiforgery_token` varchar(255) DEFAULT NULL
 )
 ```
-- table posts :
+- table notes :
 ```sql
-CREATE TABLE `posts` (
+CREATE TABLE `notes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `private_key` varchar(255) DEFAULT NULL,
-  `created` varchar(255) DEFAULT NULL,
   `content` text,
-  `attachment` varchar(255) DEFAULT NULL,
+  `forwhen` varchar(255),
+  `created` varchar(255) DEFAULT NULL,
   `token` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 )
@@ -60,7 +60,7 @@ CREATE TABLE `posts` (
 ```sql
 CREATE TABLE `likes` (
   `private_key` varchar(255) DEFAULT NULL,
-  `post_id` varchar(2550) DEFAULT NULL
+  `note_id` varchar(255) DEFAULT NULL
 ) 
 ```
 

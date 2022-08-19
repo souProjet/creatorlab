@@ -137,7 +137,7 @@ socket.on('join', (data) => {
         });
 
         //######################################################################################################################
-        //                                             AUTRES ACTIONS DE LA PAGE D'ACCUEIL
+        //                                   AFFICHAGE DU STOCKAGE RESTANT SUR LE CLOUD PRIVÉ
         //######################################################################################################################
         fetch('./api/cloud/totalsize', {
             method: 'POST',
@@ -150,7 +150,7 @@ socket.on('join', (data) => {
                 let percent = Math.round(data.size / 5000000000 * 100);
                 mainContent.innerHTML += `
                 <div class="lg:flex lg:space-x-10">
-                    <div class="lg:w-full lg:px-20 space-y-7 post-container">
+                    <div class="lg:w-full lg:px-20 space-y-7">
                         <div class="card p-2 flex space-x-4 border border-gray-100">
                             <div class="w-28 h-24 overflow-hidden rounded-lg">
                                 <div class="card-media h-24">
@@ -171,13 +171,76 @@ socket.on('join', (data) => {
                             </div>
                         </div>
                     </div>
-                </div>`;
+                </div><br>`;
             } else {
                 console.log(data.message);
             }
         }).catch(err => {
             console.log(err);
         });
+
+        //######################################################################################################################
+        //                                             AFFICHAGE DES NOTES
+        //######################################################################################################################
+        fetch('./api/note/get', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(res => res.json()).then(data => {
+            if (data.status) {
+                let notes = data.notes;
+                for (let i = 0; i < notes.length; i++) {
+                    let note = notes[i];
+                    mainContent.innerHTML += `
+                    <div class="lg:flex lg:space-x-10 uk-animation-slide-bottom-small note mb-5" id="${note.token}">
+                        <div class="lg:w-full lg:px-20 space-y-7">
+                            <div class="card space-x-4">
+                                <div class="flex justify-between items-center lg:p-4 p-2.5">
+
+                                    <div class="flex flex-1 items-center space-x-4">
+                                    <a>
+                                        <img src="${document.querySelector('.is_avatar').src}" class="bg-gray-200 border border-white rounded-full w-10 h-10">
+                                    </a>
+                                    <div class="flex-1 font-semibold ">
+                                        <a class="text-black dark:text-gray-100">${document.querySelector('.user_name').innerText.split('\n')[1].trim()}</a>
+                                                <div class="text-gray-700 flex items-center space-x-2">
+                                                    ${utils.calculateTimeBetweenTwoDates(note.created, note.forwhen)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                        <a href="#" aria-expanded="false" class="">
+                                            <i class="uil-trash-alt text-2xl hover:bg-gray-200 rounded-full p-2 transition -mr-1 dark:hover:bg-gray-700"></i>
+                                        </a>
+                                        <div class="bg-white w-56 shadow-md mx-auto p-2 mt-12 rounded-md text-gray-500 hidden text-base border border-gray-100 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 uk-drop uk-drop-bottom-right" uk-drop="mode: click;pos: bottom-right;animation: uk-animation-slide-bottom-small" style="left: 279.703px; top: 2.5px;">
+
+                                            <ul class="space-y-1">
+                                                <li>
+                                                    <a href onclick="deleteNote(event, '${note.token}')" class="flex items-center px-3 py-2 text-red-500 hover:bg-red-100 hover:text-red-500 rounded-md dark:hover:bg-red-600">
+                                                        <i class="uil-trash-alt mr-1"></i> Supprimer
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div> 
+                                </div>
+                                <div class="p-5 pt-0 dark:border-gray-700">
+                                    ${note.content}
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+            } else {
+                console.log(data.message);
+            }
+        }).catch(err => {
+            console.log(err);
+        });
+
+
     } else {
         loader.innerHTML = `<div>${data.message}</div>`;
         document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
@@ -255,6 +318,7 @@ function createNote(e) {
     if (e.type == 'keyup') {
         if (e.keyCode == 13) {
             if (e.target.value.length > 0) {
+                let content = utils.escapeHTML(e.target.value);
                 fetch('./api/note/add', {
                     method: 'POST',
                     headers: {
@@ -262,13 +326,56 @@ function createNote(e) {
                         'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify({
-                        content: utils.escapeHTML(e.target.value),
+                        content: content,
                         date: utils.escapeHTML(noteDate)
                     })
                 }).then(res => res.json()).then(data => {
                     if (data.status) {
                         e.target.value = '';
+                        utils.createModal('Note ajoutée !');
+                        let HTMLnoteadd = `
+                        <div class="lg:flex lg:space-x-10 uk-animation-slide-bottom-small note mb-5" id="${data.noteId}">
+                            <div class="lg:w-full lg:px-20 space-y-7">
+                                <div class="card space-x-4">
+                                    <div class="flex justify-between items-center lg:p-4 p-2.5">
+    
+                                        <div class="flex flex-1 items-center space-x-4">
+                                        <a>
+                                            <img src="${document.querySelector('.is_avatar').src}" class="bg-gray-200 border border-white rounded-full w-10 h-10">
+                                        </a>
+                                        <div class="flex-1 font-semibold ">
+                                            <a class="text-black dark:text-gray-100">${document.querySelector('.user_name').innerText.split('\n')[1].trim()}</a>
+                                                    <div class="text-gray-700 flex items-center space-x-2">
+                                                        Ajoutée à l'instant
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                            <a href="#" aria-expanded="false" class="">
+                                                <i class="uil-trash-alt text-2xl hover:bg-gray-200 rounded-full p-2 transition -mr-1 dark:hover:bg-gray-700"></i>
+                                            </a>
+                                            <div class="bg-white w-56 shadow-md mx-auto p-2 mt-12 rounded-md text-gray-500 hidden text-base border border-gray-100 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 uk-drop uk-drop-bottom-right" uk-drop="mode: click;pos: bottom-right;animation: uk-animation-slide-bottom-small" style="left: 279.703px; top: 2.5px;">
+    
+                                                <ul class="space-y-1">
+                                                    <li>
+                                                        <a href onclick="deleteNote(event, '${data.noteId}')" class="flex items-center px-3 py-2 text-red-500 hover:bg-red-100 hover:text-red-500 rounded-md dark:hover:bg-red-600">
+                                                            <i class="uil-trash-alt mr-1"></i> Supprimer
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div> 
+                                    </div>
+                                    <div class="p-5 pt-0 dark:border-gray-700">
+                                        ${content}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+
+                        document.querySelector('.note') ? document.querySelector('.note').insertAdjacentHTML('beforebegin', HTMLnoteadd) : mainContent.innerHTML += HTMLnoteadd;
                     } else {
+                        utils.createModal(data.message, false);
                         console.log(data.message);
                     }
                 }).catch(err => {
@@ -281,6 +388,31 @@ function createNote(e) {
     } else if (e.type == 'change') {
         noteDate = e.target.value;
     }
+}
+
+function deleteNote(e, noteId) {
+    e.preventDefault();
+    e.stopPropagation();
+    fetch('./api/note/delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({
+            noteId: noteId
+        })
+    }).then(res => res.json()).then(data => {
+        if (data.status) {
+            utils.createModal('Note supprimée !');
+            document.getElementById(noteId).remove();
+        } else {
+            utils.createModal(data.message, false);
+            console.log(data.message);
+        }
+    }).catch(err => {
+        console.log(err);
+    });
 }
 
 disconnectedBtn.addEventListener('click', () => {

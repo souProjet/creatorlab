@@ -524,13 +524,35 @@ app.post('/api/\*', async(req, res) => {
                     if (content && date && content.length > 0 && date.length > 0) {
                         let isSuccess = note.add(token3, content, date);
                         res.send({
-                            status: isSuccess,
-                            message: isSuccess ? 'Note ajoutée' : 'Erreur lors de l\'ajout de la note'
+                            status: isSuccess.status,
+                            message: isSuccess.status ? 'Note ajoutée' : 'Erreur lors de l\'ajout de la note',
+                            noteId: isSuccess.noteId
                         });
                     } else {
                         res.send({
                             status: false,
                             message: 'Données invalides'
+                        });
+                    }
+                } else if (subAction == 'get') {
+                    let isSuccess = await note.get(token3);
+                    res.send({
+                        status: isSuccess.status,
+                        message: isSuccess.status ? 'Notes récupérées' : 'Erreur lors de la récupération des notes',
+                        notes: isSuccess.notes
+                    });
+                } else if (subAction == 'delete') {
+                    let noteId = req.body.noteId ? escapeHTML(req.body.noteId) : null;
+                    if (noteId) {
+                        let isSuccess = note.delete(token3, noteId);
+                        res.send({
+                            status: isSuccess.status,
+                            message: isSuccess.status ? 'Note supprimée' : 'Erreur lors de la suppression de la note'
+                        });
+                    } else {
+                        res.send({
+                            status: false,
+                            message: 'Id de note invalide'
                         });
                     }
                 } else {

@@ -59,6 +59,21 @@ let Utils = class Utils {
             return 'Il y a ' + Math.floor(time / (24 * 30 * 12)) + ' ans';
         }
     }
+    calculateTimeBetweenTwoDates(date1, date2) {
+        let date1ms = new Date(date1).getTime();
+        let date2ms = new Date(date2).getTime();
+        let timeBetween = date2ms - date1ms;
+        let time = Math.floor(timeBetween / (1000 * 60 * 60));
+        if (time < 24 * 30) {
+            return Math.floor(time / 24) + ' jours restants';
+        } else if (time < 24 * 30 * 12) {
+            return Math.floor(time / (24 * 30)) + ' mois restants';
+        } else {
+            return Math.floor(time / (24 * 30 * 12)) + ' ans restants';
+        }
+        
+    }
+
     replaceURLWithHTMLLinks(text) {
         var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/i;
         return text.replace(exp, "<a href='$1' target='_blank'>$1</a>");

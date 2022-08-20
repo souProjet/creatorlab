@@ -64,17 +64,20 @@ let Utils = class Utils {
         let date2ms = new Date(date2).getTime();
         let timeBetween = date2ms - date1ms;
         let time = Math.floor(timeBetween / (1000 * 60 * 60));
-        if (time < 24 * 30) {
-            return Math.floor(time / 24) + ' jours restants';
-        } else if (time < 24 * 30 * 12) {
-            return Math.floor(time / (24 * 30)) + ' mois restants';
+        let ans = Math.floor(time / (24 * 30 * 12));
+        let mois = Math.floor(time / (24 * 30));
+        let semaines = Math.floor(time / (24 * 7));
+        let jours = Math.floor(time / (24));
+        //vérifier si timeBetween est négatif
+        if (timeBetween < 0) {
+            return '<span style="color:red">passée&nbsp;</span> ';
         } else {
-            return Math.floor(time / (24 * 30 * 12)) + ' ans restants';
+            return (ans ? ans + ' an'+(ans > 1 ? 's' : '')+' restant'+(ans > 1 ? 's' : '') : mois ? mois + ' mois restant'+(mois > 1 ? 's' : '') : semaines ? semaines + ' semaine'+(semaines > 1 ? 's' : '')+' restante'+(semaines > 1 ? 's' : '') : jours ? jours + ' jour'+(jours > 1 ? 's' : '')+' restant'+(jours > 1 ? 's' : '') : 'aujourd\'hui');
         }
-        
     }
 
     replaceURLWithHTMLLinks(text) {
+        text = utils.htmlDecode(text);
         var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/i;
         return text.replace(exp, "<a href='$1' target='_blank'>$1</a>");
     }
@@ -224,5 +227,9 @@ let Utils = class Utils {
                 console.error('oops, something went wrong!', error);
             });
         return url;
+    }
+    htmlDecode(input) {
+        var doc = new DOMParser().parseFromString(input, "text/html");
+        return doc.documentElement.textContent;
     }
 }

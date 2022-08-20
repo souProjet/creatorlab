@@ -191,12 +191,17 @@ socket.on('join', (data) => {
         }).then(res => res.json()).then(data => {
             if (data.status) {
                 let notes = data.notes;
+                notes = notes.sort((a, b) => {
+                    return new Date(a.forwhen).getTime() - new Date(b.forwhen).getTime();
+                });
+
                 for (let i = 0; i < notes.length; i++) {
                     let note = notes[i];
+                    let timeLeft = utils.calculateTimeBetweenTwoDates(note.created, note.forwhen)
                     mainContent.innerHTML += `
                     <div class="lg:flex lg:space-x-10 uk-animation-slide-bottom-small note mb-5" id="${note.token}">
                         <div class="lg:w-full lg:px-20 space-y-7">
-                            <div class="card space-x-4">
+                            <div class="card space-x-4" ${timeLeft == '1 jour restant' || timeLeft == 'aujourd\'hui' ? 'style="border:solid 1px red;"' : ''}>
                                 <div class="flex justify-between items-center lg:p-4 p-2.5">
 
                                     <div class="flex flex-1 items-center space-x-4">
@@ -206,7 +211,7 @@ socket.on('join', (data) => {
                                     <div class="flex-1 font-semibold ">
                                         <a class="text-black dark:text-gray-100">${document.querySelector('.user_name').innerText.split('\n')[1].trim()}</a>
                                                 <div class="text-gray-700 flex items-center space-x-2">
-                                                    ${utils.calculateTimeBetweenTwoDates(note.created, note.forwhen)}
+                                                    ${timeLeft} (${note.forwhen.split('-')[2] + '/' + note.forwhen.split('-')[1] + '/' + note.forwhen.split('-')[0]})
                                                 </div>
                                             </div>
                                         </div>
@@ -227,7 +232,7 @@ socket.on('join', (data) => {
                                     </div> 
                                 </div>
                                 <div class="p-5 pt-0 dark:border-gray-700">
-                                    ${note.content}
+                                    ${utils.replaceURLWithHTMLLinks(utils.htmlDecode(note.content))}
                                 </div>
                             </div>
                         </div>
@@ -367,7 +372,7 @@ function createNote(e) {
                                         </div> 
                                     </div>
                                     <div class="p-5 pt-0 dark:border-gray-700">
-                                        ${content}
+                                        ${utils.replaceURLWithHTMLLinks(content)}
                                     </div>
                                 </div>
                             </div>

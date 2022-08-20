@@ -149,29 +149,29 @@ socket.on('join', (data) => {
             if (data.status) {
                 let percent = Math.round(data.size / 5000000000 * 100);
                 mainContent.innerHTML += `
-                <div class="lg:flex lg:space-x-10">
-                    <div class="lg:w-full lg:px-20 space-y-7">
-                        <div class="card p-2 flex space-x-4 border border-gray-100">
-                            <div class="w-28 h-24 overflow-hidden rounded-lg">
-                                <div class="card-media h-24">
-                                    <img src="./public/images/storage.png" alt="Storage icon">
-                                </div>
-                            </div>
-                            <div class="flex-1 pt-2.5 relative">
-                                <div class="flex justify-center text-lg mt-3 2.5 text-gray-700">Espace de stockage privé</div>
-                                <div class="mt-3 items-center">
-                                    <div class="flex justify-center text-${percent > 50 ? (percent > 90 ? 'red' : 'orange') : 'green'}-500 font-medium mb-2">
-                                        ${utils.octetToString(data.size)} sur 5 Go (${percent}%)
-                                    </div>
-                                    <div class="bg-gray-100 rounded-2xl h-2 w-full relative overflow-hidden">
-                                        <div class="bg-${percent > 50 ? (percent > 90 ? 'red' : 'orange') : 'green'}-600 h-full" style="width:${percent}%;"></div>
+                    <div class="lg:flex lg:space-x-10">
+                        <div class="lg:w-full lg:px-20 space-y-7">
+                            <div class="card p-2 flex space-x-4 border border-gray-100">
+                                <div class="w-28 h-24 overflow-hidden rounded-lg">
+                                    <div class="card-media h-24">
+                                        <img src="./public/images/storage.png" alt="Storage icon">
                                     </div>
                                 </div>
+                                <div class="flex-1 pt-2.5 relative">
+                                    <div class="flex justify-center text-lg mt-3 2.5 text-gray-700">Espace de stockage privé</div>
+                                    <div class="mt-3 items-center">
+                                        <div class="flex justify-center text-${percent > 50 ? (percent > 90 ? 'red' : 'orange') : 'green'}-500 font-medium mb-2">
+                                            ${utils.octetToString(data.size)} sur 5 Go (${percent}%)
+                                        </div>
+                                        <div class="bg-gray-100 rounded-2xl h-2 w-full relative overflow-hidden">
+                                            <div class="bg-${percent > 50 ? (percent > 90 ? 'red' : 'orange') : 'green'}-600 h-full" style="width:${percent}%;"></div>
+                                        </div>
+                                    </div>
 
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div><br>`;
+                    </div><br>`;
             } else {
                 console.log(data.message);
             }
@@ -199,44 +199,44 @@ socket.on('join', (data) => {
                     let note = notes[i];
                     let timeLeft = utils.calculateTimeBetweenTwoDates(note.created, note.forwhen)
                     mainContent.innerHTML += `
-                    <div class="lg:flex lg:space-x-10 uk-animation-slide-bottom-small note mb-5" id="${note.token}">
-                        <div class="lg:w-full lg:px-20 space-y-7">
-                            <div class="card space-x-4" ${timeLeft == '1 jour restant' || timeLeft == 'aujourd\'hui' ? 'style="border:solid 1px red;"' : ''}>
-                                <div class="flex justify-between items-center lg:p-4 p-2.5">
+                        <div class="lg:flex lg:space-x-10 uk-animation-slide-bottom-small note mb-5" id="${note.token}">
+                            <div class="lg:w-full lg:px-20 space-y-7">
+                                <div class="card space-x-4" ${timeLeft == '1 jour restant' || timeLeft == 'aujourd\'hui' ? 'style="border:solid 1px red;"' : ''}>
+                                    <div class="flex justify-between items-center lg:p-4 p-2.5">
 
-                                    <div class="flex flex-1 items-center space-x-4">
-                                    <a>
-                                        <img src="${document.querySelector('.is_avatar').src}" class="bg-gray-200 border border-white rounded-full w-10 h-10">
-                                    </a>
-                                    <div class="flex-1 font-semibold ">
-                                        <a class="text-black dark:text-gray-100">${document.querySelector('.user_name').innerText.split('\n')[1].trim()}</a>
-                                                <div class="text-gray-700 flex items-center space-x-2">
-                                                    ${timeLeft} (${note.forwhen.split('-')[2] + '/' + note.forwhen.split('-')[1] + '/' + note.forwhen.split('-')[0]})
+                                        <div class="flex flex-1 items-center space-x-4">
+                                        <a>
+                                            <img src="${document.querySelector('.is_avatar').src}" class="bg-gray-200 border border-white rounded-full w-10 h-10">
+                                        </a>
+                                        <div class="flex-1 font-semibold ">
+                                            <a class="text-black dark:text-gray-100">${document.querySelector('.user_name').innerText.split('\n')[1].trim()}</a>
+                                                    <div class="text-gray-700 flex items-center space-x-2">
+                                                        ${timeLeft} (${note.forwhen.split('-')[2] + '/' + note.forwhen.split('-')[1] + '/' + note.forwhen.split('-')[0]})
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div>
-                                        <a href="#" aria-expanded="false" class="">
-                                            <i class="uil-trash-alt text-2xl hover:bg-gray-200 rounded-full p-2 transition -mr-1 dark:hover:bg-gray-700"></i>
-                                        </a>
-                                        <div class="bg-white w-56 shadow-md mx-auto p-2 mt-12 rounded-md text-gray-500 hidden text-base border border-gray-100 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 uk-drop uk-drop-bottom-right" uk-drop="mode: click;pos: bottom-right;animation: uk-animation-slide-bottom-small" style="left: 279.703px; top: 2.5px;">
+                                            <div>
+                                            <a href="#" aria-expanded="false" class="">
+                                                <i class="uil-trash-alt text-2xl hover:bg-gray-200 rounded-full p-2 transition -mr-1 dark:hover:bg-gray-700"></i>
+                                            </a>
+                                            <div class="bg-white w-56 shadow-md mx-auto p-2 mt-12 rounded-md text-gray-500 hidden text-base border border-gray-100 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 uk-drop uk-drop-bottom-right" uk-drop="mode: click;pos: bottom-right;animation: uk-animation-slide-bottom-small" style="left: 279.703px; top: 2.5px;">
 
-                                            <ul class="space-y-1">
-                                                <li>
-                                                    <a href onclick="deleteNote(event, '${note.token}')" class="flex items-center px-3 py-2 text-red-500 hover:bg-red-100 hover:text-red-500 rounded-md dark:hover:bg-red-600">
-                                                        <i class="uil-trash-alt mr-1"></i> Supprimer
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div> 
-                                </div>
-                                <div class="p-5 pt-0 dark:border-gray-700">
-                                    ${utils.replaceURLWithHTMLLinks(utils.htmlDecode(note.content))}
+                                                <ul class="space-y-1">
+                                                    <li>
+                                                        <a href onclick="deleteNote(event, '${note.token}')" class="flex items-center px-3 py-2 text-red-500 hover:bg-red-100 hover:text-red-500 rounded-md dark:hover:bg-red-600">
+                                                            <i class="uil-trash-alt mr-1"></i> Supprimer
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div> 
+                                    </div>
+                                    <div class="p-5 pt-0 dark:border-gray-700">
+                                        ${utils.replaceURLWithHTMLLinks(utils.htmlDecode(note.content))}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>`;
+                        </div>`;
                 }
             } else {
                 console.log(data.message);
@@ -244,7 +244,6 @@ socket.on('join', (data) => {
         }).catch(err => {
             console.log(err);
         });
-
 
     } else {
         loader.innerHTML = `<div>${data.message}</div>`;
@@ -311,8 +310,14 @@ function launchPage(pageName) {
     sidebarItems.forEach(item => {
         item.classList.remove('active');
         if (item.querySelector('span').innerHTML === pageName) {
-            item.classList.add('active');
-            mainContainer.classList.add('hide');
+            if (pageName == 'Accueil') {
+                window.location.href = '/';
+            } else {
+                item.classList.add('active');
+                mainContainer.classList.add('hide');
+            }
+            localStorage.setItem('activePage', pageName);
+
         }
     });
 }

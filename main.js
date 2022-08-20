@@ -153,6 +153,25 @@ app.get('/offline', (req, res) => {
     res.sendFile(__dirname + '/template/offline.html');
 });
 
+// //#############################################################################################################################
+// //                                               RENVOIE STATIC DES DONNÉES "STORAGE"
+// //#############################################################################################################################
+// app.get('/storage/:token/:id/:ext', async(req, res) => {
+//     let token = escapeHTML(req.params.token);
+//     let id = escapeHTML(req.params.id);
+//     let ext = escapeHTML(req.params.ext);
+
+//     //retourner le fichier qui est dans /userdata/token/data/id.ext
+//     fs.readFile(__dirname + '/userdata/' + token + '/data/' + id + '.' + ext, (err, data) => {
+//         if (err) {
+//             res.status(404).send('File not found');
+//         } else {
+//             res.writeHead(200, { 'Content-Type': 'image/' + ext });
+//             res.end(data);
+//         }
+//     });
+// });
+
 //requêtes GET sur la page de connexion
 app.get('/login', (req, res) => {
     //vérifier si l'utilisateur a le cookie "token"

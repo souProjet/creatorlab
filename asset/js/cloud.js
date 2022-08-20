@@ -47,7 +47,7 @@ function initcloudApp() {
                 </g>
             </svg>
         </div>
-        <main class="main-cloud" >
+        <main class="main-cloud" uk-lightbox>
         </main>
     </div>`;
     main = document.querySelector('main.main-cloud')
@@ -169,9 +169,15 @@ async function enterInFolder(path, reload = false) {
                     <p class="cooltip">${utils.octetToString(files[i].size) || "non défini"}</p>
                     <h1>${files[i].name}</h1>
                 </div>`;
+                // main.innerHTML +=
+                // `<a id="${files[i].id}" type="${files[i].type}" isuploadedfile="${files[i].isUploadedFile}" class="folder" `+(files[i].isUploadedFile ? `href="/storage/${token}/${files[i].id}/${files[i].name.split('.')[files[i].name.split('.').length-1]}"` : `onclick="enterInEditor('${files[i].id}', '${files[i].parent}')"`)+` data-caption="${files[i].name}">
+                //     <i class="material-icons">description</i>
+                //     <p class="cooltip">${utils.octetToString(files[i].size) || "non défini"}</p>
+                //     <h1>${files[i].name}</h1>
+                // </a>`;
                 let thumbnailElement = document.querySelectorAll('.material-icons')[document.querySelectorAll('.material-icons').length - 1];
 
-                if(!files[i].isUploadedFile){
+                if(!files[i].isUploadedFile) {    
                     fetch('/api/cloud/getthumbnail', {
                         method: 'POST',
                         headers: {
@@ -258,7 +264,6 @@ function downloadFile(fileId){
             console.log(file.message)
         }
     }).catch(err => console.log(err));
-
 }
 function enterInEditor(fileId, parentFolderId){
     mainContent.id = "editorjs";

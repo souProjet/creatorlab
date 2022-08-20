@@ -178,7 +178,16 @@ let Utils = class Utils {
         if (!this.sidebarLoaderState[0] && !this.sidebarLoaderState[1]) {
             sidebarLoader.remove();
             document.querySelector('.sidebar_inner').classList.remove('hide');
+            sidebarItems = document.querySelectorAll('.sidebar_inner ul li');
+            if (localStorage.getItem('activePage') && localStorage.getItem('activePage') != "Accueil" && Array.from(sidebarItems).find(item => item.querySelector('span').innerText == localStorage.getItem('activePage'))) {
+                sidebarItems.forEach(item => {
+                    if (item.querySelector('span').innerHTML == localStorage.getItem('activePage')) {
+                        item.click();
+                    }
+                });
+            }
         }
+
     }
     octetToString(octet) {
         let octetString = octet;

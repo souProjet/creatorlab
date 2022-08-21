@@ -293,6 +293,18 @@ sidebarItemTool.addEventListener('click', function() {
                             </div>
                         </a>
                     </li>
+                    <li tabindex="-1" >
+                        <a href="https://rytr.me/" target="_blank">
+                            <div class="card">
+                                <div class="card-media h-40">
+                                    <img src="./public/images/toolicon/rytr.png" alt="">
+                                </div>
+                                <div class="card-body">                                
+                                    <div class="ext-lg font-medium mt-1 t truncate">Rytr</div>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
                 </ul>
                 <a class="absolute bg-white bottom-1/2 flex items-center justify-center p-2 -left-4 rounded-full shadow-md text-xl w-9 z-10 dark:bg-gray-800 dark:text-white uk-invisible" href="#" uk-slider-item="previous"><svg width="14px" height="24px" viewBox="0 0 14 24" xmlns="http://www.w3.org/2000/svg" data-svg="slidenav-previous"><polyline fill="none" stroke="#000" stroke-width="1.4" points="12.775,1 1.225,12 12.775,23 "></polyline></svg></a>
                 <a class="absolute bg-white bottom-1/2 flex items-center justify-center p-2 -right-4 rounded-full shadow-md text-xl w-9 z-10 dark:bg-gray-800 dark:text-white" href="#" uk-slider-item="next"><svg width="14px" height="24px" viewBox="0 0 14 24" xmlns="http://www.w3.org/2000/svg" data-svg="slidenav-next"><polyline fill="none" stroke="#000" stroke-width="1.4" points="1.225,23 12.775,12 1.225,1 "></polyline></svg></a>
@@ -300,11 +312,11 @@ sidebarItemTool.addEventListener('click', function() {
         </div>`;
 
 
-    //conversion
+    //Autre outils
     mainContent.innerHTML += `
         <div class="my-6 flex items-center justify-between">
             <div>
-                <h2 class="text-xl font-semibold">Conversion de fichiers</h2>
+                <h2 class="text-xl font-semibold">Autre outils</h2>
             </div>
         </div>`;
 
@@ -332,6 +344,54 @@ sidebarItemTool.addEventListener('click', function() {
                                 </div>
                                 <div class="card-body">                                
                                     <div class="ext-lg font-medium mt-1 t truncate">Notube</div>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li tabindex="-1" >
+                        <a href="https://10minemail.com/fr/" target="_blank">
+                            <div class="card">
+                                <div class="card-media h-40">
+                                    <img src="./public/images/toolicon/10minemail.png" alt="">
+                                </div>
+                                <div class="card-body">                                
+                                    <div class="ext-lg font-medium mt-1 t truncate">10 Minutes Email</div>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li tabindex="-1" >
+                        <a href="https://www.mathway.com/" target="_blank">
+                            <div class="card">
+                                <div class="card-media h-40">
+                                    <img src="./public/images/toolicon/mathway.png" alt="">
+                                </div>
+                                <div class="card-body">                                
+                                    <div class="ext-lg font-medium mt-1 t truncate">Mathway</div>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li tabindex="-1" >
+                        <a href="https://flag.creatorlab.com/" target="_blank">
+                            <div class="card">
+                                <div class="card-media h-40">
+                                    <img src="./public/images/toolicon/flagcreator.png" alt="">
+                                </div>
+                                <div class="card-body">                                
+                                    <div class="ext-lg font-medium mt-1 t truncate">Flagcreator</div>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li tabindex="-1" >
+                        <a href="https://color.adobe.com/fr/" target="_blank">
+                            <div class="card">
+                                <div class="card-media h-40">
+                                    <img src="./public/images/toolicon/coloradobe.png" alt="">
+                                </div>
+                                <div class="card-body">                                
+                                    <div class="ext-lg font-medium mt-1 t truncate">Adobe Color</div>
                                 </div>
                             </div>
                         </a>

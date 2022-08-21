@@ -101,14 +101,19 @@ io.on('connection', socket => {
             if (returnData.status) {
                 let name = returnData.name;
                 let avatar = returnData.avatar;
-                //ajouter le socketId de l'utilisateur dans la base de données et on l'ajoute dans la liste des utilisateurs connectés au websocket
-                returnData = await login.updateSocketId(token, socket.id);
-                if (returnData.status) {
-                    io.to(socket.id).emit('join', { status: true, message: 'Vous êtes connecté', username: name, avatar: avatar });
-                    //une fois l'utilisateur connecté, on lui envoie les notifications et les messages privés ainsi que les informations sur l'utilisateur
+                let isSuccess = await login.updateNameAndAvatar(token, name, avatar);
+                if (isSuccess) {
+                    //ajouter le socketId de l'utilisateur dans la base de données et on l'ajoute dans la liste des utilisateurs connectés au websocket
+                    returnData = await login.updateSocketId(token, socket.id);
+                    if (returnData.status) {
+                        io.to(socket.id).emit('join', { status: true, message: 'Vous êtes connecté', username: name, avatar: avatar });
+                        //une fois l'utilisateur connecté, on lui envoie les notifications et les messages privés ainsi que les informations sur l'utilisateur
 
+                    } else {
+                        io.to(socket.id).emit('join', { status: false, message: returnData.message });
+                    }
                 } else {
-                    io.to(socket.id).emit('join', { status: false, message: returnData.message });
+                    io.to(socket.id).emit('join', { status: false, message: 'Impossible de vous connecter' });
                 }
             } else {
                 io.to(socket.id).emit('join', { status: false, message: returnData.message });

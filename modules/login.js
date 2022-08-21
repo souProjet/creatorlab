@@ -210,6 +210,20 @@ let Login = class Login {
             });
         return response
     }
+    updateNameAndAvatar(token, name, avatar) {
+        //met à jour le nom et l'avatar de l'utilisateur correspondant au token dans la base de données
+        //retourne true si la requete SQL réussit, false sinon
+        return new Promise((resolve, reject) => {
+            this.db.query(`UPDATE users SET name = '${name}', avatar = '${avatar}' WHERE token = '${token}'`, (err, rows) => {
+                if (err) {
+                    reject(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+
     updateSocketId(token, socketId) {
         //met à jour l'utilisateur correspondant au token avec le socketId et renvoie une promise
         return new Promise((resolve, reject) => {

@@ -197,7 +197,9 @@ socket.on('join', (data) => {
 
                 for (let i = 0; i < notes.length; i++) {
                     let note = notes[i];
-                    let timeLeft = utils.calculateTimeBetweenTwoDates(note.created, note.forwhen)
+                    let today = new Date();
+                    today = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+                    let timeLeft = utils.calculateTimeBetweenTwoDates(today, note.forwhen)
                     mainContent.innerHTML += `
                         <div class="lg:flex lg:space-x-10 uk-animation-slide-bottom-small note mb-5" id="${note.token}">
                             <div class="lg:w-full lg:px-20 space-y-7">

@@ -51,7 +51,7 @@ const Note = require('./modules/note');
 //#############################################################################################################################
 //                                               INSTANCIATION DES MODULES
 //#############################################################################################################################
-const login = new Login(puppeteer, db, fetch);
+const login = new Login(db, fetch, fs);
 const cloud = new Cloud(fs, utf8);
 const privatemessage = new Privatemessage();
 const user = new User(db);
@@ -92,7 +92,7 @@ io.on('connection', socket => {
         let token = escapeHTML(data.token);
         socket.join(socket.id);
         //on vérifie si le token est valide pour cela il faut déjà récupérer le sessionId associé au token
-        let returnData = await login.getSessionId(token);
+        let returnData = await login.getSessionIds(token);
         if (returnData.status) {
             //on récupère le sessionId
             let sessionId = returnData.sessionId;
@@ -206,9 +206,13 @@ app.post('/api/\*', async(req, res) => {
             let username = escapeHTML(req.body.username);
             let password = escapeHTML(req.body.password);
             if (username && password && username.length > 0 && password.length > 0) {
-                let returnData = await login.loginToFranceConnect(username, password);
+                const browser = await puppeteer.launch({ headless: true });
+                const page = await browser.newPage();
+                let returnData = await login.loginToFranceConnect(page, 0, username, password);
+                browser.close();
                 if (returnData.status) {
                     let sessionId = returnData.sessionId;
+                    let shibsession = returnData.shibsession;
                     //si l'id est valide, on regarde si l'utilisateur est déjà enregistré dans la base de données
                     let userWithSameUsername = await login.getUserByUsername(username);
                     if (userWithSameUsername.length > 0) {
@@ -228,10 +232,18 @@ app.post('/api/\*', async(req, res) => {
                             });
                         }
                     }
-                    res.status(200).send({
-                        status: true,
-                        message: 'Connexion réussie'
-                    });
+                    let shibsessionReturnedData = await login.updateShibsessionByUsername(username, shibsession);
+                    if (shibsessionReturnedData.status) {
+                        res.status(200).send({
+                            status: true,
+                            message: 'Connexion réussie'
+                        });
+                    } else {
+                        res.status(200).send({
+                            status: false,
+                            message: shibsessionReturnedData.message
+                        });
+                    }
 
                 } else {
                     //si l'id n'est pas valide, on renvoie une erreur
@@ -251,9 +263,10 @@ app.post('/api/\*', async(req, res) => {
         case 'connect':
             //récupérer le token dans l'entête de la requête
             let token = escapeHTML(req.headers.authorization.split(' ')[1]);
-            let resultData = await login.getSessionId(token);
+            let resultData = await login.getSessionIds(token);
             if (resultData.status) {
                 let sessionId = resultData.sessionId;
+                let shibsession = resultData.shibsession;
                 //soit E-lyco (/api/connect/elyco) soit Pronote (/api/connect/pronote)
                 let instance = params[1];
                 if (instance == 'elyco') {
@@ -315,13 +328,37 @@ app.post('/api/\*', async(req, res) => {
                     }
                 } else if (instance == 'pronote') {
                     //si c'est Pronote, on lance un scraping puppeteer pour récupérer les informations de l'utilisateur comme l'emploi du temps et les notes
-                    let resultData = await login.connectToPronote(sessionId);
+                    const browser = await puppeteer.launch({ headless: true });
+                    const page = await browser.newPage();
+                    let resultData = await login.connectToPronote(page, shibsession);
+                    browser.close();
                     if (resultData.status) {
                         pronoteState = true;
-                        res.status(200).send({
-                            status: true,
-                            message: 'Connexion à Pronote réussie'
-                        });
+                        let schedule = resultData.schedule;
+                        let reportcard = resultData.reportcard;
+
+                        let isSucess = login.updateSchedule(token, schedule);
+                        if (isSucess) {
+                            isSucess = login.updateReportcard(token, reportcard);
+                            if (isSucess) {
+                                res.status(200).send({
+                                    status: true,
+                                    schedule: (schedule != '' && schedule) ? true : false,
+                                    reportcard: (reportcard != '' && reportcard) ? true : false,
+                                    message: 'Connexion à Pronote réussie'
+                                });
+                            } else {
+                                res.status(200).send({
+                                    status: false,
+                                    message: 'Erreur lors de la récupération du bulletin de notes'
+                                });
+                            }
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: 'Erreur lors de la récupération de l\'emploi du temps'
+                            });
+                        }
                     } else {
                         res.status(200).send({
                             status: false,
@@ -344,7 +381,7 @@ app.post('/api/\*', async(req, res) => {
         case 'cloud':
             //récupérer le token dans l'entête de la requête
             let token2 = escapeHTML(req.headers.authorization.split(' ')[1]);
-            let resultData2 = await login.getSessionId(token2);
+            let resultData2 = await login.getSessionIds(token2);
             if (resultData2.status) {
                 let sessionId = resultData2.sessionId;
                 //déterminer la sous-action de la requête
@@ -537,7 +574,7 @@ app.post('/api/\*', async(req, res) => {
             //récupérer le token présent dans l'entête de la requête
             let token3 = escapeHTML(req.headers.authorization.split(' ')[1]);
 
-            let resultData3 = await login.getSessionId(token3);
+            let resultData3 = await login.getSessionIds(token3);
             if (resultData3.status) {
                 let sessionId = resultData3.sessionId;
                 //déterminer la sous-action de la requête
@@ -615,7 +652,7 @@ app.get('/api/\*', async(req, res) => {
 
                 //déterminer la sous-action de la requête
                 let subAction = params[1];
-                let resultData = await login.getSessionId(token);
+                let resultData = await login.getSessionIds(token);
                 if (resultData.status) {
                     let sessionId = resultData.sessionId;
                     if (subAction == 'preview') {

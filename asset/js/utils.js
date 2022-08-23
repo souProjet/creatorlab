@@ -1,7 +1,5 @@
 let Utils = class Utils {
-        constructor() {
-            this.sidebarLoaderState = [true, true];
-        }
+        constructor() {}
         createModal(msg, error = false) {
                 let modal = `
         <div class="absolute bg-white rounded-lg border-gray-300 border p-3 shadow-lg" style="z-index:2000;right:2%;top:8%;">
@@ -173,19 +171,14 @@ let Utils = class Utils {
         return 'default';
     
     }
-    updateSidebarLoaderState(item, state) {
-        this.sidebarLoaderState[item] = state;
-        if (!this.sidebarLoaderState[0] && !this.sidebarLoaderState[1]) {
-            sidebarLoader.remove();
-            document.querySelector('.sidebar_inner').classList.remove('hide');
-            sidebarItems = document.querySelectorAll('.sidebar_inner ul li');
-            if (localStorage.getItem('activePage') && localStorage.getItem('activePage') != "Accueil" && Array.from(sidebarItems).find(item => item.querySelector('span').innerText == localStorage.getItem('activePage'))) {
-                sidebarItems.forEach(item => {
-                    if (item.querySelector('span').innerHTML == localStorage.getItem('activePage')) {
-                        item.click();
-                    }
-                });
-            }
+    updateSidebarLoaderState() {
+        sidebarItems = document.querySelectorAll('.sidebar_inner ul li');
+        if (localStorage.getItem('activePage') && localStorage.getItem('activePage') != "Accueil" && Array.from(sidebarItems).find(item => item.querySelector('span').innerText == localStorage.getItem('activePage'))) {
+            sidebarItems.forEach(item => {
+                if (item.querySelector('span').innerHTML == localStorage.getItem('activePage') && !item.classList.contains('active') && !item.classList.contains('hide')) {
+                    item.click();
+                }
+            });
         }
 
     }

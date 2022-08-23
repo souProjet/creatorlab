@@ -1,13 +1,13 @@
 let Login = class Login {
-    constructor(puppeteer, db, fetch) {
-        this.puppeteer = puppeteer;
+    constructor(db, fetch, fs) {
         this.db = db;
         this.fetch = fetch;
+        this.fs = fs;
         this.checkSessionIdReturn = {
             status: false,
             message: 'Une erreur est survenue'
         }
-        this.getSessionIdReturn = {
+        this.getSessionIdsReturn = {
             status: false,
             message: 'Une erreur est survenue'
         }
@@ -41,13 +41,17 @@ let Login = class Login {
             });
         });
     }
-    loginToFranceConnect(username, password) {
+    loginToFranceConnect(page, counter, username, password) {
         //retourne une promise contenant le cookie de session (ASP.NET_SessionId) et les éventuels messages d'erreur
         return new Promise((resolve, reject) => {
             (async() => {
                 try {
-                    const browser = await this.puppeteer.launch({ headless: true });
-                    const page = await browser.newPage();
+                    if (counter == 3) {
+                        reject({
+                            status: false,
+                            message: 'Une erreur est survenue'
+                        });
+                    }
                     await page.goto('https://www.e-lyco.fr/');
                     await page.waitForTimeout(1000);
                     await page.$eval('.menu > li > a', el => el.click());
@@ -60,7 +64,17 @@ let Login = class Login {
                     await page.$eval('#username', (el, username) => el.value = username, username);
                     await page.$eval('#password', (el, password) => el.value = password, password);
                     await page.click('#bouton_valider');
+
+                    //écouter la réponse de la requête POST
+                    let response = await page.waitForResponse(response => response.url());
+
+                    let shibsession = response.headers()['set-cookie'].split(';')[0];
+                    if (shibsession.indexOf("_shibsession_") == -1) {
+                        return this.loginToFranceConnect(page, counter + 1, username, password);
+                    }
+
                     await page.waitForTimeout(2000);
+
                     if (await page.url() == 'https://educonnect.education.gouv.fr/idp/profile/SAML2/Redirect/SSO?execution=e1s2') {
                         //les identifiants sont incorrects
                         reject({
@@ -75,7 +89,8 @@ let Login = class Login {
                             resolve({
                                 status: true,
                                 message: 'Connexion réussie',
-                                sessionId: sessionId
+                                sessionId: sessionId,
+                                shibsession: shibsession
                             });
                         } catch (err) {
                             reject({
@@ -85,7 +100,6 @@ let Login = class Login {
                         }
 
                     }
-                    await browser.close();
                 } catch (err) {
                     console.error('[CREATOR LAB] Erreur de scraping', err);
                     reject({
@@ -138,10 +152,29 @@ let Login = class Login {
             });
         });
     }
-    getSessionId(token) {
+
+    updateShibsessionByUsername(username, shibsession) {
+        //met à jour l'utilisateur correspondant à l'username avec le shibsession et renvoie une promise contenant les logs de connexion
+        return new Promise((resolve, reject) => {
+            this.db.query(`UPDATE users SET shibsession = '${shibsession}' WHERE username = '${username}'`, (err, rows) => {
+                if (err) {
+                    reject({
+                        status: false,
+                        message: 'Une erreur est survenue'
+                    });
+                } else {
+                    resolve({
+                        status: true,
+                        message: 'Shibsession mis à jour avec succès'
+                    });
+                }
+            });
+        });
+    }
+    getSessionIds(token) {
         //retourne une promise contenant le sessionId de l'utilisateur correspondant au token
         return new Promise((resolve, reject) => {
-            this.db.query(`SELECT clientId FROM users WHERE token = '${token}'`, (err, rows) => {
+            this.db.query(`SELECT * FROM users WHERE token = '${token}'`, (err, rows) => {
                 if (err) {
                     reject({
                         status: false,
@@ -149,18 +182,19 @@ let Login = class Login {
                     });
                 } else {
                     if (rows.length == 0) {
-                        this.getSessionIdReturn = {
+                        this.getSessionIdsReturn = {
                             status: false,
                             message: 'Utilisateur non trouvé'
                         }
                     } else {
-                        this.getSessionIdReturn = {
+                        this.getSessionIdsReturn = {
                             status: true,
                             message: 'SessionId trouvé',
-                            sessionId: rows[0].clientId
+                            sessionId: rows[0].clientId,
+                            shibsession: rows[0].shibsession
                         }
                     }
-                    resolve(this.getSessionIdReturn);
+                    resolve(this.getSessionIdsReturn);
                 }
             })
         });
@@ -244,7 +278,7 @@ let Login = class Login {
     }
     async updateAntiforgeryToken(token) {
         //récupérer le sessionId dans la base de données
-        let returnData = await this.getSessionId(token);
+        let returnData = await this.getSessionIds(token);
         if (returnData.status) {
             //effectué un fetch pour récupérer le token antiforgery
             let returnDataAntiforgery = await this.fetch('https://elyco.itslearning.com/DashboardMenu.aspx', {
@@ -330,12 +364,156 @@ let Login = class Login {
         return response;
     }
 
-    connectToPronote(sessionId) {
+    async connectToPronote(page, shibsession) {
+        await page.goto('https://cas3.e-lyco.fr');
+        //inject shibsession cookie
+
+        await page.setCookie({
+            name: shibsession.split('=')[0],
+            value: shibsession.split('=')[1],
+            domain: 'cas3.e-lyco.fr',
+            path: '/',
+        });
+        // await page.reload();
+        await page.goto('https://pronote.lyc-orbigny-44.ac-nantes.fr/pronote/');
+        await page.waitForTimeout(4000);
+        await page.evaluate(() => {
+            document.querySelectorAll('.menu-principal_niveau1')[3].querySelector('li').click();
+        });
+        await page.waitForTimeout(3000);
+        //#############################################################################################################################
+        //                                          RÉCUPÉRATION DE L'EMPLOIE DU TEMPS  
+        //#############################################################################################################################
+        let schedule = '';
+        let reportcard = '';
+        try {
+            schedule = await page.evaluate(() => {
+                let timeTemplate = ['08h05', '08h30', '09h00', '9h30', '10h15', '10h45', '11h10', '11h40', '12h05', '12h30', '13h00', '13h30', '13h55', '14h25', '14h50', '15h20', '16h05', '16h35', '17h00', '17h30', '17h55'];
+                let dayTemplate = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+                let scheduleDom = document.createElement('div');
+                scheduleDom.innerHTML = document.getElementById(`GInterface.Instances[2].Instances[1].Instances[0]_Grille_Elements`).innerHTML.replace("id=\"id_125_cours_0\"", "id=\"id_125_cours_0 \" sh=\"" + (document.querySelector('#id_122_Grille_').style.height) + "\" sw=\"" + (document.querySelector('#id_122_Grille_').style.width) + "\"");
+
+                let scheduleJSON = [];
+
+                let courseDom = scheduleDom.querySelectorAll('.EmploiDuTemps_Element');
+                let scheduleHeight = parseInt(scheduleDom.querySelector('.EmploiDuTemps_Element').getAttribute('sh').replace('px', ''));
+                let scheduleWidth = parseInt(scheduleDom.querySelector('.EmploiDuTemps_Element').getAttribute('sw').replace('px', ''));
+                for (let i = 0; i < courseDom.length; i++) {
+                    //let course = courseDom[i].outerHTML;
+                    let courseDOM = document.createElement('div');
+                    courseDOM.innerHTML = courseDom[i].outerHTML;
+                    courseDOM = courseDOM.firstChild;
+                    let courseLeft = parseInt(courseDOM.style.left.replace('px', '').trim())
+                    let courseTop = parseInt(courseDOM.style.top.replace('px', '').trim());
+                    //     //let courseWidth = courseDOM.style.width.replace('px', '');
+
+                    let courseHeight = parseInt(courseDOM.style.height.replace('px', '').trim())
+                    let col = Math.ceil(courseLeft / (scheduleWidth / 5)) + 1;
+                    let row = Math.round((courseTop / (scheduleHeight / 10) + 1) * -10) / -10;
+                    let height = Math.round((courseHeight / (scheduleHeight / 10)) * -10) / -10;
+                    let startingTime = dayTemplate[col - 1] + ' ' + timeTemplate[(row - 1) * 2];
+                    let endingTime = dayTemplate[col - 1] + ' ' + timeTemplate[(row - 1 + height) * 2];
+                    let courseJSON = {
+                        col: col,
+                        row: row,
+                        height: height,
+                        startingTime: startingTime,
+                        endingTime: endingTime,
+                        room: courseDOM.querySelectorAll('.AlignementMilieu')[2] ? courseDOM.querySelectorAll('.AlignementMilieu')[2].innerText : '',
+                        teacher: courseDOM.querySelectorAll('.AlignementMilieu')[1].innerText,
+                        subject: courseDOM.querySelectorAll('.AlignementMilieu')[0].innerText,
+                        event: (courseDOM.querySelectorAll('tr').length == 2 ? courseDOM.querySelectorAll('tr')[0].querySelector('.NoWrap.ie-ellipsis').innerHTML : false)
+                    }
+                    scheduleJSON.push(courseJSON);
+                }
+                return scheduleJSON;
+            });
+
+        } catch (err) {
+            console.log(err);
+            return {
+                status: false,
+                message: 'Erreur de récupération de l\'emploi du temps'
+            }
+        }
+
+        await page.evaluate(() => {
+            document.querySelectorAll('.label-menu_niveau0')[2].click();
+        });
+        await page.waitForTimeout(2000);
+
+
+        //#############################################################################################################################
+        //                                          RÉCUPÉRATION DU BULLETIN DE NOTES
+        //#############################################################################################################################
+        try {
+            reportcard = await page.evaluate(() => {
+                let reportcardDom = document.createElement('div');
+                reportcardDom.innerHTML = document.querySelector('.EspaceGauche.EspaceHaut tr').innerHTML;
+                let reportcardJSON = {
+                    general_student: parseFloat(reportcardDom.querySelector('.AlignementDroit.EspaceHaut div span span').innerHTML.trim().replace(',', '.')),
+                    general_class: parseFloat(reportcardDom.querySelector('.AlignementDroit.EspaceHaut div:nth-child(2) span span').innerHTML.trim().replace(',', '.')),
+                };
+
+                let testContainerChildren = Array.from(document.querySelector('.SansMain.liste_fixed').childNodes);
+                let testMatters = [];
+                for (let i = 0; i < testContainerChildren.length; i++) {
+                    if (testContainerChildren[i].querySelector('.Gras.Espace')) {
+                        let evaluation = [];
+                        for (let j = i + 1; j < testContainerChildren.length; j++) {
+                            if (testContainerChildren[j].querySelector('.Gras.Espace')) {
+                                break;
+                            } else if (testContainerChildren[j].querySelector('.Espace:not(.Gras)')) {
+                                evaluation.push({
+                                    date: testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(2)').innerHTML,
+                                    class: parseFloat(testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(3)').innerHTML.split(':')[1].trim().replace(',', '.')),
+                                    student: parseFloat(testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(1) div').innerHTML.trim().replace(',', '.')),
+                                    of: testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(1) div span') ? parseFloat(testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(1) div span').innerHTML.replace('/', '')) : 20
+                                });
+                            }
+                        }
+
+                        testMatters.push({
+                            name: testContainerChildren[i].querySelector('.Gras.Espace div:nth-child(2)').innerHTML,
+                            mean: parseFloat(testContainerChildren[i].querySelector('.Gras.Espace div:nth-child(1)').innerHTML.replace(',', '.').trim()),
+                            evaluation: evaluation
+                        });
+                    }
+                }
+                reportcardJSON["matters"] = testMatters;
+                return reportcardJSON;
+            });
+        } catch (err) {
+            console.log(err);
+            return {
+                status: false,
+                message: "Erreur de récupération du bulletin de notes"
+            }
+        }
+
         return {
-            status: false,
-            message: 'Pas encore implémenté'
+            status: true,
+            message: 'Connecté à Pronote',
+            schedule: schedule,
+            reportcard: reportcard
         }
     }
+
+    updateSchedule(token, schedule) {
+        this.fs.writeFileSync('./userdata/' + token + '/schedule.json', JSON.stringify(schedule), (err) => {
+            if (err) return false;
+
+        });
+        return true
+    }
+    updateReportcard(token, reportcard) {
+        this.fs.writeFileSync('./userdata/' + token + '/reportcard.json', JSON.stringify(reportcard), (err) => {
+            if (err) return false;
+        });
+        return true
+    }
+
+
 }
 
 module.exports = Login;

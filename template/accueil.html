@@ -179,11 +179,7 @@
 
         <!-- sidebar -->
         <div class="sidebar">
-            <div class="connection-box absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                Chargement...
-                <img src='./public/images/loader-waiting2.svg'>
-            </div>
-            <div class="sidebar_inner hide" data-simplebar>
+            <div class="sidebar_inner" data-simplebar>
 
                 <ul>
                     <li class="active" onclick="launchPage('Accueil')">
@@ -221,7 +217,7 @@
                             <span>Les outils</span>
                         </a>
                     </li>
-                    <li onclick="launchPage('Mes cours')">
+                    <li onclick="launchPage('Mes cours')" class="hide">
                         <a>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="text-red-500">
                                 <path fill-rule="evenodd"
@@ -234,7 +230,7 @@
                             <span>Mes cours</span>
                         </a>
                     </li>
-                    <li onclick="launchPage('Emplois du temps')">
+                    <li onclick="launchPage('Emplois du temps')" class="hide">
                         <a>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="text-pink-500">
                                 <path fill-rule="evenodd"
@@ -244,7 +240,7 @@
                             <span>Emplois du temps</span>
                         </a>
                     </li>
-                    <li onclick="launchPage('Mon bulletin')">
+                    <li onclick="launchPage('Mon bulletin')" class="hide">
                         <a>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="text-yellow-500">
                                 <path

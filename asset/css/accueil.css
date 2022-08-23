@@ -85,6 +85,10 @@ button.button {
     border-radius: 6px;
 }
 
+.hide {
+    display: none !important;
+}
+
 input[type="button"],
 input[type="submit"] {
     background-color: #2a41e8;
@@ -11237,10 +11241,6 @@ a.res-link:hover {
 }
 
 .popup-check {
-    display: none;
-}
-
-.hide {
     display: none;
 }
 

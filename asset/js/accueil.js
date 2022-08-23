@@ -4,8 +4,8 @@ let disconnectedBtn = document.querySelector('.disconnected-btn');
 let mainContainer = document.querySelector('.main_content');
 let mainContent = document.querySelector('.main_content .mcontainer');
 let sidebarItems = document.querySelectorAll('.sidebar_inner ul li');
+let sidebar = document.querySelector('.sidebar_inner ul');
 let loader = document.querySelector('.connection-box');
-let sidebarLoader = document.querySelectorAll('.connection-box')[1];
 
 let nameField = document.querySelector('.user_name > div');
 let avatarField = document.querySelector('.user_avatar > img');
@@ -82,15 +82,24 @@ socket.on('join', (data) => {
         }).then(res => res.json()).then(data => {
             let elycoConnectInstanceCard = document.querySelector('.elyco-connect-instance');
             if (data.status) {
-                elycoConnectInstanceCard.innerHTML = 'Connecté';
-                elycoConnectInstanceCard.classList.add('text-green-500');
-                elycoConnectInstanceCard.classList.remove('text-red-500');
+                if (elycoConnectInstanceCard) {
+                    elycoConnectInstanceCard.innerHTML = 'Connecté';
+                    elycoConnectInstanceCard.classList.add('text-green-500');
+                    elycoConnectInstanceCard.classList.remove('text-red-500');
+                }
                 elycoState = true;
+                sidebarItems.forEach(item => {
+                    if (item.querySelector('span').innerText == 'Mes cours') {
+                        item.classList.remove('hide');
+                    }
+                });
             } else {
-                elycoConnectInstanceCard.innerHTML = 'Echec';
-                elycoConnectInstanceCard.classList.add('text-red-500');
-                elycoConnectInstanceCard.parentNode.parentNode.style.border = "solid 1px red";
-                elycoConnectInstanceCard.parentNode.parentNode.setAttribute('uk-tooltip', 'title: Il semblerait que E-lyco soit indisponible pour le moment');
+                if (elycoConnectInstanceCard) {
+                    elycoConnectInstanceCard.innerHTML = 'Echec';
+                    elycoConnectInstanceCard.classList.add('text-red-500');
+                    elycoConnectInstanceCard.parentNode.parentNode.style.border = "solid 1px red";
+                    elycoConnectInstanceCard.parentNode.parentNode.setAttribute('uk-tooltip', 'title: Il semblerait que E-lyco soit indisponible pour le moment');
+                }
                 document.querySelector('.notif-btn').remove();
                 document.querySelector('.message-btn').remove();
                 sidebarItems.forEach(item => {
@@ -99,7 +108,7 @@ socket.on('join', (data) => {
                     }
                 });
             }
-            utils.updateSidebarLoaderState(0, false);
+            utils.updateSidebarLoaderState();
         }).catch(err => {
             console.log(err);
         });
@@ -116,22 +125,33 @@ socket.on('join', (data) => {
         }).then(res => res.json()).then(data => {
             let pronoteConnectInstanceCard = document.querySelector('.pronote-connect-instance');
             if (data.status) {
-                pronoteConnectInstanceCard.innerHTML = 'Connecté';
-                pronoteConnectInstanceCard.classList.add('text-green-500');
-                pronoteConnectInstanceCard.classList.remove('text-red-500');
+                if (pronoteConnectInstanceCard) {
+                    pronoteConnectInstanceCard.innerHTML = 'Connecté';
+                    pronoteConnectInstanceCard.classList.add('text-green-500');
+                    pronoteConnectInstanceCard.classList.remove('text-red-500');
+                }
                 pronoteState = true;
-            } else {
-                pronoteConnectInstanceCard.innerHTML = 'Echec';
-                pronoteConnectInstanceCard.classList.add('text-red-500');
-                pronoteConnectInstanceCard.parentNode.parentNode.style.border = "solid 1px red";
-                pronoteConnectInstanceCard.parentNode.parentNode.setAttribute('uk-tooltip', 'title: Il semblerait que Pronote soit indisponible pour le moment.');
                 sidebarItems.forEach(item => {
                     if (item.querySelector('span').innerText == 'Emplois du temps' || item.querySelector('span').innerText == 'Mon bulletin') {
+                        item.classList.remove('hide');
+                    }
+                });
+            } else {
+                if (pronoteConnectInstanceCard) {
+                    pronoteConnectInstanceCard.innerHTML = 'Echec';
+                    pronoteConnectInstanceCard.classList.add('text-red-500');
+                    pronoteConnectInstanceCard.parentNode.parentNode.style.border = "solid 1px red";
+                    pronoteConnectInstanceCard.parentNode.parentNode.setAttribute('uk-tooltip', 'title: Il semblerait que Pronote soit indisponible pour le moment.');
+                }
+                sidebarItems.forEach(item => {
+                    if (item.querySelector('span').innerText == 'Emplois du temps' && data.schedule) {
+                        item.remove();
+                    } else if (item.querySelector('span').innerText == 'Mon bulletin' && data.reportcard) {
                         item.remove();
                     }
                 });
             }
-            utils.updateSidebarLoaderState(1, false);
+            utils.updateSidebarLoaderState();
         }).catch(err => {
             console.log(err);
         });

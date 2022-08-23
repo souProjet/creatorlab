@@ -777,10 +777,10 @@ app.get('/api/\*', async(req, res) => {
             let token2 = escapeHTML(req.headers.authorization.split(' ')[1]);
 
             //déterminer la sous-action de la requête
-            let subAction = params[1];
-            let resultData = await login.getSessionIds(token2);
-            if (resultData.status) {
-                if (subAction == 'get') {
+            let subAction2 = params[1];
+            let resultData2 = await login.getSessionIds(token2);
+            if (resultData2.status) {
+                if (subAction2 == 'get') {
                     let scheduleReturnedData = schedule.get(token2);
                     if (scheduleReturnedData.status) {
                         res.send({
@@ -797,7 +797,7 @@ app.get('/api/\*', async(req, res) => {
                 } else {
                     res.status(200).send({
                         status: false,
-                        message: subAction + ' : methode inconnue'
+                        message: subAction2 + ' : methode inconnue'
                     });
                 }
             } else {
@@ -808,6 +808,39 @@ app.get('/api/\*', async(req, res) => {
             }
             break;
         case 'reportcard':
+            //récupérer le token dans l'entête de la requête
+            let token3 = escapeHTML(req.headers.authorization.split(' ')[1]);
+
+            //déterminer la sous-action de la requête
+            let subAction3 = params[1];
+            let resultData3 = await login.getSessionIds(token3);
+            if (resultData3.status) {
+                if (subAction3 == 'get') {
+                    let reportcardReturnedData = reportcard.get(token3);
+                    if (reportcardReturnedData.status) {
+                        res.send({
+                            status: true,
+                            message: reportcardReturnedData.message,
+                            reportcard: reportcardReturnedData.reportcard
+                        });
+                    } else {
+                        res.status(200).send({
+                            status: false,
+                            message: reportcardReturnedData.message
+                        })
+                    }
+                } else {
+                    res.status(200).send({
+                        status: false,
+                        message: subAction3 + ' : methode inconnue'
+                    });
+                }
+            } else {
+                res.status(200).send({
+                    status: false,
+                    message: 'Token invalide'
+                });
+            }
             break;
         case 'privatemessage':
             break;

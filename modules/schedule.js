@@ -15,14 +15,14 @@ let Schedule = class Schedule {
             if (err) {
                 return {
                     status: false,
-                    message: 'Erreur lors de la récupértion de l\'emloie du temps'
+                    message: 'Erreur lors de la récupértion de l\'emplois du temps'
                 }
             }
         });
 
         return {
             status: true,
-            message: 'Récupération de l\'emploie du temps réussie',
+            message: 'Récupération de l\'emplois du temps réussie',
             schedule: scheduleJSON
         }
     }

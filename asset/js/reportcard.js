@@ -1,16 +1,22 @@
-mainContent = document.querySelector('.main_content .mcontainer');
-let sidebarItemReportcard = document.querySelector('.sidebar_inner ul li:nth-child(5)');
+let sidebarItemReportcard;
+sidebarItems.forEach((item) => {
+    if (item.querySelector('span').innerHTML === 'Mon bulletin') {
+        sidebarItemReportcard = item;
+    }
+});
 
 sidebarItemReportcard.addEventListener('click', function() {
             let navBarMatters = ``;
             for (let i = 0; i < reportcard.matters.length; i++) {
-                navBarMatters += `<li onclick="showNoteForMatter(this, ${i})" class="${i == 0 ? `active` : ``}">
+                navBarMatters += `
+        <li onclick="showNoteForMatter(this, ${i})" class="${i == 0 ? `active` : ``}">
             <a  class="lg:px-2">
                 ${reportcard.matters[i].name}
                 <span>${reportcard.matters[i].mean.toString().replace('.', ',')}</span>
             </a>
         </li>`;
-    }
+            }
+
 
     let testHTML = ``;
 
@@ -23,7 +29,7 @@ sidebarItemReportcard.addEventListener('click', function() {
         dist_mean > offset_mean ? dist_mean = offset_mean : dist_mean < -offset_mean ? dist_mean = -offset_mean : dist_mean = dist_mean;
         let g_mean = Math.floor(((dist_mean + offset_mean) * 256 / (offset_mean * 2)) - 1);
         let r_mean = Math.floor(256 - ((dist_mean + offset_mean) * 256 / (offset_mean * 2)));
-        
+
         testHTML += `
         <div class="flex items-center space-x-4 py-3 hover:bg-gray-100 rounded-md -mx-2 px-2">
             <div class="w-14 h-14 flex-shrink-0 rounded-md relative"> 
@@ -109,20 +115,18 @@ sidebarItemReportcard.addEventListener('click', function() {
         `;
     }
 
-
-    mainContent.innerHTML = `<div class="lg:w-full"> 
-    <h3 class="text-xl font-semibold">Vos notes pour ce trimestre :</h3>
-    <nav class="responsive-nav border-b">
-        <ul class="reportcard-nav">
-            `+navBarMatters+`
-        </ul>
-    </nav>
-    <div class="grid md:grid-cols-2 divide divide-gray-200 gap-x-4 mt-4 repordcard-note">
-            `+testHTML+`
-    </div> 
-</div>`;
-
-
+    mainContent.innerHTML = `
+    <div class="lg:w-full"> 
+        <h3 class="text-xl font-semibold">Vos notes pour ce trimestre :</h3>
+        <nav class="responsive-nav border-b">
+            <ul class="reportcard-nav">
+                `+navBarMatters+`
+            </ul>
+        </nav>
+        <div class="grid md:grid-cols-2 divide divide-gray-200 gap-x-4 mt-4 repordcard-note">
+                `+testHTML+`
+        </div> 
+    </div>`;
 
     mainContainer.classList.remove('hide');
 });
@@ -130,7 +134,7 @@ sidebarItemReportcard.addEventListener('click', function() {
 function showNoteForMatter(element, matterId){
     element.parentNode.querySelector('.active').classList.remove('active');
     element.classList.add('active');
-    
+
     let testHTML = ``;
 
     for(let i = 0; i < reportcard.matters[matterId].evaluation.length; i++) {
@@ -225,7 +229,7 @@ function showNoteForMatter(element, matterId){
         </div>
         `;
         }
-    
+
 
     document.querySelector('.repordcard-note').innerHTML = testHTML;
 }

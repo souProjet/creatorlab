@@ -19,6 +19,8 @@ let utils = new Utils(); //on crée un objet utils pour pouvoir utiliser les fon
 
 let token = utils.getToken(); //on récupère le token stocké dans les cookies
 
+let reportcard = {};
+
 socket.emit('join', { token: token }); //on envoie le token au websocket pour qu'il l'ajoute à la liste des utilisateurs connectés
 
 socket.on('join', (data) => {
@@ -131,11 +133,40 @@ socket.on('join', (data) => {
                     pronoteConnectInstanceCard.classList.remove('text-red-500');
                 }
                 pronoteState = true;
+
                 sidebarItems.forEach(item => {
-                    if (item.querySelector('span').innerText == 'Emplois du temps' || item.querySelector('span').innerText == 'Mon bulletin') {
-                        item.classList.remove('hide');
+                    if (item.querySelector('span').innerText == 'Emplois du temps' && data.schedule) {
+                        item.classList.remove('hide')
+                    } else if (item.querySelector('span').innerText == 'Mon bulletin' && data.reportcard) {
+                        item.classList.remove('hide')
                     }
                 });
+                //######################################################################################################################
+                //                                             RÉCUPÉRATION DU BULLETIN DE NOTES
+                //######################################################################################################################
+                fetch('/api/reportcard/get', {
+                    method: 'GET',
+                    headers: {
+                        'Application-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    }
+                }).then(res => res.json()).then(data => {
+                    if (data.status) {
+                        reportcard = JSON.parse(data.reportcard);
+                        let offset_mean = 4;
+                        document.querySelector('.user_name > p').style.fontSize = ".8em";
+                        let dist_mean = Math.round((reportcard.general_student - reportcard.general_class) * -100) / -100;
+                        dist_mean > offset_mean ? dist_mean = offset_mean : dist_mean < -offset_mean ? dist_mean = -offset_mean : dist_mean = dist_mean;
+                        let g_mean = Math.floor(((dist_mean + offset_mean) * 256 / (offset_mean * 2)) - 1);
+                        let r_mean = Math.floor(256 - ((dist_mean + offset_mean) * 256 / (offset_mean * 2)));
+                        document.querySelector('.user_name > p').style.color = "rgb(" + (r_mean) + ", " + (g_mean) + ", 0)";
+                        document.querySelector('.user_name > p').innerText = reportcard.general_student.toString().replace('.', ',') + ' de moyenne';
+                    } else {
+                        console.log(data.message)
+                    }
+                });
+
+
             } else {
                 if (pronoteConnectInstanceCard) {
                     pronoteConnectInstanceCard.innerHTML = 'Echec';
@@ -144,10 +175,8 @@ socket.on('join', (data) => {
                     pronoteConnectInstanceCard.parentNode.parentNode.setAttribute('uk-tooltip', 'title: Il semblerait que Pronote soit indisponible pour le moment.');
                 }
                 sidebarItems.forEach(item => {
-                    if (item.querySelector('span').innerText == 'Emplois du temps' && data.schedule) {
-                        item.remove();
-                    } else if (item.querySelector('span').innerText == 'Mon bulletin' && data.reportcard) {
-                        item.remove();
+                    if (item.querySelector('span').innerText == 'Emplois du temps' || item.querySelector('span').innerText == 'Mon bulletin') {
+                        item.classList.remove('hide');
                     }
                 });
             }

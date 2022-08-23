@@ -498,22 +498,6 @@ let Login = class Login {
             reportcard: reportcard
         }
     }
-
-    updateSchedule(token, schedule) {
-        this.fs.writeFileSync('./userdata/' + token + '/schedule.json', JSON.stringify(schedule), (err) => {
-            if (err) return false;
-
-        });
-        return true
-    }
-    updateReportcard(token, reportcard) {
-        this.fs.writeFileSync('./userdata/' + token + '/reportcard.json', JSON.stringify(reportcard), (err) => {
-            if (err) return false;
-        });
-        return true
-    }
-
-
 }
 
 module.exports = Login;

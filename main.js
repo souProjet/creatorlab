@@ -47,6 +47,8 @@ const User = require('./modules/user');
 const Notification = require('./modules/notification');
 const Course = require('./modules/course');
 const Note = require('./modules/note');
+const Schedule = require('./modules/schedule');
+const Reportcard = require('./modules/reportcard');
 
 //#############################################################################################################################
 //                                               INSTANCIATION DES MODULES
@@ -58,6 +60,8 @@ const user = new User(db);
 const notification = new Notification(fetch);
 const course = new Course(fetch);
 const note = new Note(db);
+const schedule = new Schedule(fs);
+const reportcard = new Reportcard(fs);
 
 //#############################################################################################################################
 //                                               FONCTION ECHAPPEMENT DE CARACTERES HTML
@@ -334,17 +338,17 @@ app.post('/api/\*', async(req, res) => {
                     browser.close();
                     if (resultData.status) {
                         pronoteState = true;
-                        let schedule = resultData.schedule;
-                        let reportcard = resultData.reportcard;
+                        let scheduleSuccess = resultData.schedule;
+                        let reportcardSuccess = resultData.reportcard;
 
-                        let isSucess = login.updateSchedule(token, schedule);
+                        let isSucess = schedule.updateSchedule(token, scheduleSuccess);
                         if (isSucess) {
-                            isSucess = login.updateReportcard(token, reportcard);
+                            isSucess = reportcard.updateReportcard(token, reportcardSuccess);
                             if (isSucess) {
                                 res.status(200).send({
                                     status: true,
-                                    schedule: (schedule != '' && schedule) ? true : false,
-                                    reportcard: (reportcard != '' && reportcard) ? true : false,
+                                    schedule: (scheduleSuccess != '' && scheduleSuccess) ? true : false,
+                                    reportcard: (reportcardSuccess != '' && reportcardSuccess) ? true : false,
                                     message: 'Connexion à Pronote réussie'
                                 });
                             } else {
@@ -768,9 +772,40 @@ app.get('/api/\*', async(req, res) => {
                 });
             }
             break;
-        case 'posts':
-            break;
         case 'schedule':
+            //récupérer le token dans l'entête de la requête
+            let token2 = escapeHTML(req.headers.authorization.split(' ')[1]);
+
+            //déterminer la sous-action de la requête
+            let subAction = params[1];
+            let resultData = await login.getSessionIds(token2);
+            if (resultData.status) {
+                if (subAction == 'get') {
+                    let scheduleReturnedData = schedule.get(token2);
+                    if (scheduleReturnedData.status) {
+                        res.send({
+                            status: true,
+                            message: scheduleReturnedData.message,
+                            schedule: scheduleReturnedData.schedule
+                        });
+                    } else {
+                        res.status(200).send({
+                            status: false,
+                            message: scheduleReturnedData.message
+                        })
+                    }
+                } else {
+                    res.status(200).send({
+                        status: false,
+                        message: subAction + ' : methode inconnue'
+                    });
+                }
+            } else {
+                res.status(200).send({
+                    status: false,
+                    message: 'Token invalide'
+                });
+            }
             break;
         case 'reportcard':
             break;

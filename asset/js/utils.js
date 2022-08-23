@@ -27,6 +27,12 @@ let Utils = class Utils {
             modalDOM.remove();
         }, 3000);
     }
+    timeTemplate(){
+        return ['08h05', '08h30', '09h00', '9h30', '10h15', '10h45', '11h10', '11h40', '12h05', '12h30', '13h00', '13h30', '13h55', '14h25', '14h50', '15h20', '16h05', '16h35', '17h00', '17h30', '17h55'];
+    }
+    dayTemplate(){
+        return ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+    }
     escapeHTML(unsafe) {
         return unsafe
             .replace(/&/g, "&amp;")
@@ -95,6 +101,23 @@ let Utils = class Utils {
             'décembre': 11
         }
         return monthByName[month];
+    }
+    nameToColor(){
+        return {
+            'FRANCAIS': 'green',
+            'PHYSIQUE-CHIMIE': 'orange',
+            'MATHEMATIQUES': 'red',
+            'HISTOIRE-GEOGRAPHIE': 'yellow',
+            'SCIENCES VIE &amp; TERRE': 'blue',
+            'ESPAGNOL LV2': 'pink',
+            'SC. ECONO.&amp; SOCIALES': 'black',
+            'ANGLAIS LV1': 'light-gray',
+            'SC.NUMERIQ.TECHNOL.': 'purple',
+            'ACCOMPAGNEMENT PERSO': 'brown',
+            'ENS. MORAL &amp; CIVIQUE': 'gray',
+            'ED.PHYSIQUE &amp; SPORT.': 'dark-gray',
+            'VIE DE CLASSE': 'dark-blue'
+        }
     }
     getToken() {
         return this.escapeHTML(document.cookie.split('=')[1]);

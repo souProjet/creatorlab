@@ -45,13 +45,13 @@ let Login = class Login {
         //retourne une promise contenant le cookie de session (ASP.NET_SessionId) et les éventuels messages d'erreur
         return new Promise((resolve, reject) => {
             (async() => {
+                if (counter == 3) {
+                    reject({
+                        status: false,
+                        message: 'Une erreur est survenue'
+                    });
+                }
                 try {
-                    if (counter == 3) {
-                        reject({
-                            status: false,
-                            message: 'Une erreur est survenue'
-                        });
-                    }
                     await page.goto('https://www.e-lyco.fr/');
                     await page.waitForTimeout(1000);
                     await page.$eval('.menu > li > a', el => el.click());
@@ -65,41 +65,6 @@ let Login = class Login {
                     await page.$eval('#password', (el, password) => el.value = password, password);
                     await page.click('#bouton_valider');
 
-                    //écouter la réponse de la requête POST
-                    let response = await page.waitForResponse(response => response.url());
-
-                    let shibsession = response.headers()['set-cookie'].split(';')[0];
-                    if (shibsession.indexOf("_shibsession_") == -1) {
-                        return this.loginToFranceConnect(page, counter + 1, username, password);
-                    }
-
-                    await page.waitForTimeout(2000);
-
-                    if (await page.url() == 'https://educonnect.education.gouv.fr/idp/profile/SAML2/Redirect/SSO?execution=e1s2') {
-                        //les identifiants sont incorrects
-                        reject({
-                            status: false,
-                            message: 'Identifiants incorrects'
-                        });
-                    } else {
-                        //les identifiants sont corrects
-                        try {
-                            let cookie = await page.cookies();
-                            let sessionId = cookie.find(c => c.name == 'ASP.NET_SessionId').value;
-                            resolve({
-                                status: true,
-                                message: 'Connexion réussie',
-                                sessionId: sessionId,
-                                shibsession: shibsession
-                            });
-                        } catch (err) {
-                            reject({
-                                status: false,
-                                message: 'Une erreur est survenue'
-                            });
-                        }
-
-                    }
                 } catch (err) {
                     console.error('[CREATOR LAB] Erreur de scraping', err);
                     reject({
@@ -108,6 +73,43 @@ let Login = class Login {
                     });
 
                 }
+
+                //écouter la réponse de la requête POST
+                let response = await page.waitForResponse(response => response.url());
+
+                let shibsession = response.headers()['set-cookie'].split(';')[0];
+                if (shibsession.indexOf("_shibsession_") == -1) {
+                    return this.loginToFranceConnect(page, counter + 1, username, password);
+                }
+
+                await page.waitForTimeout(2000);
+
+                if (await page.url() == 'https://educonnect.education.gouv.fr/idp/profile/SAML2/Redirect/SSO?execution=e1s2') {
+                    //les identifiants sont incorrects
+                    reject({
+                        status: false,
+                        message: 'Identifiants incorrects'
+                    });
+                } else {
+                    //les identifiants sont corrects
+                    try {
+                        let cookie = await page.cookies();
+                        let sessionId = cookie.find(c => c.name == 'ASP.NET_SessionId').value;
+                        resolve({
+                            status: true,
+                            message: 'Connexion réussie',
+                            sessionId: sessionId,
+                            shibsession: shibsession
+                        });
+                    } catch (err) {
+                        reject({
+                            status: false,
+                            message: 'Une erreur est survenue'
+                        });
+                    }
+
+                }
+
             })();
         });
     }

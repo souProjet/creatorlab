@@ -15,6 +15,8 @@ let userGeneralMean = document.querySelector('.user_name > p');
 let elycoState = false;
 let pronoteState = false;
 
+let accueilHTMLpage = ``;
+
 let utils = new Utils(); //on crée un objet utils pour pouvoir utiliser les fonctions outils
 
 let token = utils.getToken(); //on récupère le token stocké dans les cookies
@@ -25,7 +27,6 @@ socket.emit('join', { token: token }); //on envoie le token au websocket pour qu
 
 socket.on('join', (data) => {
     if (data.status) {
-        loader.remove();
 
         nameField.innerText = utils.escapeHTML(data.username);
         avatarField.src = data.avatar;
@@ -69,7 +70,6 @@ socket.on('join', (data) => {
             </div>
         </div>
         `;
-        mainContainer.classList.remove('hide');
 
 
         //######################################################################################################################
@@ -110,6 +110,13 @@ socket.on('join', (data) => {
                     }
                 });
             }
+            document.querySelectorAll('.connection-box')[1] ? document.querySelectorAll('.connection-box')[1].remove() : null;
+            loader ? loader.remove() : null;
+
+            mainContainer.classList.remove('hide');
+            sidebar.classList.remove('hide');
+            accueilHTMLpage = mainContent.innerHTML;
+
             utils.updateSidebarLoaderState();
         }).catch(err => {
             console.log(err);
@@ -289,6 +296,7 @@ socket.on('join', (data) => {
                             </div>
                         </div>`;
                 }
+
             } else {
                 console.log(data.message);
             }
@@ -361,14 +369,22 @@ function launchPage(pageName) {
     sidebarItems.forEach(item => {
         item.classList.remove('active');
         if (item.querySelector('span').innerHTML === pageName) {
+            item.classList.add('active');
             if (pageName == 'Accueil') {
-                window.location.href = '/';
+                mainContainer.classList.add('hide');
+                mainContent.innerHTML = accueilHTMLpage;
+                let pronoteConnectInstanceCard = document.querySelector('.pronote-connect-instance');
+                if (pronoteState) {
+                    pronoteConnectInstanceCard.innerHTML = 'Connecté';
+                    pronoteConnectInstanceCard.classList.add('text-green-500');
+                    pronoteConnectInstanceCard.classList.remove('text-red-500');
+                }
+                mainContainer.classList.remove('hide');
+                //window.location.href = '/';
             } else {
-                item.classList.add('active');
                 mainContainer.classList.add('hide');
             }
             localStorage.setItem('activePage', pageName);
-
         }
     });
 }

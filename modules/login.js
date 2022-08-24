@@ -228,7 +228,7 @@ let Login = class Login {
                     }
                     return this.checkSessionIdReturn;
                 } catch (err) {
-                    console.error('[CREATOR LAB] Erreur de scraping', err);
+                    //console.error('[CREATOR LAB] Erreur de scraping', err);
                     this.checkSessionIdReturn = {
                         status: false,
                         message: 'Session invalide'
@@ -432,7 +432,7 @@ let Login = class Login {
             });
 
         } catch (err) {
-            console.log(err);
+            //console.log(err);
             return {
                 status: false,
                 message: 'Erreur de récupération de l\'emploi du temps'
@@ -486,7 +486,7 @@ let Login = class Login {
                 return reportcardJSON;
             });
         } catch (err) {
-            console.log(err);
+            //console.log(err);
             return {
                 status: false,
                 message: "Erreur de récupération du bulletin de notes"

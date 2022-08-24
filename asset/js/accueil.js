@@ -451,6 +451,7 @@ function createNote(e) {
                         </div>`;
 
                         document.querySelector('.note') ? document.querySelector('.note').insertAdjacentHTML('beforebegin', HTMLnoteadd) : mainContent.innerHTML += HTMLnoteadd;
+                        accueilHTMLpage = mainContent.innerHTML;
                     } else {
                         utils.createModal(data.message, false);
                         console.log(data.message);

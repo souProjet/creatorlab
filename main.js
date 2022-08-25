@@ -9,7 +9,8 @@ const io = new Server(server);
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const puppeteer = require('puppeteer');
-const config = require('./utils/config.json') // Configuration du serveur web et de la base de données MySQL
+const HOME = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + "/.creatorlab_data";
+const config = require(HOME + '/utils/config.json') // Configuration du serveur web et de la base de données MySQL
 const fetch = require('node-fetch')
 const fs = require('fs');
 const utf8 = require('utf8');

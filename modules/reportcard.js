@@ -1,16 +1,18 @@
+const HOME_USERDATA = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + "/.creatorlab_data";
+
 let Reportcard = class Reportcard {
     constructor(fs) {
         this.fs = fs;
     }
     updateReportcard(token, reportcard) {
-        this.fs.writeFileSync('./userdata/' + token + '/reportcard.json', JSON.stringify(reportcard), (err) => {
+        this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/reportcard.json', JSON.stringify(reportcard), (err) => {
             if (err) return false;
         });
         return true
     }
 
     get(token) {
-        let reportcardJSON = this.fs.readFileSync('./userdata/' + token + '/reportcard.json', 'utf8', (err) => {
+        let reportcardJSON = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/reportcard.json', 'utf8', (err) => {
             if (err) {
                 return {
                     status: false,

@@ -1,9 +1,11 @@
+const HOME_USERDATA = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + "/.creatorlab_data";
+
 let Schedule = class Schedule {
     constructor(fs) {
         this.fs = fs;
     }
     updateSchedule(token, schedule) {
-        this.fs.writeFileSync('./userdata/' + token + '/schedule.json', JSON.stringify(schedule), (err) => {
+        this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/schedule.json', JSON.stringify(schedule), (err) => {
             if (err) return false;
 
         });
@@ -11,7 +13,7 @@ let Schedule = class Schedule {
     }
 
     get(token) {
-        let scheduleJSON = this.fs.readFileSync('./userdata/' + token + '/schedule.json', 'utf8', (err) => {
+        let scheduleJSON = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/schedule.json', 'utf8', (err) => {
             if (err) {
                 return {
                     status: false,

@@ -1,3 +1,5 @@
+const HOME_USERDATA = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + "/.creatorlab_data";
+
 let Cloud = class Cloud {
     constructor(fs, utf8) {
         this.fs = fs;
@@ -15,7 +17,7 @@ let Cloud = class Cloud {
 
     createFolder(token, path) {
         try {
-            let arch = this.fs.readFileSync('./userdata/' + token + '/arch.json');
+            let arch = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json');
             arch = JSON.parse(arch);
             arch.push({
                 type: 'folder',
@@ -23,7 +25,7 @@ let Cloud = class Cloud {
                 parent: path,
                 id: this.generateToken()
             });
-            this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
+            this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
                 if (error) {
                     console.log(error);
                 }
@@ -37,7 +39,7 @@ let Cloud = class Cloud {
 
     createFile(token, parentId) {
         try {
-            let arch = this.fs.readFileSync('./userdata/' + token + '/arch.json');
+            let arch = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json');
             arch = JSON.parse(arch);
             let fileId = this.generateToken();
             arch.push({
@@ -48,12 +50,12 @@ let Cloud = class Cloud {
                 id: fileId,
                 size: 0
             });
-            this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
+            this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
                 if (error) {
                     console.log(error);
                 }
             });
-            this.fs.writeFileSync('./userdata/' + token + '/data/' + fileId + '.json', JSON.stringify({ name: 'Nouveau fichier', content: {} }), (error) => {
+            this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/data/' + fileId + '.json', JSON.stringify({ name: 'Nouveau fichier', content: {} }), (error) => {
                 if (error) {
                     console.log(error);
                 }
@@ -72,14 +74,14 @@ let Cloud = class Cloud {
 
     delete(token, id, isFile, isUploadedFile, ext) {
         try {
-            let arch = this.fs.readFileSync('./userdata/' + token + '/arch.json');
+            let arch = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json');
             arch = JSON.parse(arch);
 
             arch = arch.filter(file => file.id != id);
 
             if (arch.filter(file => file.parent == id).length == 0) {
 
-                this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
+                this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
                     if (error) {
                         console.log(error);
                     }
@@ -87,13 +89,13 @@ let Cloud = class Cloud {
 
                 if (isFile) {
                     if (isUploadedFile) {
-                        this.fs.unlink('./userdata/' + token + '/data/' + id + '.' + ext, (error) => {
+                        this.fs.unlink(HOME_USERDATA + '/userdata/' + token + '/data/' + id + '.' + ext, (error) => {
                             if (error) {
                                 console.log(error);
                             }
                         });
                     } else {
-                        this.fs.unlink('./userdata/' + token + '/data/' + id + '.json', (error) => {
+                        this.fs.unlink(HOME_USERDATA + '/userdata/' + token + '/data/' + id + '.json', (error) => {
                             if (error) {
                                 console.log(error);
                             }
@@ -109,37 +111,37 @@ let Cloud = class Cloud {
 
     rename(token, id, newName, isFile, isUploadedFile) {
         try {
-            let arch = this.fs.readFileSync('./userdata/' + token + '/arch.json');
+            let arch = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json');
             arch = JSON.parse(arch);
             arch.forEach(file => {
                 if (file.id == id) {
                     file.name = newName;
                 }
             });
-            this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
+            this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
                 if (error) {
                     console.log(error);
                 }
             });
             if (isFile) {
-                let arch = this.fs.readFileSync('./userdata/' + token + '/arch.json');
+                let arch = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json');
                 arch = JSON.parse(arch);
                 arch.forEach(file => {
                     if (file.id == id) {
                         file.name = newName;
                     }
                 });
-                this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
+                this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
                     if (error) {
                         console.log(error);
                     }
                 });
                 if (!isUploadedFile) {
-                    let data = this.fs.readFileSync('./userdata/' + token + '/data/' + id + '.json');
+                    let data = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/data/' + id + '.json');
                     data = JSON.parse(data);
                     data.name = newName;
 
-                    this.fs.writeFileSync('./userdata/' + token + '/data/' + id + '.json', JSON.stringify(data), (error) => {
+                    this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/data/' + id + '.json', JSON.stringify(data), (error) => {
                         if (error) {
                             console.log(error);
                         }
@@ -157,7 +159,7 @@ let Cloud = class Cloud {
         try {
             return {
                 status: true,
-                data: JSON.parse(this.fs.readFileSync('./userdata/' + token + '/arch.json'))
+                data: JSON.parse(this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json'))
             }
         } catch (err) {
             return {
@@ -169,22 +171,22 @@ let Cloud = class Cloud {
 
 
     createUserDataProfile(token) {
-        this.fs.mkdir('./userdata/' + token, (error) => {
+        this.fs.mkdir(HOME_USERDATA + '/userdata/' + token, (error) => {
             if (error) {
                 console.log(error);
             } else {
-                this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify([]), (error) => {
+                this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json', JSON.stringify([]), (error) => {
                     if (error) {
                         console.log(error);
                     }
                 });
-                this.fs.mkdir('./userdata/' + token + '/thumbnails', (error) => {
+                this.fs.mkdir(HOME_USERDATA + '/userdata/' + token + '/thumbnails', (error) => {
                     if (error) {
                         console.log(error);
                     }
                 });
 
-                this.fs.mkdir('./userdata/' + token + '/data', (error) => {
+                this.fs.mkdir(HOME_USERDATA + '/userdata/' + token + '/data', (error) => {
                     if (error) {
                         console.log(error);
                     }
@@ -197,7 +199,7 @@ let Cloud = class Cloud {
         try {
             return {
                 status: true,
-                file: JSON.parse(this.fs.readFileSync('./userdata/' + token + '/data/' + id + '.json'))
+                file: JSON.parse(this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/data/' + id + '.json'))
             }
         } catch (err) {
             return {
@@ -209,24 +211,24 @@ let Cloud = class Cloud {
 
     saveFile(token, id, content) {
         try {
-            let data = this.fs.readFileSync('./userdata/' + token + '/data/' + id + '.json');
+            let data = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/data/' + id + '.json');
             data = JSON.parse(data);
             data.content = content;
-            this.fs.writeFileSync('./userdata/' + token + '/data/' + id + '.json', JSON.stringify(data), (error) => {
+            this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/data/' + id + '.json', JSON.stringify(data), (error) => {
                 if (error) {
                     console.log(error);
                 }
             });
 
             //update file size
-            let arch = this.fs.readFileSync('./userdata/' + token + '/arch.json');
+            let arch = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json');
             arch = JSON.parse(arch);
             arch.forEach(file => {
                 if (file.id == id) {
-                    file.size = this.fs.statSync('./userdata/' + token + '/data/' + id + '.json').size;
+                    file.size = this.fs.statSync(HOME_USERDATA + '/userdata/' + token + '/data/' + id + '.json').size;
                 }
             });
-            this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
+            this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
                 if (error) {
                     console.log(error);
                 }
@@ -249,7 +251,7 @@ let Cloud = class Cloud {
                     error: "Sorry, " + file.name + " : Ce format n'est pas autorisé"
                 }
             }
-            let arch = this.fs.readFileSync('./userdata/' + token + '/arch.json');
+            let arch = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json');
             arch = JSON.parse(arch);
             arch.push({
                 type: 'file',
@@ -259,7 +261,7 @@ let Cloud = class Cloud {
                 id: fileId,
                 size: file.size,
             });
-            this.fs.writeFileSync('./userdata/' + token + '/arch.json', JSON.stringify(arch), { encoding: "utf8" }, (error) => {
+            this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json', JSON.stringify(arch), { encoding: "utf8" }, (error) => {
                 if (error) {
                     console.log(error);
                     return {
@@ -268,7 +270,7 @@ let Cloud = class Cloud {
                     }
                 }
             });
-            this.fs.writeFileSync('./userdata/' + token + '/data/' + fileId + '.' + fileExtension, file.data, (error) => {
+            this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/data/' + fileId + '.' + fileExtension, file.data, (error) => {
                 if (error) {
                     console.log(error);
                     return {
@@ -291,7 +293,7 @@ let Cloud = class Cloud {
 
     uploadThumbnail(token, fileId, base64Data) {
         try {
-            this.fs.writeFileSync('./userdata/' + token + '/thumbnails/' + fileId + '.png', base64Data, (err) => {
+            this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/thumbnails/' + fileId + '.png', base64Data, (err) => {
                 if (err) throw err;
             });
             return true;
@@ -304,7 +306,7 @@ let Cloud = class Cloud {
         try {
             return {
                 status: true,
-                thumbnail: this.fs.readFileSync('./userdata/' + token + '/thumbnails/' + fileId + '.png').toString('base64')
+                thumbnail: this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/thumbnails/' + fileId + '.png').toString('base64')
             }
         } catch (e) {
             return {
@@ -315,7 +317,7 @@ let Cloud = class Cloud {
     }
     getTotalSize(token) {
         try {
-            let arch = this.fs.readFileSync('./userdata/' + token + '/arch.json');
+            let arch = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json');
             arch = JSON.parse(arch);
             let totalSize = 0;
             arch.forEach(file => {

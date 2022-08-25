@@ -193,19 +193,11 @@ let Cloud = class Cloud {
         });
     }
 
-    getFile(token, id, isUploadedFile, ext) {
+    getFile(token, id) {
         try {
-            if (isUploadedFile) {
-                return {
-                    status: true,
-                    ext: ext,
-                    file: this.fs.readFileSync('./userdata/' + token + '/data/' + id + '.' + ext).toString('base64')
-                }
-            } else {
-                return {
-                    status: true,
-                    file: JSON.parse(this.fs.readFileSync('./userdata/' + token + '/data/' + id + '.json'))
-                }
+            return {
+                status: true,
+                file: JSON.parse(this.fs.readFileSync('./userdata/' + token + '/data/' + id + '.json'))
             }
         } catch (err) {
             return {

@@ -267,113 +267,101 @@ function downloadFile(fileId){
 }
 function enterInEditor(fileId, parentFolderId){
     mainContent.id = "editorjs";
-    fetch('/api/cloud/getfile', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({
-            fileId: fileId,
-            isUploadedFile: document.getElementById(fileId) ? document.getElementById(fileId).getAttribute('isuploadedfile') : false,
-            ext: document.getElementById(fileId) ? document.getElementById(fileId).querySelector('h1').innerHTML.split('.').length > 1 ? (document.getElementById(fileId).querySelector('h1').innerHTML.split('.')[document.getElementById(fileId).querySelector('h1').innerHTML.split('.').length - 1]) : null : null
-        })
-    })
-    .then(response => response.json())
-    .then(file => {
-        if(file.status){
-            let ext = file.ext;
-            if(ext){
-                let data = file.file;
-                let acceptedExtensionsImages = ['png', 'jpg', 'jpeg', 'gif'];
-                let acceptedExtensionsVideos = ['mp4', 'webm', 'ogg'];
-                let acceptedExtensionsAudios = ['mp3', 'wav', 'ogg'];
-                if(!inDlOrAction){
-                    if(acceptedExtensionsImages.includes(ext)){
-                        inDlOrAction = true;
-                        let contentType = 'image/' + ext;
-                        let b64Data = data;
-                        let blob = utils.b64toBlob(b64Data, contentType);
-                        let url = URL.createObjectURL(blob);
-                        mainContent.innerHTML += `
-                        <div class="visualisator-cloud" style="background:url(${url}); background-size:contain;background-repeat:no-repeat;background-position:center;">
-                            <svg width="100%" height="100%" viewBox="0 0 2000 2000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;fill:#565656;">
-                                <path fill="black" id="path4582" d="M505.116,1000c0,-14.799 5.657,-27.857 16.974,-39.172l792.381,-792.383c11.317,-11.316 24.375,-16.974 39.174,-16.974c14.798,0 27.855,5.658 39.172,16.974l85.093,85.093c11.317,11.317 16.974,24.374 16.974,39.173c0,14.799 -5.657,27.856 -16.974,39.173l-668.117,668.116l668.117,668.116c11.317,11.317 16.974,24.374 16.974,39.172c0,14.8 -5.657,27.857 -16.974,39.174l-85.093,85.093c-11.317,11.315 -24.374,16.974 -39.172,16.974c-14.799,0 -27.857,-5.659 -39.174,-16.974l-792.381,-792.383c-11.317,-11.316 -16.974,-24.374 -16.974,-39.172Z" style="fill-rule:nonzero;" />
-                            </svg>
-                        </div>`;
-                        let visuaCloud =  document.querySelector('.visualisator-cloud');
-                        setTimeout(() => {
-                            visuaCloud.classList.add('active');
-                            visuaCloud.querySelector('svg').addEventListener('click', () => {
-                                visuaCloud.classList.remove('active');
-                                setTimeout(() => {
-                                    visuaCloud.remove();
-                                    inDlOrAction = false;
-                                }, 300);
-                            });
-                        }, 100);
-                    }else if(acceptedExtensionsVideos.includes(ext)){
-                        inDlOrAction = true;
-                        let contentType = 'video/' + ext;
-                        let b64Data = data;
-                        let blob = utils.b64toBlob(b64Data, contentType);
-                        let url = URL.createObjectURL(blob);
-                        mainContent.innerHTML += `
-                        <div class="visualisator-cloud" >
-                            <svg width="100%" height="100%" viewBox="0 0 2000 2000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;fill:#565656;">
-                                <path fill="black" id="path4582" d="M505.116,1000c0,-14.799 5.657,-27.857 16.974,-39.172l792.381,-792.383c11.317,-11.316 24.375,-16.974 39.174,-16.974c14.798,0 27.855,5.658 39.172,16.974l85.093,85.093c11.317,11.317 16.974,24.374 16.974,39.173c0,14.799 -5.657,27.856 -16.974,39.173l-668.117,668.116l668.117,668.116c11.317,11.317 16.974,24.374 16.974,39.172c0,14.8 -5.657,27.857 -16.974,39.174l-85.093,85.093c-11.317,11.315 -24.374,16.974 -39.172,16
-                            c-14.799,0 -27.857,-5.659 -39.174,-16.974l-792.381,-792.383c-11.317,-11.316 -16.974,-24.374 -16.974,-39.172Z" style="fill-rule:nonzero;" />
-                            </svg>
-                            <video autoplay>
-                                <source src="${url}" type="video/${ext}">
-                            </video>
 
-                        </div>`;
-                        let visuaCloud =  document.querySelector('.visualisator-cloud');
-                        setTimeout(() => {
-                            visuaCloud.classList.add('active');
-                            visuaCloud.querySelector('svg').addEventListener('click', () => {
-                                visuaCloud.classList.remove('active');
-                                setTimeout(() => {
-                                    visuaCloud.remove();
-                                    inDlOrAction = false;
-                                }, 300);
-                            });
-                            utils.createModal('Lecture de '+ document.querySelector('#'+fileId + ' h1').innerText);
-                        }, 100);
-                    }
-                    else if(acceptedExtensionsAudios.includes(ext)){
-                        inDlOrAction = true;
-                        let contentType = 'audio/' + ext;
-                        let b64Data = data;
-                        let blob = utils.b64toBlob(b64Data, contentType);
-                        let url = URL.createObjectURL(blob);
-                        mainContent.innerHTML += `
-                        <div class="visualisator-cloud" >
-                            <svg width="100%" height="100%" viewBox="0 0 2000 2000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;fill:#565656;">
-                                <path fill="black" id="path4582" d="M505.116,1000c0,-14.799 5.657,-27.857 16.974,-39.172l792.381,-792.383c11.317,-11.316 24.375,-16.974 39.174,-16.974c14.798,0 27.855,5.658 39.172,16.974l85.093,85.093c11.317,11.317 16.974,24.374 16.974,39.173c0,14.799 -5.657,27.856 -16.974,39.173l-668.117,668.116l668.117,668.116c11.317,11.317 16.974,24.374 16.974,39.172c0,14.8 -5.657,27.857 -16.974,39.174l-85.093,85.093c-11.317,11.315 -24.374,16.974 -39.172,16.974c-14.799,0 -27.857,-5.659 -39.174,-16.974l-792.381,-792.383c-11.317,-11.316 -16.974,-24.374 -16.974,-39.172Z" style="fill-rule:nonzero;" />
+    let isUploadedFile = JSON.parse(document.getElementById(fileId) ? document.getElementById(fileId).getAttribute('isuploadedfile') : false);
+    if(isUploadedFile){
+        let ext = document.getElementById(fileId) ? document.getElementById(fileId).querySelector('h1').innerHTML.split('.').length > 1 ? (document.getElementById(fileId).querySelector('h1').innerHTML.split('.')[document.getElementById(fileId).querySelector('h1').innerHTML.split('.').length - 1]) : null : null;
+        let url = '/storage/'+token+'/'+fileId+'/'+ext;
+
+        let acceptedExtensionsImages = ['png', 'jpg', 'jpeg', 'gif'];
+        let acceptedExtensionsVideos = ['mp4', 'webm', 'ogg'];
+        let acceptedExtensionsAudios = ['mp3', 'wav', 'ogg'];
+
+        if(!inDlOrAction){
+            if(acceptedExtensionsImages.includes(ext)){
+                inDlOrAction = true;
+                document.body.insertAdjacentHTML('afterbegin',  `
+                    <div class="uk-lightbox uk-overflow-hidden uk-lightbox-panel uk-open uk-active uk-transition-active visualisator-cloud">
+                        <ul class="uk-lightbox-items">
+                            <li class="uk-active uk-transition-active">
+                                <img width="1800" height="1200" src="${url}" alt="">
+                            </li>
+                        </ul> 
+                        <div class="uk-lightbox-toolbar uk-position-top uk-text-right uk-transition-slide-top uk-transition-opaque">
+                            <button class="uk-lightbox-toolbar-icon uk-close-large uk-icon uk-close" type="button" uk-close="" onclick="closeMedia(this)">
+                                <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="close-large">
+                                    <line fill="none" stroke="#000" stroke-width="1.4" x1="1" y1="1" x2="19" y2="19"></line>
+                                    <line fill="none" stroke="#000" stroke-width="1.4" x1="19" y1="1" x2="1" y2="19"></line>
+                                </svg>
+                            </button>   
+                        </div>
+                        <div class="uk-lightbox-toolbar uk-lightbox-caption uk-position-bottom uk-text-center uk-transition-slide-bottom uk-transition-opaque">
+                            ${document.querySelector('#'+fileId + ' h1').innerText}
+                        </div>
+                    </div>`);
+
+
+            }else if(acceptedExtensionsVideos.includes(ext)){
+                inDlOrAction = true;
+                document.body.insertAdjacentHTML('afterbegin',  `
+                <div class="uk-lightbox uk-overflow-hidden uk-lightbox-panel uk-open uk-active uk-transition-active visualisator-cloud">
+                    <ul class="uk-lightbox-items">
+                        <li class="uk-active uk-transition-active">
+                            <video autoplay controls="" playsinline="" uk-video="false" src="${url}" width="1920" height="1080"></video>
+                        </li>
+                    </ul> 
+                    <div class="uk-lightbox-toolbar uk-position-top uk-text-right uk-transition-slide-top uk-transition-opaque">
+                        <button class="uk-lightbox-toolbar-icon uk-close-large uk-icon uk-close" type="button" uk-close="" onclick="closeMedia(this)">
+                            <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="close-large">
+                                <line fill="none" stroke="#000" stroke-width="1.4" x1="1" y1="1" x2="19" y2="19"></line>
+                                <line fill="none" stroke="#000" stroke-width="1.4" x1="19" y1="1" x2="1" y2="19"></line>
                             </svg>
-                            <audio autoplay controls>
-                                <source src="${url}" type="audio/${ext}">
-                            </audio>
-                        </div>`;
-                        let visuaCloud =  document.querySelector('.visualisator-cloud');
-                        setTimeout(() => {
-                            visuaCloud.classList.add('active');
-                            visuaCloud.querySelector('svg').addEventListener('click', () => {
-                                visuaCloud.classList.remove('active');
-                                setTimeout(() => {
-                                    visuaCloud.remove();
-                                    inDlOrAction = false;
-                                }, 300);
-                            });
-                            utils.createModal('Lecture de '+ document.querySelector('#'+fileId + ' h1').innerText);
-                        }, 100);
-                    } else{
-                        utils.createModal('Creatorlab ne peut pas encore lire ce type de fichier, mais vous pouvez le télécharger.', true);
-                    }
-                }
-            }else{
+                        </button>   
+                    </div>
+                    <div class="uk-lightbox-toolbar uk-lightbox-caption uk-position-bottom uk-text-center uk-transition-slide-bottom uk-transition-opaque">
+                        ${document.querySelector('#'+fileId + ' h1').innerText}
+                    </div>
+                </div>`);
+                       
+            } else if(acceptedExtensionsAudios.includes(ext)){ 
+                document.body.insertAdjacentHTML('afterbegin',  `
+                <div class="uk-lightbox uk-overflow-hidden uk-lightbox-panel uk-open uk-active uk-transition-active visualisator-cloud">
+                    <ul class="uk-lightbox-items">
+                        <li class="uk-active uk-transition-active">
+                            <video autoplay controls="" playsinline="" uk-video="false" src="${url}" width="1920" height="1080"></video>
+                        </li>
+                    </ul> 
+                    <div class="uk-lightbox-toolbar uk-position-top uk-text-right uk-transition-slide-top uk-transition-opaque">
+                        <button class="uk-lightbox-toolbar-icon uk-close-large uk-icon uk-close" type="button" uk-close="" onclick="closeMedia(this)">
+                            <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="close-large">
+                                <line fill="none" stroke="#000" stroke-width="1.4" x1="1" y1="1" x2="19" y2="19"></line>
+                                <line fill="none" stroke="#000" stroke-width="1.4" x1="19" y1="1" x2="1" y2="19"></line>
+                            </svg>
+                        </button>   
+                    </div>
+                    <div class="uk-lightbox-toolbar uk-lightbox-caption uk-position-bottom uk-text-center uk-transition-slide-bottom uk-transition-opaque">
+                        ${document.querySelector('#'+fileId + ' h1').innerText}
+                    </div>
+                </div>`);
+
+            } else{
+                utils.createModal('Creatorlab ne peut pas encore lire ce type de fichier, mais vous pouvez le télécharger.', true);
+            }
+        }
+    }else {
+        fetch('/api/cloud/getfile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                fileId: fileId
+            })
+        })
+        .then(response => response.json())
+        .then(file => {
+            if(file.status){
                 file = file.file;
                 let countDown;
                 let issave = true;
@@ -559,12 +547,18 @@ function enterInEditor(fileId, parentFolderId){
                     }
 
                 });
+            } else{
+                utils.createModal('Ce fichier n\'existe pas');
             }
-        }else{
-            utils.createModal('Ce fichier n\'existe pas');
-        }
-    });
+        
+        });
+    }
 
+}
+
+function closeMedia(element){
+    element.parentNode.parentNode.style.display="none";
+    // inDlOrAction = true;
 }
 
 function createFolder() {

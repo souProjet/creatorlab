@@ -108,15 +108,15 @@ let Utils = class Utils {
             'PHYSIQUE-CHIMIE': 'orange',
             'MATHEMATIQUES': 'red',
             'HISTOIRE-GEOGRAPHIE': 'yellow',
-            'SCIENCES VIE &amp; TERRE': 'blue',
+            'SCIENCES VIE &; TERRE': 'blue',
             'ESPAGNOL LV2': 'pink',
-            'SC. ECONO.&amp; SOCIALES': 'black',
+            'SC. ECONO.& SOCIALES': 'black',
             'ANGLAIS LV1': 'light-gray',
             'SC.NUMERIQ.TECHNOL.': 'purple',
             'ACCOMPAGNEMENT PERSO': 'brown',
-            'ENS. MORAL &amp; CIVIQUE': 'gray',
-            'ED.PHYSIQUE &amp; SPORT.': 'dark-gray',
-            'VIE DE CLASSE': 'dark-blue'
+            'ENS. MORAL & CIVIQUE': 'gray',
+            'ED.PHYSIQUE & SPORT.': 'dark-gray',
+            'VIE DE CLASSE': 'dark-blue',
         }
     }
     getToken() {

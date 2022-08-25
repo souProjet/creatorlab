@@ -165,21 +165,14 @@ app.get('/offline', (req, res) => {
 // //#############################################################################################################################
 // //                                               RENVOIE STATIC DES DONNÉES "STORAGE"
 // //#############################################################################################################################
-// app.get('/storage/:token/:id/:ext', async(req, res) => {
-//     let token = escapeHTML(req.params.token);
-//     let id = escapeHTML(req.params.id);
-//     let ext = escapeHTML(req.params.ext);
+app.get('/storage/:token/:id/:ext', async(req, res) => {
+    let token = escapeHTML(req.params.token);
+    let id = escapeHTML(req.params.id);
+    let ext = escapeHTML(req.params.ext);
 
-//     //retourner le fichier qui est dans /userdata/token/data/id.ext
-//     fs.readFile(__dirname + '/userdata/' + token + '/data/' + id + '.' + ext, (err, data) => {
-//         if (err) {
-//             res.status(404).send('File not found');
-//         } else {
-//             res.writeHead(200, { 'Content-Type': 'image/' + ext });
-//             res.end(data);
-//         }
-//     });
-// });
+    //retourner le fichier qui est dans /userdata/token/data/id.ext 
+    res.sendFile(__dirname + '/userdata/' + token + '/data/' + id + '.' + ext);
+});
 
 //requêtes GET sur la page de connexion
 app.get('/login', (req, res) => {
@@ -413,14 +406,12 @@ app.post('/api/\*', async(req, res) => {
                     }
                 } else if (subAction == 'getfile') {
                     let fileId = req.body.fileId ? escapeHTML(req.body.fileId) : null;
-                    let ext = req.body.ext ? escapeHTML(req.body.ext) : null;
-                    let isUploadedFile = req.body.isUploadedFile ? JSON.parse(req.body.isUploadedFile) : null;
-                    let file = cloud.getFile(token2, fileId, isUploadedFile, ext);
+
+                    let file = cloud.getFile(token2, fileId);
                     if (file.status) {
                         res.status(200).send({
                             status: true,
-                            file: file.file,
-                            ext: file.ext ? file.ext : null
+                            file: file.file
                         });
                     } else {
                         res.status(200).send({
@@ -428,6 +419,7 @@ app.post('/api/\*', async(req, res) => {
                             message: file.message
                         });
                     }
+
                 } else if (subAction == 'createfolder') {
                     let path = req.body.path ? escapeHTML(req.body.path) : null;
                     let isSuccess = cloud.createFolder(token2, path);

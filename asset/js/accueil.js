@@ -484,6 +484,7 @@ function deleteNote(e, noteId) {
         if (data.status) {
             utils.createModal('Note supprimée !');
             document.getElementById(noteId).remove();
+            accueilHTMLpage = mainContent.innerHTML;
         } else {
             utils.createModal(data.message, false);
             console.log(data.message);

@@ -162,6 +162,7 @@ app.get('/offline', (req, res) => {
     res.sendFile(__dirname + '/template/offline.html');
 });
 
+
 // //#############################################################################################################################
 // //                                               RENVOIE STATIC DES DONNÉES "STORAGE"
 // //#############################################################################################################################
@@ -270,53 +271,61 @@ app.post('/api/\*', async(req, res) => {
                     //si c'est E-lyco, on récupère l'antiforgeryToken et on le met à jour dans la base de données
                     let resultData = await login.updateAntiforgeryToken(token);
                     if (resultData.status) {
-                        //vérifier si on a accàs aux cours de l'utilisateur
-                        let coursesAccessReturnedData = await login.checkCoursesAccess(sessionId);
-                        if (coursesAccessReturnedData.status) {
-                            elycoState = true;
-                            res.status(200).send({
-                                status: true,
-                                message: 'Connexion à E-lyco réussie'
-                            });
-                            //Envoyer les notifications et les messages privés à l'utilisateur
-                            //On commence par récuperer le socketId de l'utilisateur pour pourvoir envoyer les notifications et les messages privés via websocket
-                            resultData = await user.getSocketIdByToken(token);
-                            if (resultData.status) {
-                                let socketId = resultData.socketId;
-                                //on récupère les notifications via E-lyco
-                                notificationReturnedData = await notification.getNotifications(sessionId);
-                                if (notificationReturnedData.status) {
-                                    //il faut formater les notifications reçu pour avoir un beau JSON contenant les notifications
-                                    let notifications = notificationReturnedData.message;
-                                    let formatReturnedData = notification.formatNotifications(notifications);
-                                    if (formatReturnedData.status) {
-                                        //on envoie les notifications à l'utilisateur via websocket
-                                        // io.to(socketId).emit('notifications', {
-                                        //     status: true,
-                                        //     notifications: formatReturnedData.notifications
-                                        // });
-                                    } else {
-                                        io.to(socketId).emit('notifications', {
-                                            status: false,
-                                            message: 'Erreur lors de la récupération des notifications'
-                                        });
-                                    }
-                                } else {
-                                    io.to(socketId).emit('notification', {
-                                        status: false,
-                                        message: 'Erreur lors de la récupération des notifications'
-                                    });
-                                }
 
-                            } else {
-                                //Il y a eu une erreur lors de la récupération du socketId de l'utilisateur
-                            }
-                        } else {
-                            res.status(200).send({
-                                status: false,
-                                message: 'Connxion  à E-lyco échouée'
-                            });
-                        }
+                        //en attendant l'ouverture d'e-lyco
+                        res.status(200).send({
+                            status: false,
+                            message: 'Connexion à E-lyco échouée'
+                        });
+
+
+                        // //vérifier si on a accàs aux cours de l'utilisateur
+                        // let coursesAccessReturnedData = await login.checkCoursesAccess(sessionId);
+                        // if (coursesAccessReturnedData.status) {
+                        //     elycoState = true;
+                        //     res.status(200).send({
+                        //         status: true,
+                        //         message: 'Connexion à E-lyco réussie'
+                        //     });
+                        //     //Envoyer les notifications et les messages privés à l'utilisateur
+                        //     //On commence par récuperer le socketId de l'utilisateur pour pourvoir envoyer les notifications et les messages privés via websocket
+                        //     resultData = await user.getSocketIdByToken(token);
+                        //     if (resultData.status) {
+                        //         let socketId = resultData.socketId;
+                        //         //on récupère les notifications via E-lyco
+                        //         notificationReturnedData = await notification.getNotifications(sessionId);
+                        //         if (notificationReturnedData.status) {
+                        //             //il faut formater les notifications reçu pour avoir un beau JSON contenant les notifications
+                        //             let notifications = notificationReturnedData.message;
+                        //             let formatReturnedData = notification.formatNotifications(notifications);
+                        //             if (formatReturnedData.status) {
+                        //                 //on envoie les notifications à l'utilisateur via websocket
+                        //                 // io.to(socketId).emit('notifications', {
+                        //                 //     status: true,
+                        //                 //     notifications: formatReturnedData.notifications
+                        //                 // });
+                        //             } else {
+                        //                 io.to(socketId).emit('notifications', {
+                        //                     status: false,
+                        //                     message: 'Erreur lors de la récupération des notifications'
+                        //                 });
+                        //             }
+                        //         } else {
+                        //             io.to(socketId).emit('notification', {
+                        //                 status: false,
+                        //                 message: 'Erreur lors de la récupération des notifications'
+                        //             });
+                        //         }
+
+                        //     } else {
+                        //         //Il y a eu une erreur lors de la récupération du socketId de l'utilisateur
+                        //     }
+                        // } else {
+                        //     res.status(200).send({
+                        //         status: false,
+                        //         message: 'Connxion  à E-lyco échouée'
+                        //     });
+                        // }
                     } else {
                         res.status(200).send({
                             status: false,
@@ -841,6 +850,16 @@ app.get('/api/\*', async(req, res) => {
         case 'user':
             break;
     }
+});
+
+//######################################################################################################################
+//                                             ERREUR 404
+//######################################################################################################################
+app.get('*', (req, res) => {
+    res.redirect('/');
+});
+app.post('*', (req, res) => {
+    res.status(404).send('Method inconnue')
 });
 
 

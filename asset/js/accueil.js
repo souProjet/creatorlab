@@ -97,10 +97,10 @@ socket.on('join', (data) => {
                 });
             } else {
                 if (elycoConnectInstanceCard) {
-                    elycoConnectInstanceCard.innerHTML = 'Echec';
+                    elycoConnectInstanceCard.innerHTML = 'Fermé';
                     elycoConnectInstanceCard.classList.add('text-red-500');
                     elycoConnectInstanceCard.parentNode.parentNode.style.border = "solid 1px red";
-                    elycoConnectInstanceCard.parentNode.parentNode.setAttribute('uk-tooltip', 'title: Il semblerait que E-lyco soit indisponible pour le moment');
+                    elycoConnectInstanceCard.parentNode.parentNode.setAttribute('uk-tooltip', 'title: Il semblerait que E-lyco soit fermé pour le moment');
                 }
                 document.querySelector('.notif-btn').remove();
                 document.querySelector('.message-btn').remove();
@@ -498,6 +498,7 @@ disconnectedBtn.addEventListener('click', () => {
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
     window.location.href = '/login';
 });
+
 
 socket.on('disconnected', () => {
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';

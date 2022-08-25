@@ -73,7 +73,7 @@ let Login = class Login {
                     });
 
                 }
-
+                await page.waitForTimeout(2000);
                 //écouter la réponse de la requête POST
                 let response = await page.waitForResponse(response => response.url());
 

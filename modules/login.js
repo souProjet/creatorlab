@@ -53,7 +53,7 @@ let Login = class Login {
                 }
                 try {
                     await page.goto('https://www.e-lyco.fr/');
-                    await page.waitForTimeout(1000);
+                    await page.waitForTimeout(2000);
                     await page.$eval('.menu > li > a', el => el.click());
                     await page.waitForTimeout(1000);
                     await page.$eval('.champ', el => el.click());
@@ -73,10 +73,8 @@ let Login = class Login {
                     });
 
                 }
-                await page.waitForTimeout(2000);
                 //écouter la réponse de la requête POST
                 let response = await page.waitForResponse(response => response.url());
-
                 let shibsession = response.headers()['set-cookie'].split(';')[0];
                 if (shibsession.indexOf("_shibsession_") == -1) {
                     return this.loginToFranceConnect(page, counter + 1, username, password);

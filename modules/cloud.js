@@ -1,4 +1,4 @@
-const HOME_USERDATA = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + "/.creatorlab_data";
+const HOME_USERDATA = process.argv.includes('--dev') ? './' : process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + "/.creatorlab_data";
 
 let Cloud = class Cloud {
     constructor(fs, utf8) {

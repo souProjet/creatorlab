@@ -175,7 +175,6 @@ async function enterInFolder(path, reload = false) {
                 //     <p class="cooltip">${utils.octetToString(files[i].size) || "non défini"}</p>
                 //     <h1>${files[i].name}</h1>
                 // </a>`;
-                let thumbnailElement = document.querySelectorAll('.material-icons')[document.querySelectorAll('.material-icons').length - 1];
 
                 if(!files[i].isUploadedFile) {    
                     fetch('/api/cloud/getthumbnail', {
@@ -189,6 +188,8 @@ async function enterInFolder(path, reload = false) {
                         })
                     }).then(response => response.json()).then(data => {
                         if (data.status) {
+                            let thumbnailElement = document.getElementById(files[i].id).querySelector('.material-icons');
+
                             let thumbnailB64 = data.thumbnail;
                             let thumbnailBlob = utils.b64toBlob(thumbnailB64, 'image/png');
                             let thumbnailUrl = URL.createObjectURL(thumbnailBlob);
@@ -239,31 +240,13 @@ let inDlOrAction = false;
 
 function downloadFile(fileId){
     inDlOrAction = true;
-    fetch('/api/cloud/getfile', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({
-            fileId: fileId,
-            isUploadedFile: document.getElementById(fileId) ? document.getElementById(fileId).getAttribute('isuploadedfile') : false,
-            ext: document.getElementById(fileId) ? document.getElementById(fileId).querySelector('h1').innerHTML.split('.').length > 1 ? (document.getElementById(fileId).querySelector('h1').innerHTML.split('.')[document.getElementById(fileId).querySelector('h1').innerHTML.split('.').length - 1]) : null : null
-        })
-    }).then(response => response.json()).then(file => {
-        if(file.status){
-            let ext = file.ext;
-            let data = file.file;
-            let blob = utils.b64toBlob(data, `${ext}`);
-            let link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = `${document.querySelector('#'+fileId + ' h1').innerText}`;
-            link.click();
-            inDlOrAction = false;
-        }else{
-            console.log(file.message)
-        }
-    }).catch(err => console.log(err));
+    let ext = document.getElementById(fileId) ? document.getElementById(fileId).querySelector('h1').innerHTML.split('.').length > 1 ? (document.getElementById(fileId).querySelector('h1').innerHTML.split('.')[document.getElementById(fileId).querySelector('h1').innerHTML.split('.').length - 1]) : null : null
+    let url = '/storage/'+token+'/'+fileId+'/'+ext;
+    let link = document.querySelector('a');
+    link.href = url;
+    link.download = document.querySelector('#'+fileId + ' h1').innerText;
+    link.click();
+    inDlOrAction = false;
 }
 function enterInEditor(fileId, parentFolderId){
     mainContent.id = "editorjs";
@@ -557,8 +540,8 @@ function enterInEditor(fileId, parentFolderId){
 }
 
 function closeMedia(element){
-    element.parentNode.parentNode.style.display="none";
-    // inDlOrAction = true;
+    element.parentNode.parentNode.remove();
+    inDlOrAction = false;
 }
 
 function createFolder() {

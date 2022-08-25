@@ -144,7 +144,8 @@ socket.on('join', (data) => {
                 sidebarItems.forEach(item => {
                     if (item.querySelector('span').innerText == 'Emplois du temps' && data.schedule) {
                         item.classList.remove('hide')
-                    } else if (item.querySelector('span').innerText == 'Mon bulletin' && data.reportcard) {
+                    }
+                    if (item.querySelector('span').innerText == 'Mon bulletin' && data.reportcard) {
                         item.classList.remove('hide')
                     }
                 });
@@ -380,7 +381,6 @@ function launchPage(pageName) {
                     pronoteConnectInstanceCard.classList.remove('text-red-500');
                 }
                 mainContainer.classList.remove('hide');
-                //window.location.href = '/';
             } else {
                 mainContainer.classList.add('hide');
             }

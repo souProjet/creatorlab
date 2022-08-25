@@ -55,10 +55,10 @@ let Login = class Login {
                     await page.goto('https://www.e-lyco.fr/');
                     await page.waitForTimeout(2000);
                     await page.$eval('.menu > li > a', el => el.click());
-                    await page.waitForTimeout(1000);
+                    await page.waitForTimeout(2000);
                     await page.$eval('.champ', el => el.click());
                     await page.$eval('#valider', el => el.click());
-                    await page.waitForTimeout(1000);
+                    await page.waitForTimeout(2000);
                     await page.waitForSelector('#bouton_eleve', { visible: true });
                     await page.$eval('#bouton_eleve', el => el.click());
                     await page.$eval('#username', (el, username) => el.value = username, username);
@@ -66,10 +66,10 @@ let Login = class Login {
                     await page.click('#bouton_valider');
 
                 } catch (err) {
-                    console.error('[CREATOR LAB] Erreur de scraping', err);
+                    console.log('[CREATOR LAB] Erreur de scraping', err);
                     reject({
                         status: false,
-                        message: 'Une erreur est survenue'
+                        message: 'Une erreur est survenue, 72'
                     });
 
                 }

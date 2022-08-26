@@ -177,10 +177,10 @@ socket.on('join', (data) => {
 
             } else {
                 if (pronoteConnectInstanceCard) {
-                    pronoteConnectInstanceCard.innerHTML = 'Echec';
+                    pronoteConnectInstanceCard.innerHTML = 'Fermé';
                     pronoteConnectInstanceCard.classList.add('text-red-500');
                     pronoteConnectInstanceCard.parentNode.parentNode.style.border = "solid 1px red";
-                    pronoteConnectInstanceCard.parentNode.parentNode.setAttribute('uk-tooltip', 'title: Il semblerait que Pronote soit indisponible pour le moment.');
+                    pronoteConnectInstanceCard.parentNode.parentNode.setAttribute('uk-tooltip', 'title: Il semblerait que Pronote soit fermé pour le moment.');
                 }
                 sidebarItems.forEach(item => {
                     if (item.querySelector('span').innerText == 'Emplois du temps' || item.querySelector('span').innerText == 'Mon bulletin') {

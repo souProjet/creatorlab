@@ -44,41 +44,34 @@ let Login = class Login {
     loginToFranceConnect(page, counter, username, password) {
         //retourne une promise contenant le cookie de session (ASP.NET_SessionId) et les éventuels messages d'erreur
         return new Promise(async(resolve, reject) => {
-            if (counter == 3) {
-                reject({
-                    status: false,
-                    message: 'Une erreur est survenue'
-                });
-            }
-            try {
-                await page.goto('https://www.e-lyco.fr/');
-                await page.waitForTimeout(1000);
-                await page.$eval('.menu > li > a', el => el.click());
-                await page.waitForTimeout(1000);
-                await page.$eval('.champ', el => el.click());
-                await page.$eval('#valider', el => el.click());
-                await page.waitForTimeout(1000);
-                await page.waitForSelector('#bouton_eleve', { visible: true });
-                await page.$eval('#bouton_eleve', el => el.click());
-                await page.$eval('#username', (el, username) => el.value = username, username);
-                await page.$eval('#password', (el, password) => el.value = password, password);
-                await page.click('#bouton_valider');
+            // if (counter == 3) {
+            //     reject({
+            //         status: false,
+            //         message: 'Une erreur est survenue'
+            //     });
+            // }
+            await page.goto('https://www.e-lyco.fr/');
+            await page.waitForTimeout(1000);
+            await page.$eval('.menu > li > a', el => el.click());
+            await page.waitForTimeout(1000);
+            await page.$eval('.champ', el => el.click());
+            await page.$eval('#valider', el => el.click());
+            await page.waitForTimeout(1000);
+            await page.waitForSelector('#bouton_eleve', { visible: true });
+            await page.$eval('#bouton_eleve', el => el.click());
+            await page.$eval('#username', (el, username) => el.value = username, username);
+            await page.$eval('#password', (el, password) => el.value = password, password);
+            await page.click('#bouton_valider');
 
-            } catch (err) {
-                console.log('[CREATOR LAB] Erreur de scraping', err);
-                reject({
-                    status: false,
-                    message: 'Une erreur est survenue, 72'
-                });
-
-            }
             //écouter la réponse de la requête POST
-            let response = await page.waitForResponse(response => response.url());
-            let shibsession = response.headers()['set-cookie'].split(';')[0];
-            if (shibsession.indexOf("_shibsession_") == -1) {
-                return this.loginToFranceConnect(page, counter + 1, username, password);
+            let shibsession;
+            if (counter != 3) {
+                let response = await page.waitForResponse(response => response.url());
+                shibsession = response.headers()['set-cookie'].split(';')[0];
+                if (shibsession.indexOf("_shibsession_") == -1) {
+                    return this.loginToFranceConnect(page, counter + 1, username, password);
+                }
             }
-
 
             await page.waitForTimeout(2000);
 
@@ -90,23 +83,16 @@ let Login = class Login {
                 });
             } else {
                 //les identifiants sont corrects
-                try {
-                    let cookie = await page.cookies();
-                    let sessionId = cookie.find(c => c.name == 'ASP.NET_SessionId').value;
-                    resolve({
-                        status: true,
-                        message: 'Connexion réussie',
-                        sessionId: sessionId,
-                        shibsession: shibsession
-                    });
-                } catch (err) {
-                    reject({
-                        status: false,
-                        message: 'Une erreur est survenue'
-                    });
-                }
-
+                let cookie = await page.cookies();
+                let sessionId = cookie.find(c => c.name == 'ASP.NET_SessionId').value;
+                resolve({
+                    status: true,
+                    message: 'Connexion réussie',
+                    sessionId: sessionId,
+                    shibsession: shibsession
+                });
             }
+
         });
     }
     getUserByUsername(username) {
@@ -363,22 +349,30 @@ let Login = class Login {
     }
 
     async connectToPronote(page, shibsession) {
-        await page.goto('https://cas3.e-lyco.fr');
-        //inject shibsession cookie
+        try {
+            await page.goto('https://cas3.e-lyco.fr');
+            //inject shibsession cookie
 
-        await page.setCookie({
-            name: shibsession.split('=')[0],
-            value: shibsession.split('=')[1],
-            domain: 'cas3.e-lyco.fr',
-            path: '/',
-        });
-        // await page.reload();
-        await page.goto('https://pronote.lyc-orbigny-44.ac-nantes.fr/pronote/');
-        await page.waitForTimeout(4000);
-        await page.evaluate(() => {
-            document.querySelectorAll('.menu-principal_niveau1')[3].querySelector('li').click();
-        });
-        await page.waitForTimeout(3000);
+            await page.setCookie({
+                name: shibsession.split('=')[0],
+                value: shibsession.split('=')[1],
+                domain: 'cas3.e-lyco.fr',
+                path: '/',
+            });
+            // await page.reload();
+            await page.goto('https://pronote.lyc-orbigny-44.ac-nantes.fr/pronote/');
+            await page.waitForTimeout(4000);
+            await page.evaluate(() => {
+                document.querySelectorAll('.menu-principal_niveau1')[3].querySelector('li').click();
+            });
+            await page.waitForTimeout(3000);
+
+        } catch (err) {
+            return {
+                status: false,
+                message: "erreur lors de la connexion à Pronote"
+            }
+        }
         //#############################################################################################################################
         //                                          RÉCUPÉRATION DE L'EMPLOIE DU TEMPS  
         //#############################################################################################################################

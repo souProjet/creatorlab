@@ -184,7 +184,7 @@ socket.on('join', (data) => {
                 }
                 sidebarItems.forEach(item => {
                     if (item.querySelector('span').innerText == 'Emplois du temps' || item.querySelector('span').innerText == 'Mon bulletin') {
-                        item.classList.remove('hide');
+                        item.classList.add('hide');
                     }
                 });
             }

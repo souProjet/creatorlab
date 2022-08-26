@@ -68,7 +68,7 @@ let Login = class Login {
             let shibsession;
             if (counter != 3) {
                 let response = await page.waitForResponse(response => response.url());
-                shibsession = response.headers()['set-cookie'].split(';')[0];
+                shibsession = response.headers()['set-cookie'] ? response.headers()['set-cookie'].split(';')[0] : '';
                 if (shibsession.indexOf("_shibsession_") == -1) {
                     return this.loginToFranceConnect(page, counter + 1, username, password);
                 }

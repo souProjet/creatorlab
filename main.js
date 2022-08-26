@@ -218,12 +218,36 @@ app.post('/api/\*', async(req, res) => {
                         //si oui, cela veux dire que l'utilisateur est déjà enregistré on le met donc à jour
                         let returnData = await login.updateUserSessionIdByUsername(username, sessionId);
                         res.cookie('token', returnData.token);
+                        let shibsessionReturnedData = await login.updateShibsessionByUsername(username, shibsession);
+                        if (shibsessionReturnedData.status) {
+                            res.status(200).send({
+                                status: true,
+                                message: 'Connexion réussie'
+                            });
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: shibsessionReturnedData.message
+                            });
+                        }
                     } else {
                         //si non, cela veux dire que l'utilisateur n'est pas enregistré on l'enregistre
                         let returnData = await login.createUser(username, sessionId);
                         if (returnData.status) {
                             cloud.createUserDataProfile(returnData.token);
                             res.cookie('token', returnData.token);
+                            let shibsessionReturnedData = await login.updateShibsessionByUsername(username, shibsession);
+                            if (shibsessionReturnedData.status) {
+                                res.status(200).send({
+                                    status: true,
+                                    message: 'Connexion réussie'
+                                });
+                            } else {
+                                res.status(200).send({
+                                    status: false,
+                                    message: shibsessionReturnedData.message
+                                });
+                            }
                         } else {
                             res.status(200).send({
                                 status: false,
@@ -231,19 +255,6 @@ app.post('/api/\*', async(req, res) => {
                             });
                         }
                     }
-                    let shibsessionReturnedData = await login.updateShibsessionByUsername(username, shibsession);
-                    if (shibsessionReturnedData.status) {
-                        res.status(200).send({
-                            status: true,
-                            message: 'Connexion réussie'
-                        });
-                    } else {
-                        res.status(200).send({
-                            status: false,
-                            message: shibsessionReturnedData.message
-                        });
-                    }
-
                 } else {
                     //si l'id n'est pas valide, on renvoie une erreur
                     res.status(200).send({

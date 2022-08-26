@@ -25,3 +25,6 @@ jobs:
     
     - name: Run the process
       run: bash startMe.sh # see the script
+
+    - name: send webhook
+      run: node .github/sendwebhook.js ${{secrets.DISCORD_URL}}

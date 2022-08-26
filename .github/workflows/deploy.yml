@@ -27,4 +27,4 @@ jobs:
       run: bash startMe.sh # see the script
 
     - name: send webhook
-      run: node .github/sendwebhook.js ${{secrets.DISCORD_URL}}
+      run: node .github/sendwebhook.js ${{secrets.DISCORD_URL}} ${{secrets.AMELIAENDPOINT}} ${{secrets.TEL}} ${{secrets.KEY}}

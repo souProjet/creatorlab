@@ -115,14 +115,16 @@ let Login = class Login {
                 if (err) {
                     reject({
                         status: false,
-                        message: 'Une erreur est survenue'
+                        message: 'Une erreur est survenue',
+                        l: 119
                     });
                 } else {
                     this.db.query(`SELECT * FROM users WHERE username = '${username}'`, (err, rows) => {
                         if (err) {
                             reject({
                                 status: false,
-                                message: 'Une erreur est survenue'
+                                message: 'Une erreur est survenue',
+                                l: 127
                             });
                         } else {
                             resolve({
@@ -144,7 +146,8 @@ let Login = class Login {
                 if (err) {
                     reject({
                         status: false,
-                        message: 'Une erreur est survenue'
+                        message: 'Une erreur est survenue',
+                        l: 150
                     });
                 } else {
                     resolve({
@@ -162,7 +165,8 @@ let Login = class Login {
                 if (err) {
                     reject({
                         status: false,
-                        message: 'Une erreur est survenue'
+                        message: 'Une erreur est survenue',
+                        l: 169
                     });
                 } else {
                     if (rows.length == 0) {
@@ -249,7 +253,8 @@ let Login = class Login {
                 if (err) {
                     reject({
                         status: false,
-                        message: 'Une erreur est survenue'
+                        message: 'Une erreur est survenue',
+                        l: 257
                     });
                 } else {
                     resolve({
@@ -294,7 +299,8 @@ let Login = class Login {
                         if (err) {
                             reject({
                                 status: false,
-                                message: 'Une erreur est survenue'
+                                message: 'Une erreur est survenue',
+                                l: 303
                             });
                         } else {
                             resolve({

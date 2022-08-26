@@ -14,6 +14,34 @@ Vos identifiants FranceConnect ne sont en **aucun** cas stocké d'une quelconque
  - Vos pouvez aussi retrouver vos messages privée en haut à droite.
  - Un système de feed est mis à profit sur la page d'accueil ne servant pour l'instant pas à grand chose ne serait-ce qu'a partager quelques informations.
 
+## base de donnée
+Voilà les prérequis pour la base de donnée, elle contient une table users, posts, et likes :
+- table users :
+```sql
+CREATE TABLE `users` (
+  `private_key` varchar(255) DEFAULT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
+  `clientId` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `socketid` varchar(255) DEFAULT NULL,
+  `antiforgery_token` varchar(255) DEFAULT NULL,
+  `shibsession` varchar(255) DEFAULT NULL
+)
+```
+- table notes :
+```sql
+CREATE TABLE `notes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `private_key` varchar(255) DEFAULT NULL,
+  `content` text,
+  `forwhen` varchar(255),
+  `created` varchar(255) DEFAULT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)
+```
 
 ## Démarrer cratorlab dans un environnement local
 Il vous faudra crée un dossier `utils` à la racine et y crée à l'intérieur un fichier `config.json`
@@ -29,33 +57,8 @@ y contenant les identifiants de votre base de donnée mysql et autre sous cette 
 ```
 Enfin il vous sera nécessaire de crée un dossier `userdata` à la racine du projet, ce dossier contiendra les élements du cloud ainsi que les fichiers JSON contenant les notes et l'emploie du temps
 
-## base de donnée
-Voilà les prérequis pour la base de donnée, elle contient une table users, posts, et likes :
-- table users :
-```sql
-CREATE TABLE `users` (
-  `private_key` varchar(255) DEFAULT NULL,
-  `token` varchar(255) DEFAULT NULL,
-  `username` varchar(255) DEFAULT NULL,
-  `avatar` varchar(255) DEFAULT NULL,
-  `clientId` varchar(255) DEFAULT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `socketid` varchar(255) DEFAULT NULL,
-  `antiforgery_token` varchar(255) DEFAULT NULL
-)
-```
-- table notes :
-```sql
-CREATE TABLE `notes` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `private_key` varchar(255) DEFAULT NULL,
-  `content` text,
-  `forwhen` varchar(255),
-  `created` varchar(255) DEFAULT NULL,
-  `token` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-)
-```
+Pour démarrer le script en local lancer la commande : `node main.js --dev`
+
 
 ## Crédit
 Ce projet à pour but d'aider un maximum de personne et se tronvant juridiquement dans une zone grise merci d'en profiter tout en le respectant!

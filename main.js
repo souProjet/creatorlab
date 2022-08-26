@@ -10,6 +10,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const puppeteer = require('puppeteer');
 const HOME = process.argv.includes('--dev') ? './utils' : process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + "/.creatorlab_data";
+const HOME_USERDATA = process.argv.includes('--dev') ? __dirname : process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + "/.creatorlab_data";
 const config = require(HOME + '/config.json') // Configuration du serveur web et de la base de données MySQL
 const fetch = require('node-fetch')
 const fs = require('fs');
@@ -173,7 +174,7 @@ app.get('/storage/:token/:id/:ext', async(req, res) => {
     let ext = escapeHTML(req.params.ext);
 
     //retourner le fichier qui est dans /userdata/token/data/id.ext 
-    res.sendFile(__dirname + '/userdata/' + token + '/data/' + id + '.' + ext);
+    res.sendFile(HOME_USERDATA + '/userdata/' + token + '/data/' + id + '.' + ext);
 });
 
 //requêtes GET sur la page de connexion

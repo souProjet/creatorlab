@@ -145,6 +145,7 @@ let Login = class Login {
         return new Promise((resolve, reject) => {
             this.db.query(`UPDATE users SET shibsession = '${shibsession}' WHERE username = '${username}'`, (err, rows) => {
                 if (err) {
+                    console.log(err)
                     reject({
                         status: false,
                         message: 'Une erreur est survenue',

@@ -10,10 +10,45 @@
     <meta name="description" content="Une toute nouvelle interface pour e-lyco avec plein d'autre fonction !">
     <meta name="keywords" content="accueil, creatorlab, scolaire, design, pratique, outils">
     <meta name="author" content="Sou - Rufus">
+
+    <link rel="icon" href="./public/images/favicon.ico" type="image/icon">
+
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./public/css/accueil.css">
+
+
 </head>
 
 <body>
-    <h1>Vous êtes actuellement hors ligne</h1>
+
+    <div id="wrapper">
+
+        <!-- Header -->
+        <header>
+            <div class="header_wrap">
+                <div class="header_inner mcontainer">
+                    <div class="left_side">
+                        <div id="logo">
+                            <a href="/">
+                                <img src="./public/images/favicon.ico" alt="">
+                                <img src="./public/images/favicon.ico" class="logo_mobile" alt="">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Contents -->
+        <div class="main_content">
+            <div class="mcontainer">
+                <h1>Vous êtes actuellement hors ligne !</h1>
+                <a href="/" class="btn">Réessayer</a>
+            </div>
+        </div>
+
+    </div>
+
 </body>
 
 </html>

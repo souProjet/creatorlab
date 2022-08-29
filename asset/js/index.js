@@ -1,3 +1,4 @@
+document.cookie.indexOf('token') != -1 ? window.location = '/' : null;
 !(function($) {
     'use strict';
     // Go to Top
@@ -15,5 +16,7 @@
             scrollTop: 0,
         }, 0);
     });
+
+
 
 })(jQuery);

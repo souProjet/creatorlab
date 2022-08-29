@@ -1,3 +1,5 @@
+document.cookie.indexOf('token') == -1 ? window.location = '/welcome' : null;
+
 let socket = io(); //on se connecte au websocket
 
 let disconnectedBtn = document.querySelector('.disconnected-btn');

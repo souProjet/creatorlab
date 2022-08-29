@@ -1,3 +1,5 @@
+document.cookie.indexOf('token') != -1 ? window.location = '/' : null;
+
 let loginBtn = document.querySelector('button')
 let errorSpan = document.querySelector('.error-span');
 let username = document.querySelector('input[type="text"]');

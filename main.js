@@ -141,15 +141,11 @@ io.on('connection', socket => {
 //#############################################################################################################################
 //requêtes GET sur la racine du site
 app.get('/', (req, res) => {
-    //Vérifier si l'utilisateur a le cookie "token"
-    let token = req.cookies.token;
-    if (token) {
-        //si oui, cela ne veux pas forcément être un utilisateur connecté, on lui renvoie la page d'accueil et le traitement de son token se fera dans le module login
-        res.sendFile(__dirname + '/template/accueil.html');
-    } else {
-        //si non, c'est surement la première connexion de l'utilisateur ou il a viré le cookie, on lui renvoie la page index (Landing Page)
-        res.sendFile(__dirname + '/template/index.html');
-    }
+    res.sendFile(__dirname + '/template/accueil.html');
+});
+//requêtes GET sur la page "welcome"
+app.get('/welcome', (req, res) => {
+    res.sendFile(__dirname + '/template/index.html');
 });
 //requête sur le manifest.json
 app.get('/manifest.json', (req, res) => {
@@ -179,15 +175,7 @@ app.get('/storage/:token/:id/:ext', async(req, res) => {
 
 //requêtes GET sur la page de connexion
 app.get('/login', (req, res) => {
-    //vérifier si l'utilisateur a le cookie "token"
-    let token = req.cookies.token;
-    if (token) {
-        //si oui, cela ne veux pas forcément être un utilisateur connecté, on le redirige vers la page d'accueil et le traitement de son token se fera dans le module login
-        res.redirect('/');
-    } else {
-        //si non, c'est surement la première connexion de l'utilisateur ou il a viré le cookie, on lui renvoie la page de connexion
-        res.sendFile(__dirname + '/template/login.html');
-    }
+    res.sendFile(__dirname + '/template/login.html');
 });
 
 //#############################################################################################################################

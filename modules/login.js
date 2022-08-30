@@ -52,10 +52,11 @@ let Login = class Login {
             // }
             try {
                 await page.goto('https://www.e-lyco.fr/');
-                await page.waitForTimeout(1000);
+                await page.waitForTimeout(2000);
                 await page.$eval('.menu > li > a', el => el.click());
                 await page.waitForTimeout(1000);
                 await page.$eval('.champ', el => el.click());
+                await page.waitForTimeout(500);
                 await page.$eval('#valider', el => el.click());
                 await page.waitForTimeout(1000);
                 await page.waitForSelector('#bouton_eleve', { visible: true });

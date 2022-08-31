@@ -381,6 +381,11 @@ function launchPage(pageName) {
                     pronoteConnectInstanceCard.innerHTML = 'Connecté';
                     pronoteConnectInstanceCard.classList.add('text-green-500');
                     pronoteConnectInstanceCard.classList.remove('text-red-500');
+                } else {
+                    pronoteConnectInstanceCard.innerHTML = 'Fermé';
+                    pronoteConnectInstanceCard.classList.add('text-red-500');
+                    pronoteConnectInstanceCard.parentNode.parentNode.style.border = "solid 1px red";
+                    pronoteConnectInstanceCard.parentNode.parentNode.setAttribute('uk-tooltip', 'title: Il semblerait que Pronote soit fermé pour le moment.');
                 }
                 mainContainer.classList.remove('hide');
             } else {

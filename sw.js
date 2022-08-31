@@ -1,12 +1,11 @@
 const BASE = location.protocol + '//' + location.host;
-const PREFIX = 'V1';
+const PREFIX = 'V2';
 const CACHED_FILES = [
     'https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css',
     BASE + '/public/css/accueil.css',
     BASE + '/public/images/favicon.ico',
 
-]
-console.log(BASE)
+];
 self.addEventListener('install', (event) => {
     self.skipWaiting();
     event.waitUntil((async() => {

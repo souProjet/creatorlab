@@ -785,11 +785,18 @@ app.get('/api/\*', async(req, res) => {
                 if (subAction2 == 'get') {
                     let scheduleReturnedData = schedule.get(token2);
                     if (scheduleReturnedData.status) {
-                        res.send({
-                            status: true,
-                            message: scheduleReturnedData.message,
-                            schedule: scheduleReturnedData.schedule
-                        });
+                        if (scheduleReturnedData.schedule != '{}') {
+                            res.send({
+                                status: true,
+                                message: scheduleReturnedData.message,
+                                schedule: scheduleReturnedData.schedule
+                            });
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: "Aucun emplois du temps trouvé"
+                            });
+                        }
                     } else {
                         res.status(200).send({
                             status: false,
@@ -820,11 +827,18 @@ app.get('/api/\*', async(req, res) => {
                 if (subAction3 == 'get') {
                     let reportcardReturnedData = reportcard.get(token3);
                     if (reportcardReturnedData.status) {
-                        res.send({
-                            status: true,
-                            message: reportcardReturnedData.message,
-                            reportcard: reportcardReturnedData.reportcard
-                        });
+                        if (reportcardReturnedData.reportcard != '{}') {
+                            res.send({
+                                status: true,
+                                message: reportcardReturnedData.message,
+                                reportcard: reportcardReturnedData.reportcard
+                            });
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: "Aucun bulletin de note trouvé"
+                            });
+                        }
                     } else {
                         res.status(200).send({
                             status: false,

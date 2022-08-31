@@ -6,26 +6,27 @@ sidebarItems.forEach((item) => {
 });
 let scheduleJSON;
 sidebarItemSchedule.addEventListener('click', function() {
-    fetch('/api/schedule/get', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        .then(res => res.text())
-        .then(res => {
-            scheduleJSON = JSON.parse(JSON.parse(res).schedule);
+    scheduleJSON = schedule;
+    // fetch('/api/schedule/get', {
+    //         method: 'GET',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //             'Authorization': 'Bearer ' + token
+    //         }
+    //     })
+    //     .then(res => res.text())
+    //     .then(res => {
+    //         scheduleJSON = JSON.parse(JSON.parse(res).schedule);
+    createSchedule();
+    window.addEventListener('resize', function() {
+        if (sidebarItemSchedule.classList.contains('active')) {
             createSchedule();
-            window.addEventListener('resize', function() {
-                if (sidebarItemSchedule.classList.contains('active')) {
-                    createSchedule();
-                }
-            });
-            mainContainer.classList.remove('hide');
-        }).catch(err => {
-            console.log(err);
-        });
+        }
+    });
+    mainContainer.classList.remove('hide');
+    //     }).catch(err => {
+    //         console.log(err);
+    //     });
 });
 
 let today = new Date();

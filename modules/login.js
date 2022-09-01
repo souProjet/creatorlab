@@ -190,7 +190,8 @@ let Login = class Login {
                             status: true,
                             message: 'SessionId trouvé',
                             sessionId: rows[0].clientId,
-                            shibsession: rows[0].shibsession
+                            shibsession: rows[0].shibsession,
+                            antiforgeryToken: rows[0].antiforgery_token
                         }
                     }
                     resolve(this.getSessionIdsReturn);

@@ -57,7 +57,7 @@ const Reportcard = require('./modules/reportcard');
 //#############################################################################################################################
 const login = new Login(db, fetch, fs);
 const cloud = new Cloud(fs, utf8);
-const privatemessage = new Privatemessage();
+const privatemessage = new Privatemessage(fetch);
 const user = new User(db);
 const notification = new Notification(fetch);
 const course = new Course(fetch);
@@ -129,6 +129,57 @@ io.on('connection', socket => {
         }
     });
 
+    //#############################################################################################################################
+    //                                             DEMANDE DES MESSAGES PRIVÉS VIA WEBSOCKET
+    //#############################################################################################################################
+    socket.on('getprivatemessages', async({ token, pageIndex }) => {
+        token = escapeHTML(token);
+        pageIndex = parseInt(pageIndex);
+
+        //on vérifie si le token est valide pour cela il faut déjà récupérer le sessionId associé au token
+        let returnData = await login.getSessionIds(token);
+        if (returnData.status) {
+            //on récupère le sessionId
+            let sessionId = returnData.sessionId;
+
+            let privatemessages = await privatemessage.getPrivatemessages(sessionId, pageIndex);
+            if (privatemessages.status) {
+                let formatedMessages = privatemessage.formatPrivatemessages(privatemessages.message);
+                if (formatedMessages.status) {
+                    socket.emit('privatemessages', {
+                        status: true,
+                        privatemessages: formatedMessages.privatemessages
+                    })
+                }
+            }
+        }
+    });
+    //#############################################################################################################################
+    //                                      DEMANDE D'UNE CONVERSATION DE MESSAGES PRIVÉS VIA WEBSOCKET
+    //#############################################################################################################################
+    socket.on('getprivatemessageconv', async({ token, convId, pageIndex }) => {
+        token = escapeHTML(token);
+        convId = parseInt(convId);
+        pageIndex = parseInt(pageIndex);
+
+        //on vérifie si le token est valide pour cela il faut déjà récupérer le sessionId associé au token
+        let returnData = await login.getSessionIds(token);
+        if (returnData.status) {
+            //on récupère le sessionId
+            let sessionId = returnData.sessionId;
+            let conv = await privatemessage.getPrivatemessages(sessionId, pageIndex);
+            if (conv.status) {
+                let formatedConv = privatemessage.formatConv(conv.message, convId);
+                if (formatedConv.status) {
+                    socket.emit('privatemessageconv', {
+                        status: true,
+                        conv: formatedConv.conv
+                    });
+                }
+            }
+        }
+    });
+
     socket.on('disconnect', () => {
         //une fois l'utilisateur déconnecté, on supprime son socketId de la base de données et on le supprime de la liste des utilisateurs connectés au websocket
         socket.leave(socket.id);
@@ -161,9 +212,9 @@ app.get('/offline', (req, res) => {
 });
 
 
-// //#############################################################################################################################
-// //                                               RENVOIE STATIC DES DONNÉES "STORAGE"
-// //#############################################################################################################################
+//#############################################################################################################################
+//                                               RENVOIE STATIC DES DONNÉES "STORAGE"
+//#############################################################################################################################
 app.get('/storage/:token/:id/:ext', async(req, res) => {
     let token = escapeHTML(req.params.token);
     let id = escapeHTML(req.params.id);
@@ -273,60 +324,89 @@ app.post('/api/\*', async(req, res) => {
                     let resultData = await login.updateAntiforgeryToken(token);
                     if (resultData.status) {
 
-                        //en attendant l'ouverture d'e-lyco
-                        res.status(200).send({
-                            status: false,
-                            message: 'Connexion à E-lyco échouée'
-                        });
-
 
                         // //vérifier si on a accàs aux cours de l'utilisateur
-                        // let coursesAccessReturnedData = await login.checkCoursesAccess(sessionId);
-                        // if (coursesAccessReturnedData.status) {
-                        //     elycoState = true;
-                        //     res.status(200).send({
-                        //         status: true,
-                        //         message: 'Connexion à E-lyco réussie'
-                        //     });
-                        //     //Envoyer les notifications et les messages privés à l'utilisateur
-                        //     //On commence par récuperer le socketId de l'utilisateur pour pourvoir envoyer les notifications et les messages privés via websocket
-                        //     resultData = await user.getSocketIdByToken(token);
-                        //     if (resultData.status) {
-                        //         let socketId = resultData.socketId;
-                        //         //on récupère les notifications via E-lyco
-                        //         notificationReturnedData = await notification.getNotifications(sessionId);
-                        //         if (notificationReturnedData.status) {
-                        //             //il faut formater les notifications reçu pour avoir un beau JSON contenant les notifications
-                        //             let notifications = notificationReturnedData.message;
-                        //             let formatReturnedData = notification.formatNotifications(notifications);
-                        //             if (formatReturnedData.status) {
-                        //                 //on envoie les notifications à l'utilisateur via websocket
-                        //                 // io.to(socketId).emit('notifications', {
-                        //                 //     status: true,
-                        //                 //     notifications: formatReturnedData.notifications
-                        //                 // });
-                        //             } else {
-                        //                 io.to(socketId).emit('notifications', {
-                        //                     status: false,
-                        //                     message: 'Erreur lors de la récupération des notifications'
-                        //                 });
-                        //             }
-                        //         } else {
-                        //             io.to(socketId).emit('notification', {
-                        //                 status: false,
-                        //                 message: 'Erreur lors de la récupération des notifications'
-                        //             });
-                        //         }
+                        let coursesAccessReturnedData = await login.checkCoursesAccess(sessionId);
+                        if (coursesAccessReturnedData.status) {
+                            elycoState = true;
+                            res.status(200).send({
+                                status: true,
+                                message: 'Connexion à E-lyco réussie'
+                            });
+                            //Envoyer les notifications et les messages privés à l'utilisateur
+                            //On commence par récuperer le socketId de l'utilisateur pour pourvoir envoyer les notifications et les messages privés via websocket
+                            resultData = await user.getSocketIdByToken(token);
+                            if (resultData.status) {
+                                let socketId = resultData.socketId;
 
-                        //     } else {
-                        //         //Il y a eu une erreur lors de la récupération du socketId de l'utilisateur
-                        //     }
-                        // } else {
-                        //     res.status(200).send({
-                        //         status: false,
-                        //         message: 'Connxion  à E-lyco échouée'
-                        //     });
-                        // }
+                                //#############################################################################################################################
+                                //                                             RÉCUPÉRATION DES NOTIFICATIONS VIA E-LYCO
+                                //#############################################################################################################################
+                                notificationReturnedData = await notification.getNotifications(sessionId);
+                                if (notificationReturnedData.status) {
+                                    //il faut formater les notifications reçu pour avoir un beau JSON contenant les notifications
+                                    let notifications = notificationReturnedData.message;
+                                    let formatReturnedData = notification.formatNotifications(notifications);
+                                    if (formatReturnedData.status) {
+                                        //on envoie les notifications à l 'utilisateur via websocket
+                                        // io.to(socketId).emit('notifications', {
+                                        //     status: true,
+                                        //     notifications: formatReturnedData.notifications
+                                        // });
+                                        //en attendant le nouveau formattage des notifications
+                                        io.to(socketId).emit('notifications', {
+                                            status: false,
+                                            message: 'Erreur lors de la récupération des notifications'
+                                        });
+                                    } else {
+                                        io.to(socketId).emit('notifications', {
+                                            status: false,
+                                            message: 'Erreur lors de la récupération des notifications'
+                                        });
+                                    }
+                                } else {
+                                    io.to(socketId).emit('notifications', {
+                                        status: false,
+                                        message: 'Erreur lors de la récupération des notifications'
+                                    });
+                                }
+
+                                //#############################################################################################################################
+                                //                                             RÉCUPÉRATION DES MESSAGES PRIVÉS VIA E-LYCO
+                                //#############################################################################################################################
+                                privatemessageReturnedData = await privatemessage.getPrivatemessages(sessionId);
+                                if (privatemessageReturnedData.status) {
+                                    //il faut formater les notifications reçu pour avoir un beau JSON contenant les notifications
+                                    let privatemessages = privatemessageReturnedData.message;
+
+                                    let formatReturnedData = privatemessage.formatPrivatemessages(privatemessages);
+                                    if (formatReturnedData.status) {
+                                        //on envoie les messages privés à l'utilisateur via websocket
+                                        io.to(socketId).emit('privatemessages', {
+                                            status: true,
+                                            privatemessages: formatReturnedData.privatemessages
+                                        });
+                                    } else {
+                                        io.to(socketId).emit('privatemessages', {
+                                            status: false,
+                                            message: 'Erreur lors de la récupération des messages privés'
+                                        });
+                                    }
+                                } else {
+                                    io.to(socketId).emit('privatemessages', {
+                                        status: false,
+                                        message: 'Erreur lors de la récupération des messages privés'
+                                    });
+                                }
+                            } else {
+                                //Il y a eu une erreur lors de la récupération du socketId de l'utilisateur
+                            }
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: 'Connxion  à E-lyco échouée'
+                            });
+                        }
                     } else {
                         res.status(200).send({
                             status: false,
@@ -638,6 +718,38 @@ app.post('/api/\*', async(req, res) => {
 
             break;
         case 'privatemessage':
+            //récupérer le token dans l'entête de la requête
+            let token4 = escapeHTML(req.headers.authorization.split(' ')[1]);
+
+            //déterminer la sous-action de la requête
+            let subAction4 = params[1];
+            let resultData4 = await login.getSessionIds(token4);
+            if (resultData4.status) {
+                let sessionId = resultData4.sessionId;
+                let antiforgeryToken = resultData4.antiforgeryToken
+                if (subAction4 == 'send') {
+                    let convId = parseInt(req.body.convId);
+                    let text = escapeHTML(req.body.text);
+                    if (convId && text) {
+                        let sendReturnedData = await privatemessage.send(sessionId, antiforgeryToken, convId, text);
+                        res.status(200).send({
+                            status: sendReturnedData.status,
+                            message: sendReturnedData.message
+                        })
+                    }
+
+                } else {
+                    res.status(200).send({
+                        status: false,
+                        message: subAction3 + ' : methode inconnue'
+                    });
+                }
+            } else {
+                res.status(200).send({
+                    status: false,
+                    message: 'Token invalide'
+                });
+            }
             break;
     }
 
@@ -858,10 +970,9 @@ app.get('/api/\*', async(req, res) => {
                 });
             }
             break;
-        case 'privatemessage':
-            break;
-        case 'notification':
-            break;
+
+            // case 'notification':
+            //     break;
         case 'user':
             break;
     }

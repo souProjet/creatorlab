@@ -403,8 +403,242 @@ socket.on('notifications', (data) => {
 //######################################################################################################################
 //                                             RÉCÉPTION DES MESSAGES PRIVÉS
 //######################################################################################################################
-socket.on('privatemessage', (data) => {
 
+function onscroll() {
+    let scrollMessageBox = document.querySelectorAll('.header_dropdown .simplebar-content')[1];
+    let offsetScrollMessageBox = scrollMessageBox.scrollHeight - scrollMessageBox.clientHeight
+    if (scrollMessageBox.scrollTop == (scrollMessageBox.scrollHeight - scrollMessageBox.clientHeight)) {
+        if (scrollMessageBox.scrollTop == offsetScrollMessageBox) {
+            scrollMessageBox.setAttribute('data-page', parseInt(scrollMessageBox.getAttribute('data-page') || 0) + 1);
+            scrollMessageBox.scrollTop = offsetScrollMessageBox;
+            offsetScrollMessageBox = scrollMessageBox.scrollHeight - scrollMessageBox.clientHeight;
+
+            socket.emit("getprivatemessages", {
+                token: token,
+                pageIndex: parseInt(scrollMessageBox.getAttribute('data-page'))
+            });
+        }
+    }
+}
+
+socket.on('privatemessages', (data) => {
+    let scrollMessageBox = document.querySelectorAll('.header_dropdown .simplebar-content')[1];
+
+    let messageBox = document.querySelector('.message-box');
+    document.querySelector('.message-reply') ? document.querySelector('.message-reply').remove() : '';
+    if (data.status) {
+        if (data.privatemessages.length > 0) {
+            let messagesHTML = ``;
+            data.privatemessages.forEach(message => {
+                message.participants = message.participants.filter(participant => participant.name != document.querySelector('.user_name > div').innerHTML);
+                messagesHTML += `<li>
+                    <a style="cursor:pointer;" class="conv" id="${message.convId}">
+                        <div class="drop_avatar"><img src="` + (message.type == "Group" ? './public/images/groupe.png' : message.participants[message.participants.length - 1].avatarUrl || './public/images/defaultAvatar.png') + `" alt="">
+                        </div>
+                        <div class="drop_text">
+                            <strong>` + (message.type == "Group" ? message.lastMessage.authorName.replace('(44-BOUAYE)', '') : message.participants[message.participants.length - 1].name) + `</strong> <time>` + (utils.calculateTimeBetweenDateAndToday(new Date(parseInt(message.lastMessage.created.split('/')[2].split(' ')[0]), parseInt(message.lastMessage.created.split('/')[1]) - 1, parseInt(message.lastMessage.created.split('/')[0]), parseInt(message.lastMessage.created.split(' ')[1].split(":")[0]), parseInt(message.lastMessage.created.split(":")[1])))) + `</time>
+                            <p>` + (message.lastMessage.text || message.lastMessage.attachmentName) + `</p>
+                        </div>
+                    </a>
+                </li>`
+            });
+            messageBox.innerHTML = messagesHTML;
+            //si l'utilisateur séléctionne une conversation
+
+            document.querySelectorAll('.conv').forEach(conv => {
+                conv.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    messageBox.classList.add('slide');
+                    let scrollMessageBox = document.querySelectorAll('.header_dropdown .simplebar-content')[1];
+                    scrollMessageBox.removeEventListener('scroll',
+                        onscroll,
+                        false
+                    );
+                    setTimeout(() => {
+                        messageBox.innerHTML = `<div class="drop_text"><p style="display:flex; justify-content:center;">Chargement de la conversation...&nbsp;<img style="height:30px; width:30px;" src="./public/images/loader-waiting2.svg"></p></div>`;
+                        messageBox.classList.remove('slide');
+
+                        socket.emit("getprivatemessageconv", {
+                            token: token,
+                            convId: conv.id,
+                            pageIndex: parseInt(scrollMessageBox.getAttribute('data-page') || 0)
+                        });
+
+                    }, 300);
+                });
+            });
+
+            scrollMessageBox.addEventListener('scroll', onscroll);
+
+        } else {
+            messageBox.innerHTML = `<div class="drop_text"><p style="display:flex; justify-content:center;">Aucun message</p></div>`;
+        }
+    }
+});
+
+socket.on('privatemessageconv', (data) => {
+    let messageBox = document.querySelector('.message-box');
+    let convTitle = document.querySelectorAll('.drop_headline > h4')[1];
+    if (data.status) {
+        if (data.conv) {
+            conv = data.conv;
+            conv.participants = conv.participants.filter(participant => participant.name != document.querySelector('.user_name > div').innerHTML);
+            convTitle.innerHTML = `<button class="back-message"><img style="height:30px;margin-right:10px;" src="./public/images/back.svg"></button>` + (conv.type == "Group" ? conv.participants[conv.participants.length - 1].name.replace('(44-BOUAYE)', '') : conv.participants[conv.participants.length - 1].name);
+
+            messageBox.id = conv.convId;
+            let convHTML = ``;
+            for (let i = 0; i < conv.messages.length; i++) {
+                let message = conv.messages[i];
+                convHTML += `
+                <div id="${message.messageId}" class="message-bubble ` + (message.authorName == document.querySelector('.user_name > div').innerHTML ? 'me' : '') + `">
+                    <div class="message-bubble-inner">
+                        <div onclick="viewprofile(${parseInt(message.author)}, '${(message.authorAvatarUrl || './public/images/defaultAvatar.png')}', '${message.authorName.replace('(44-BOUAYE)', '').replace('\'', '\\\'')}', ${conv.readOnly})" style="cursor:pointer" class="message-avatar"><img src="` + (message.authorAvatarUrl || './public/images/defaultAvatar.png') + `" alt=""></div>
+                        <div class="message-text"><p>${utils.replaceURLWithHTMLLinks(message.text)} ` + (message.attachmentUrl ? '<a href="' + message.attachmentUrl + '">' + message.attachmentName + '</a>' : '') + `</p></div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>`;
+                if (i == conv.messages.length - 1) {
+                    convHTML += `
+                    <div class="message-time-sign">
+                        <span>` + (utils.calculateTimeBetweenDateAndToday(new Date(parseInt(message.created.split('/')[2].split(' ')[0]), parseInt(message.created.split('/')[1]) - 1, parseInt(message.created.split('/')[0]), parseInt(message.created.split(' ')[1].split(":")[0]), parseInt(message.created.split(":")[1])))) + `</span>
+                    </div>`;
+
+                }
+            }
+
+            messageBox.innerHTML = convHTML;
+            if (!conv.readOnly) {
+                document.querySelectorAll('.header_dropdown')[1].innerHTML += `
+                <!-- Reply Area -->
+                <div class="message-reply">
+                    <!--<img src="./public/images/attachement.png" alt="" class="h-7 w-7 self-center mr-2 cursor-pointer">-->
+                    <input type="file" name="attachment" id="attachment" class="hidden">
+                    <textarea cols="1" rows="1" placeholder="Votre message"></textarea>
+                    <button class="button ripple-effect">Envoyer</button>
+                </div>`;
+                document.querySelector('.message-reply > textarea').addEventListener('keyup', (e) => {
+                    if (e.keyCode == 13) {
+                        e.preventDefault();
+                        document.querySelector('.message-reply > button').click();
+                    }
+                });
+
+
+                document.querySelector('.message-reply > button').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    let message = document.querySelector('.message-reply > textarea').value;
+                    if (message.trim() != '') {
+
+                        fetch('./api/privatemessage/send', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + token
+                            },
+                            body: JSON.stringify({
+                                convId: parseInt(messageBox.id),
+                                text: utils.escapeHTML(message)
+                            })
+                        }).then(response => response.json()).then(data => {
+                            if (data.status) {
+                                document.querySelector('.message-reply > textarea').value = '';
+                                messageBox = document.querySelector('.message-box');
+                                document.querySelector('.message-time-sign').remove();
+                                messageBox.innerHTML += `
+                                <div class="message-bubble me" id="${messageBox.id}">
+                                    <div class="message-bubble-inner">
+                                        <div class="message-avatar"><img src="${document.querySelector('.is_avatar').src}" alt=""></div>
+                                        <div class="message-text"><p>${utils.replaceURLWithHTMLLinks(message)}</p></div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>`;
+                                let scrollMessageBox = document.querySelectorAll('.header_dropdown .simplebar-content')[1];
+                                scrollMessageBox.scrollTop = scrollMessageBox.scrollHeight;
+                                document.querySelectorAll('.erreur-msg-chat').forEach(element => {
+                                    element.remove();
+                                });
+                            } else {
+                                console.log(data.message)
+                            }
+                        }).catch(error => {
+                            console.log(error);
+                        });
+
+                    }
+                });
+
+                // document.querySelector('.message-reply > img').addEventListener('click', (e) => {
+                //     e.preventDefault();
+                //     document.querySelector('.message-reply > input').click();
+                // });
+
+                // document.querySelector('.message-reply > input').addEventListener('change', (e) => {
+                //     e.preventDefault();
+                //     let files = e.target.files;
+                //     if (files) {
+                //         const formData = new FormData();
+                //         formData.append('fileAttachment', files[0]);
+                //         fetch('/api/upload', {
+                //             method: 'POST',
+                //             headers: {
+                //                 'Authorization': 'Bearer ' + token,
+                //                 'Destination': 'elyco',
+                //             },
+                //             body: formData
+
+                //         }).then(res => res.json()).then(data => {
+                //             if (data) {
+                //                 if (data.status) {
+
+                //                     document.querySelectorAll('.erreur-msg-chat').forEach(element => {
+                //                         element.remove();
+                //                     });
+                //                 }
+                //                 // socket.emit('sendMessage', {
+                //                 //     token: token,
+                //                 //     convId: messageBox.id,
+                //                 //     text: '',
+                //                 //     attachmentUrl: data.url,
+                //                 //     attachmentName: file.name
+                //                 // });
+                //                 // messageBox = document.querySelector('.message-box');
+                //                 // document.querySelector('.message-time-sign').remove();
+                //                 // messageBox.innerHTML += `
+                //                 //     <div class="message-bubble me" id="${messageBox.id}">
+
+                //                 //         <div class="message-bubble-inner">
+                //                 //             <div class="message-avatar"><img src="${document.querySelector('.is_avatar').src}" alt=""></div>
+                //                 //             <div class="message-text"><p>${utils.replaceURLWithHTMLLinks(file.name)}</p></div>
+                //                 //         </div>
+                //                 //         <div class="clearfix"></div>
+                //                 //     </div>`;
+                //                 // let scrollMessageBox = document.querySelectorAll('.header_dropdown .simplebar-content')[1];
+                //                 // scrollMessageBox.scrollTop = scrollMessageBox.scrollHeight;
+                //             } else {
+                //                 document.querySelector('.message-reply').innerHTML += '<p class="text-red-500 text-center erreur-msg-chat">Erreur lors de l\'envoie du fichier</p>';
+                //             }
+                //             document.querySelector('.message-reply > input').value = '';
+                //         }).catch(err => {
+                //             console.log(err);
+                //         });
+                //     }
+                // });
+            }
+
+            let scrollMessageBox = document.querySelectorAll('.header_dropdown .simplebar-content')[1];
+            scrollMessageBox.scrollTop = scrollMessageBox.scrollHeight;
+
+        }
+    }
+    let backMessageElement = document.querySelector('.back-message');
+
+    backMessageElement.addEventListener('click', (e) => {
+        e.preventDefault();
+        socket.emit("getprivatemessages", {
+            token: token,
+            pageIndex: 0
+        });
+    });
 });
 
 //lorsque l'utilisateur clique sur un des onglets de la sidebar, on change l'onglet actif et on cache le mainContainer

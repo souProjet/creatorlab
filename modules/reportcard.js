@@ -29,7 +29,7 @@ let Reportcard = class Reportcard {
         } catch (err) {
             return {
                 status: false,
-                message: err
+                message: 'Erreur lors de la récupértion du bulletin de notes'
             }
         }
 

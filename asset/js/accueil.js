@@ -191,8 +191,6 @@ socket.on('join', (data) => {
                     let r_mean = Math.floor(256 - ((dist_mean + offset_mean) * 256 / (offset_mean * 2)));
                     document.querySelector('.user_name > p').style.color = "rgb(" + (r_mean) + ", " + (g_mean) + ", 0)";
                     document.querySelector('.user_name > p').innerText = reportcard.general_student.toString().replace('.', ',') + ' de moyenne';
-                } else {
-                    console.log(data.message)
                 }
             });
 
@@ -213,8 +211,6 @@ socket.on('join', (data) => {
                 });
                 if (data.status) {
                     schedule = JSON.parse(data.schedule);
-                } else {
-                    console.log(data.message)
                 }
                 if (!pronoteState) {
                     let notuptodateSVG = `

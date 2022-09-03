@@ -13,19 +13,26 @@ let Schedule = class Schedule {
     }
 
     get(token) {
-        let scheduleJSON = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/schedule.json', 'utf8', (err) => {
-            if (err) {
-                return {
-                    status: false,
-                    message: 'Erreur lors de la récupértion de l\'emplois du temps'
+        try {
+            let scheduleJSON = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/schedule.json', 'utf8', (err) => {
+                if (err) {
+                    return {
+                        status: false,
+                        message: 'Erreur lors de la récupértion de l\'emplois du temps'
+                    }
                 }
-            }
-        });
+            });
 
-        return {
-            status: true,
-            message: 'Récupération de l\'emplois du temps réussie',
-            schedule: scheduleJSON
+            return {
+                status: true,
+                message: 'Récupération de l\'emplois du temps réussie',
+                schedule: scheduleJSON
+            }
+        } catch (err) {
+            return {
+                status: false,
+                message: err
+            }
         }
     }
 }

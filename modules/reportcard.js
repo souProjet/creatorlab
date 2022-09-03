@@ -12,18 +12,25 @@ let Reportcard = class Reportcard {
     }
 
     get(token) {
-        let reportcardJSON = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/reportcard.json', 'utf8', (err) => {
-            if (err) {
-                return {
-                    status: false,
-                    message: 'Erreur lors de la récupértion du bulletin de notes'
+        try {
+            let reportcardJSON = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/reportcard.json', 'utf8', (err) => {
+                if (err) {
+                    return {
+                        status: false,
+                        message: 'Erreur lors de la récupértion du bulletin de notes'
+                    }
                 }
+            });
+            return {
+                status: true,
+                message: 'Récupération du bulletin de notes réussi',
+                reportcard: reportcardJSON
             }
-        });
-        return {
-            status: true,
-            message: 'Récupération du bulletin de notes réussi',
-            reportcard: reportcardJSON
+        } catch (err) {
+            return {
+                status: false,
+                message: err
+            }
         }
 
     }

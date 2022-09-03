@@ -44,7 +44,7 @@ CREATE TABLE `notes` (
 ```
 
 ## Démarrer cratorlab dans un environnement local
-Il vous faudra crée un dossier `utils` à la racine et y crée à l'intérieur un fichier `config.json`
+Il vous faudra créer un dossier `utils` à la racine et y crée à l'intérieur un fichier `config.json`
 y contenant les identifiants de votre base de donnée mysql et autre sous cette forme : 
 ```json
 {
@@ -58,6 +58,10 @@ y contenant les identifiants de votre base de donnée mysql et autre sous cette 
 Enfin il vous sera nécessaire de crée un dossier `userdata` à la racine du projet, ce dossier contiendra les élements du cloud ainsi que les fichiers JSON contenant les notes et l'emploie du temps
 
 Pour démarrer le script en local lancer la commande : `node main.js --dev`
+
+## Démarrer cratorlab dans un environnement de production
+Créez les mêmes dossier et fichier que pour un environnement local mais dans un dossier nommé .creatorlab_data à la racine du dossier utilisateur
+Pour démarrer le script lancer la commande : `node main.js` puis `pm2 start main.js --name="creatorlab"` pour le process managment
 
 
 ## Crédit

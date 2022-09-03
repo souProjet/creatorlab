@@ -800,7 +800,7 @@ app.get('/api/\*', async(req, res) => {
                             });
                         }
 
-                    } else if (subAction == 'detail') {
+                    } else if (subAction == 'details') {
                         let courseID = escapeHTML(params[2]);
                         //on récupère les détails des cours via E-lyco
                         if (courseID) {

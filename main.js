@@ -103,26 +103,26 @@ io.on('connection', socket => {
             //on récupère le sessionId
             let sessionId = returnData.sessionId;
             //vérifier si le sessionId est valide
-            returnData = await login.checkSessionId(sessionId);
-            if (returnData.status) {
-                let name = returnData.name;
-                let avatar = returnData.avatar;
+            let returnData2 = await login.checkSessionId(sessionId);
+            if (returnData2.status) {
+                let name = returnData2.name;
+                let avatar = returnData2.avatar;
                 let isSuccess = await login.updateNameAndAvatar(token, name, avatar);
                 if (isSuccess) {
                     //ajouter le socketId de l'utilisateur dans la base de données et on l'ajoute dans la liste des utilisateurs connectés au websocket
-                    returnData = await login.updateSocketId(token, socket.id);
-                    if (returnData.status) {
+                    let returnData3 = await login.updateSocketId(token, socket.id);
+                    if (returnData3.status) {
                         io.to(socket.id).emit('join', { status: true, message: 'Vous êtes connecté', username: name, avatar: avatar });
                         //une fois l'utilisateur connecté, on lui envoie les notifications et les messages privés ainsi que les informations sur l'utilisateur
 
                     } else {
-                        io.to(socket.id).emit('join', { status: false, message: returnData.message });
+                        io.to(socket.id).emit('join', { status: false, message: returnData3.message });
                     }
                 } else {
                     io.to(socket.id).emit('join', { status: false, message: 'Impossible de vous connecter' });
                 }
             } else {
-                io.to(socket.id).emit('join', { status: false, message: returnData.message });
+                io.to(socket.id).emit('join', { status: false, message: returnData2.message });
             }
         } else {
             io.to(socket.id).emit('join', { status: false, message: returnData.message });
@@ -242,7 +242,7 @@ app.post('/api/\*', async(req, res) => {
     switch (params[0]) {
         case 'login':
             //requête de connexion avec dans le body le login et le mot de passe
-            let username = escapeHTML(req.body.username);
+            let username = escapeHTML(req.body.username).toLowerCase();
             let password = escapeHTML(req.body.password);
             if (username && password && username.length > 0 && password.length > 0) {
                 const browser = await puppeteer.launch({ headless: true });

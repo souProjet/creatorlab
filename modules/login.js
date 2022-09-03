@@ -43,14 +43,14 @@ let Login = class Login {
         });
     }
     loginToFranceConnect(page, counter, username, password) {
-        return new Promise(async(resolve, reject) => {
-            // if (counter == 3) {
-            //     reject({
-            //         status: false,
-            //         message: 'Une erreur est survenue'
-            //     });
-            // }
-            try {
+        try {
+            return new Promise(async(resolve, reject) => {
+                // if (counter == 3) {
+                //     reject({
+                //         status: false,
+                //         message: 'Une erreur est survenue'
+                //     });
+                // }
                 await page.goto('https://www.e-lyco.fr/');
                 await page.waitForTimeout(2000);
                 await page.$eval('.menu > li > a', el => el.click());
@@ -94,16 +94,15 @@ let Login = class Login {
                     });
                 }
 
-            } catch (err) {
-                console.error('[CREATOR LAB] Erreur de scraping', err);
-                reject({
-                    status: false,
-                    message: 'Une erreur est survenue'
-                });
+            });
+        } catch (err) {
+            //console.error('[CREATOR LAB] Erreur de scraping', err);
+            return {
+                status: false,
+                message: 'Une erreur est survenue'
+            };
 
-            }
-
-        });
+        }
     }
     getUserByUsername(username) {
         //retourne une promise contenant l'utilisateur correspondant à l'username

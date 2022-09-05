@@ -423,6 +423,7 @@ app.post('/api/\*', async(req, res) => {
                         let isSucess = schedule.updateSchedule(token, scheduleSuccess);
                         if (isSucess) {
                             isSucess = reportcard.updateReportcard(token, reportcardSuccess);
+
                             if (isSucess) {
                                 res.status(200).send({
                                     status: true,

@@ -380,7 +380,7 @@ let Login = class Login {
             await page.goto('https://pronote.lyc-orbigny-44.ac-nantes.fr/pronote/');
             await page.waitForTimeout(4000);
             await page.evaluate(() => {
-                document.querySelectorAll('.menu-principal_niveau1')[3].querySelector('li').click();
+                document.querySelectorAll('.menu-principal_niveau1')[6].querySelector('li').click();
             });
             await page.waitForTimeout(3000);
 
@@ -400,8 +400,7 @@ let Login = class Login {
                 let timeTemplate = ['08h05', '08h30', '09h00', '9h30', '10h15', '10h45', '11h10', '11h40', '12h05', '12h30', '13h00', '13h30', '13h55', '14h25', '14h50', '15h20', '16h05', '16h35', '17h00', '17h30', '17h55'];
                 let dayTemplate = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
                 let scheduleDom = document.createElement('div');
-                scheduleDom.innerHTML = document.getElementById(`GInterface.Instances[2].Instances[1].Instances[0]_Grille_Elements`).innerHTML.replace("id=\"id_125_cours_0\"", "id=\"id_125_cours_0 \" sh=\"" + (document.querySelector('#id_122_Grille_').style.height) + "\" sw=\"" + (document.querySelector('#id_122_Grille_').style.width) + "\"");
-
+                scheduleDom.innerHTML = document.querySelector('.corpsGrille').children[1].firstChild.firstChild.innerHTML.replace("id=\"id_125_cours_0\"", "id=\"id_125_cours_0 \" sh=\"" + (document.querySelector('#id_122_Grille_').style.height) + "\" sw=\"" + (document.querySelector('#id_122_Grille_').style.width) + "\"");
                 let scheduleJSON = [];
 
                 let courseDom = scheduleDom.querySelectorAll('.EmploiDuTemps_Element');
@@ -429,17 +428,15 @@ let Login = class Login {
                         startingTime: startingTime,
                         endingTime: endingTime,
                         room: courseDOM.querySelectorAll('.AlignementMilieu')[2] ? courseDOM.querySelectorAll('.AlignementMilieu')[2].innerText : '',
-                        teacher: courseDOM.querySelectorAll('.AlignementMilieu')[1].innerText,
-                        subject: courseDOM.querySelectorAll('.AlignementMilieu')[0].innerText,
-                        event: (courseDOM.querySelectorAll('tr').length == 2 ? courseDOM.querySelectorAll('tr')[0].querySelector('.NoWrap.ie-ellipsis').innerHTML : false)
+                        teacher: courseDOM.querySelectorAll('.AlignementMilieu')[1] ? courseDOM.querySelectorAll('.AlignementMilieu')[1].innerText : '',
+                        subject: courseDOM.querySelectorAll('.AlignementMilieu')[0] ? courseDOM.querySelectorAll('.AlignementMilieu')[0].innerText : '',
+                        event: (courseDOM.querySelectorAll('tr').length == 2 ? (courseDOM.querySelectorAll('tr')[0].querySelector('.NoWrap.ie-ellipsis') ? courseDOM.querySelectorAll('tr')[0].querySelector('.NoWrap.ie-ellipsis').innerHTML : false) : false)
                     }
                     scheduleJSON.push(courseJSON);
                 }
                 return scheduleJSON;
             });
-
         } catch (err) {
-            //console.log(err);
             return {
                 status: false,
                 message: 'Erreur de récupération de l\'emploi du temps'
@@ -447,7 +444,7 @@ let Login = class Login {
         }
 
         await page.evaluate(() => {
-            document.querySelectorAll('.label-menu_niveau0')[2].click();
+            document.querySelectorAll('.menu-principal_niveau1')[3].querySelector('li').click();
         });
         await page.waitForTimeout(2000);
 
@@ -457,40 +454,44 @@ let Login = class Login {
         //#############################################################################################################################
         try {
             reportcard = await page.evaluate(() => {
-                let reportcardDom = document.createElement('div');
-                reportcardDom.innerHTML = document.querySelector('.EspaceGauche.EspaceHaut tr').innerHTML;
-                let reportcardJSON = {
-                    general_student: parseFloat(reportcardDom.querySelector('.AlignementDroit.EspaceHaut div span span').innerHTML.trim().replace(',', '.')),
-                    general_class: parseFloat(reportcardDom.querySelector('.AlignementDroit.EspaceHaut div:nth-child(2) span span').innerHTML.trim().replace(',', '.')),
-                };
+                if (document.querySelector('.message-conteneur > span')) {
+                    return {};
+                } else {
+                    let reportcardDom = document.createElement('div');
+                    reportcardDom.innerHTML = document.querySelector('.EspaceGauche.EspaceHaut tr').innerHTML;
+                    let reportcardJSON = {
+                        general_student: parseFloat(reportcardDom.querySelector('.AlignementDroit.EspaceHaut div span span').innerHTML.trim().replace(',', '.')),
+                        general_class: parseFloat(reportcardDom.querySelector('.AlignementDroit.EspaceHaut div:nth-child(2) span span').innerHTML.trim().replace(',', '.')),
+                    };
 
-                let testContainerChildren = Array.from(document.querySelector('.SansMain.liste_fixed').childNodes);
-                let testMatters = [];
-                for (let i = 0; i < testContainerChildren.length; i++) {
-                    if (testContainerChildren[i].querySelector('.Gras.Espace')) {
-                        let evaluation = [];
-                        for (let j = i + 1; j < testContainerChildren.length; j++) {
-                            if (testContainerChildren[j].querySelector('.Gras.Espace')) {
-                                break;
-                            } else if (testContainerChildren[j].querySelector('.Espace:not(.Gras)')) {
-                                evaluation.push({
-                                    date: testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(2)').innerHTML,
-                                    class: parseFloat(testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(3)').innerHTML.split(':')[1].trim().replace(',', '.')),
-                                    student: parseFloat(testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(1) div').innerHTML.trim().replace(',', '.')),
-                                    of: testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(1) div span') ? parseFloat(testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(1) div span').innerHTML.replace('/', '')) : 20
-                                });
+                    let testContainerChildren = Array.from(document.querySelector('.SansMain.liste_fixed').childNodes);
+                    let testMatters = [];
+                    for (let i = 0; i < testContainerChildren.length; i++) {
+                        if (testContainerChildren[i].querySelector('.Gras.Espace')) {
+                            let evaluation = [];
+                            for (let j = i + 1; j < testContainerChildren.length; j++) {
+                                if (testContainerChildren[j].querySelector('.Gras.Espace')) {
+                                    break;
+                                } else if (testContainerChildren[j].querySelector('.Espace:not(.Gras)')) {
+                                    evaluation.push({
+                                        date: testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(2)').innerHTML,
+                                        class: parseFloat(testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(3)').innerHTML.split(':')[1].trim().replace(',', '.')),
+                                        student: parseFloat(testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(1) div').innerHTML.trim().replace(',', '.')),
+                                        of: testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(1) div span') ? parseFloat(testContainerChildren[j].querySelector('.Espace:not(.Gras) div:nth-child(1) div span').innerHTML.replace('/', '')) : 20
+                                    });
+                                }
                             }
-                        }
 
-                        testMatters.push({
-                            name: testContainerChildren[i].querySelector('.Gras.Espace div:nth-child(2)').innerHTML,
-                            mean: parseFloat(testContainerChildren[i].querySelector('.Gras.Espace div:nth-child(1)').innerHTML.replace(',', '.').trim()),
-                            evaluation: evaluation
-                        });
+                            testMatters.push({
+                                name: testContainerChildren[i].querySelector('.Gras.Espace div:nth-child(2)').innerHTML,
+                                mean: parseFloat(testContainerChildren[i].querySelector('.Gras.Espace div:nth-child(1)').innerHTML.replace(',', '.').trim()),
+                                evaluation: evaluation
+                            });
+                        }
                     }
+                    reportcardJSON["matters"] = testMatters;
+                    return reportcardJSON;
                 }
-                reportcardJSON["matters"] = testMatters;
-                return reportcardJSON;
             });
         } catch (err) {
             //console.log(err);

@@ -382,7 +382,7 @@ let Login = class Login {
             await page.evaluate(() => {
                 document.querySelectorAll('.menu-principal_niveau1')[6].querySelector('li').click();
             });
-            await page.waitForTimeout(3000);
+            await page.waitForTimeout(4000);
 
         } catch (err) {
             return {
@@ -391,7 +391,7 @@ let Login = class Login {
             }
         }
         //#############################################################################################################################
-        //                                          RÉCUPÉRATION DE L'EMPLOIE DU TEMPS  
+        //                                          RÉCUPÉRATION DE L'EMPLOIS DU TEMPS  
         //#############################################################################################################################
         let schedule = '';
         let reportcard = '';
@@ -413,7 +413,7 @@ let Login = class Login {
                     courseDOM = courseDOM.firstChild;
                     let courseLeft = parseInt(courseDOM.style.left.replace('px', '').trim())
                     let courseTop = parseInt(courseDOM.style.top.replace('px', '').trim());
-                    //     //let courseWidth = courseDOM.style.width.replace('px', '');
+                    //let courseWidth = courseDOM.style.width.replace('px', '');
 
                     let courseHeight = parseInt(courseDOM.style.height.replace('px', '').trim())
                     let col = Math.ceil(courseLeft / (scheduleWidth / 5)) + 1;
@@ -427,9 +427,9 @@ let Login = class Login {
                         height: height,
                         startingTime: startingTime,
                         endingTime: endingTime,
-                        room: courseDOM.querySelectorAll('.AlignementMilieu')[2] ? courseDOM.querySelectorAll('.AlignementMilieu')[2].innerText : '',
-                        teacher: courseDOM.querySelectorAll('.AlignementMilieu')[1] ? courseDOM.querySelectorAll('.AlignementMilieu')[1].innerText : '',
-                        subject: courseDOM.querySelectorAll('.AlignementMilieu')[0] ? courseDOM.querySelectorAll('.AlignementMilieu')[0].innerText : '',
+                        room: courseDOM.querySelectorAll('.AlignementMilieu')[2] ? courseDOM.querySelectorAll('.AlignementMilieu')[courseDOM.querySelectorAll('.AlignementMilieu').length - 1].innerHTML : '',
+                        teacher: courseDOM.querySelectorAll('.AlignementMilieu')[1] ? courseDOM.querySelectorAll('.AlignementMilieu')[1].innerHTML : '',
+                        subject: courseDOM.querySelectorAll('.AlignementMilieu')[0] ? courseDOM.querySelectorAll('.AlignementMilieu')[0].innerHTML : '',
                         event: (courseDOM.querySelectorAll('tr').length == 2 ? (courseDOM.querySelectorAll('tr')[0].querySelector('.NoWrap.ie-ellipsis') ? courseDOM.querySelectorAll('tr')[0].querySelector('.NoWrap.ie-ellipsis').innerHTML : false) : false)
                     }
                     scheduleJSON.push(courseJSON);
@@ -437,6 +437,7 @@ let Login = class Login {
                 return scheduleJSON;
             });
         } catch (err) {
+            console.log(err)
             return {
                 status: false,
                 message: 'Erreur de récupération de l\'emploi du temps'

@@ -349,15 +349,11 @@ app.post('/api/\*', async(req, res) => {
                                     let formatReturnedData = notification.formatNotifications(notifications);
                                     if (formatReturnedData.status) {
                                         //on envoie les notifications à l 'utilisateur via websocket
-                                        // io.to(socketId).emit('notifications', {
-                                        //     status: true,
-                                        //     notifications: formatReturnedData.notifications
-                                        // });
-                                        //en attendant le nouveau formattage des notifications
                                         io.to(socketId).emit('notifications', {
-                                            status: false,
-                                            message: 'Erreur lors de la récupération des notifications'
+                                            status: true,
+                                            notifications: formatReturnedData.message
                                         });
+
                                     } else {
                                         io.to(socketId).emit('notifications', {
                                             status: false,

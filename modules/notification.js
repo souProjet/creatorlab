@@ -33,16 +33,17 @@ let Notification = class Notification {
 
     }
     formatNotifications(notifs) {
+        //console.log(notifs)
         let notifsResult = [];
         let notifsMatiereRegex = notifs.match(/(Nouveau message disponible dans <a title=".[^"]+)/gm) || [];
         let notifsMatiere = [];
         notifsMatiereRegex.forEach(matiere => {
             notifsMatiere.push(matiere.replace(/(Nouveau message disponible dans <a title=")/gm, ''));
         });
-        let notifsDateRegex = notifs.match(/(<span class='itsl-widget\-extrainfo'[\s]+title=".[^"]+)/gm) || [];
+        let notifsDateRegex = notifs.match(/(<span class='itsl-widget\-extrainfo'[\s]+title=".+">[\s]*.+)/gm) || [];
         let notifsDate = [];
         notifsDateRegex.forEach(date => {
-            notifsDate.push(date.replace(/(<span class='itsl-widget\-extrainfo'[\s]+title=")/gm, ''));
+            notifsDate.push(date.replace(/(<span class='itsl-widget\-extrainfo'[\s]+title=".+">[\s]*)/gm, '').trim());
         });
         let notifsAuthorRegex = notifs.match(/(<span class="h-va-bottom">.[^<\/span]+)/gm) || [];
         let notifsAuthor = [];

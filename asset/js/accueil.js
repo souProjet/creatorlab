@@ -353,13 +353,14 @@ socket.on('join', (data) => {
 //######################################################################################################################
 //                                             RÉCÉPTION DES NOTIFICATIONS
 //######################################################################################################################
+let notificationBox = document.querySelector('.notification-box');
+
 socket.on('notifications', (data) => {
     if (data.status) {
         if (data.notifications.length > 0) {
             let notifsHTML = ``;
 
-            data.notifs.forEach(notif => {
-                let notifDate = notif.date.split(' ');
+            data.notifications.forEach(notif => {
                 notifsHTML += `<li>
                 <a style="cursor:pointer;" class="courseNotif" id="${notif.courseId}">
                     <div class="drop_avatar">
@@ -369,7 +370,7 @@ socket.on('notifications', (data) => {
                         <p>
                             <strong>${notif.matiere ? notif.matiere.replace("Accéder à ", '') : ''}</strong>&nbsppar ${notif.author}</span>
                         </p>
-                        <time>${calculateTimeBetweenDateAndToday(new Date(parseInt(notifDate[3]), parseInt(monthByName[notifDate[2]]), parseInt(notifDate[1]), parseInt(notifDate[4].split(":")[0]), parseInt(notifDate[4].split(":")[1])), 0)}</time>
+                        <time>${notif.date}</time>
                     </div>
                 </a>
             </li>`;

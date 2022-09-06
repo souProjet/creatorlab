@@ -91,14 +91,14 @@ function viewCourse(id) {
                         actuHTML += `<div class="card divide-y divide-gray-100 sm:m-0 -mx-4 actu-bloc active">`;
                         for (let i = 0; i < course.actu.length; i++) {
                             let actu = course.actu[i];
-                            let actuDate = actu.created ? actu.created.split(' ') : null;
+                            let actuDate = actu.created;
                             actuHTML += `
                 <div class="flex items-start flex-wrap p-7 sm:space-x-6 mb-10">
                     <a style="cursor:pointer;" onclick="viewprofile(${parseInt(actu.authorId)}, '${(actu.authorAvatarUrl || './public/images/defaultAvatar.png')}', '${actu.authorName.replace('(44-BOUAYE)', '').replace('\'', '\\\'')}', false)" class="w-14 h-14 relative mt-1 order-1">
                         <img src="${actu.authorAvatarUrl || './public/images/defaultAvatar.png'}" alt="" class="rounded-md">
                     </a>
                     <div class="flex-1 sm:order-2">
-                        <h4 class="text-base text-gray-500 font-medium mb-2">` + (actuDate != null ? (utils.calculateTimeBetweenDateAndToday(new Date(parseInt(actuDate[3]), parseInt(monthByName[actuDate[2]]), parseInt(actuDate[1]), parseInt(actuDate[4].split(":")[0]), parseInt(actuDate[4].split(":")[1])), 0)) : '') + `</h4>
+                        <h4 class="text-base text-gray-500 font-medium mb-2">` + (actuDate != null ? (actuDate) : '') + `</h4>
                         <a style="cursor:pointer;" onclick="viewprofile(${parseInt(actu.authorId)}, '${(actu.authorAvatarUrl || './public/images/defaultAvatar.png')}', '${actu.authorName.replace('(44-BOUAYE)', '').replace('\'', '\\\'')}', false)" >
                             <h3 class="text-xl font-medium mb-4">${actu.authorName}</h3>
                         </a>
@@ -117,7 +117,7 @@ function viewCourse(id) {
                         updateHTML += `<ul class="card divide-y divide-gray-100 update-bloc plan-container">`;
                         for (let i = 0; i < course.dernModif.length; i++) {
                             let update = course.dernModif[i];
-                            let updateDate = update.date ? update.date.split(' ') : null;
+                            let updateDate = update.date;
                             let resHTML = `<div class="flex space-x-3 text-sm pb-2 mt-1 flex-wrap font-medium"><div class="text-gray-500">`;
                             if (update.res) {
                                 for (let j = 0; j < update.res.length; j++) {
@@ -137,7 +137,7 @@ function viewCourse(id) {
                         <a class="text-lg font-semibold">${update.authorName} à ajouter du contenu au cours</a>
                         ` + resHTML +
                                 `
-                        <p class="text-sm text-gray-500">` + (updateDate != null ? (utils.calculateTimeBetweenDateAndToday(new Date(parseInt(updateDate[3]), parseInt(monthByName[updateDate[2]]), parseInt(updateDate[1]), parseInt(updateDate[4].split(":")[0]), parseInt(updateDate[4].split(":")[1])), 0)) : '') + `</p>
+                        <p class="text-sm text-gray-500">` + (updateDate != null ? (updateDate) : '') + `</p>
                     </div>
                 </li>`;
                         }

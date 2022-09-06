@@ -115,7 +115,7 @@ let Course = class Course {
                 plan: []
             };
             let preview = course.course;
-            let planner = course.planner;
+            let planner = course.planner.message;
 
             let courseNameRegex = preview.match(/(<title>.[^<]+)/gm);
             courseDetailsResult.courseName = courseNameRegex[0].replace(/(<title>)/gm, '');

@@ -808,6 +808,7 @@ app.get('/api/\*', async(req, res) => {
                         //on récupère les détails des cours via E-lyco
                         if (courseID) {
                             coursesReturnedData = await course.getCourseDetail(sessionId, courseID);
+
                             if (coursesReturnedData.status) {
                                 //il faut formater les cours reçu pour avoir un beau JSON contenant les cours
                                 let courses = coursesReturnedData.message;
@@ -817,7 +818,7 @@ app.get('/api/\*', async(req, res) => {
                                     res.status(200).send({
                                         status: true,
                                         course: {
-                                            course: formatReturnedData.course,
+                                            course: formatReturnedData.data,
                                             courseId: courseID
                                         }
                                     });

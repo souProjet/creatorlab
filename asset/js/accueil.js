@@ -15,7 +15,7 @@ let avatarField2 = document.querySelector('.is_avatar');
 let userGeneralMean = document.querySelector('.user_name > p');
 
 let elycoState = false;
-let pronoteState = false;
+let pronoteState = 2;
 
 let accueilHTMLpage = ``;
 
@@ -119,8 +119,8 @@ socket.on('join', (data) => {
             mainContainer.classList.remove('hide');
             sidebar.classList.remove('hide');
             accueilHTMLpage = mainContent.innerHTML;
-
-            utils.updateSidebarLoaderState();
+            getSchedule();
+            getReportcard();
         }).catch(err => {
             console.log(err);
         });
@@ -142,16 +142,14 @@ socket.on('join', (data) => {
                     pronoteConnectInstanceCard.classList.add('text-green-500');
                     pronoteConnectInstanceCard.classList.remove('text-red-500');
                 }
-                pronoteState = true;
+                pronoteState = 1;
 
-                sidebarItems.forEach(item => {
-                    if (item.querySelector('span').innerText == 'Emplois du temps' && data.schedule) {
-                        item.classList.remove('hide')
-                    }
-                    if (item.querySelector('span').innerText == 'Mon bulletin' && data.reportcard) {
-                        item.classList.remove('hide')
-                    }
-                });
+                if (data.schedule) {
+                    getSchedule();
+                }
+                if (data.reportcard) {
+                    getReportcard();
+                }
             } else {
                 if (pronoteConnectInstanceCard) {
                     pronoteConnectInstanceCard.innerHTML = 'Fermé';
@@ -159,77 +157,12 @@ socket.on('join', (data) => {
                     pronoteConnectInstanceCard.parentNode.parentNode.style.border = "solid 1px red";
                     pronoteConnectInstanceCard.parentNode.parentNode.setAttribute('uk-tooltip', 'title: Il semblerait que Pronote soit fermé pour le moment.');
                 }
-                sidebarItems.forEach(item => {
-                    if (item.querySelector('span').innerText == 'Emplois du temps' || item.querySelector('span').innerText == 'Mon bulletin') {
-                        item.classList.add('hide');
-                    }
-                });
+                pronoteState = 0;
             }
-
-            //######################################################################################################################
-            //                                             RÉCUPÉRATION DU BULLETIN DE NOTES
-            //######################################################################################################################
-            fetch('/api/reportcard/get', {
-                method: 'GET',
-                headers: {
-                    'Application-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                }
-            }).then(res => res.json()).then(data => {
-                sidebarItems.forEach(item => {
-                    if (item.querySelector('span').innerText == 'Mon bulletin' && data.reportcard) {
-                        item.classList.remove('hide')
-                    }
-                });
-                if (data.status) {
-                    reportcard = JSON.parse(data.reportcard);
-                    let offset_mean = 4;
-                    document.querySelector('.user_name > p').style.fontSize = ".8em";
-                    let dist_mean = Math.round((reportcard.general_student - reportcard.general_class) * -100) / -100;
-                    dist_mean > offset_mean ? dist_mean = offset_mean : dist_mean < -offset_mean ? dist_mean = -offset_mean : dist_mean = dist_mean;
-                    let g_mean = Math.floor(((dist_mean + offset_mean) * 256 / (offset_mean * 2)) - 1);
-                    let r_mean = Math.floor(256 - ((dist_mean + offset_mean) * 256 / (offset_mean * 2)));
-                    document.querySelector('.user_name > p').style.color = "rgb(" + (r_mean) + ", " + (g_mean) + ", 0)";
-                    document.querySelector('.user_name > p').innerText = reportcard.general_student.toString().replace('.', ',') + ' de moyenne';
-                }
-            });
-
-            //######################################################################################################################
-            //                                             RÉCUPÉRATION DE L'EMPLOIS DU TEMPS
-            //######################################################################################################################
-            fetch('/api/schedule/get', {
-                method: 'GET',
-                headers: {
-                    'Application-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                }
-            }).then(res => res.json()).then(data => {
-                sidebarItems.forEach(item => {
-                    if (item.querySelector('span').innerText == 'Emplois du temps' && data.schedule) {
-                        item.classList.remove('hide')
-                    }
-                });
-                if (data.status) {
-                    schedule = JSON.parse(data.schedule);
-                }
-                if (!pronoteState) {
-                    let notuptodateSVG = `
-                    &nbsp;<svg uk-tooltip="title: Les données ne sont peut-être pas à jour" xmlns="http://www.w3.org/2000/svg" style="height:28px; width:24px;" fill="red" viewbox="0 0 44 44">
-                        <path d="M24 34q.7 0 1.175-.475.475-.475.475-1.175 0-.7-.475-1.175Q24.7 30.7 24 30.7q-.7 0-1.175.475-.475.475-.475 1.175 0 .7.475 1.175Q23.3 34 24 34Zm-1.35-7.65h3V13.7h-3ZM24 44q-4.1 0-7.75-1.575-3.65-1.575-6.375-4.3-2.725-2.725-4.3-6.375Q4 28.1 4 23.95q0-4.1 1.575-7.75 1.575-3.65 4.3-6.35 2.725-2.7 6.375-4.275Q19.9 4 24.05 4q4.1 0 7.75 1.575 3.65 1.575 6.35 4.275 2.7 2.7 4.275 6.35Q44 19.85 44 24q0 4.1-1.575 7.75-1.575 3.65-4.275 6.375t-6.35 4.3Q28.15 44 24 44Zm.05-3q7.05 0 12-4.975T41 23.95q0-7.05-4.95-12T24 7q-7.05 0-12.025 4.95Q7 16.9 7 24q0 7.05 4.975 12.025Q16.95 41 24.05 41ZM24 24Z" />
-                    </svg>`;
-                    sidebarItems.forEach(item => {
-                        if (item.querySelector('span').innerText == 'Emplois du temps' || item.querySelector('span').innerText == 'Mon bulletin') {
-                            item.querySelector('a').innerHTML += notuptodateSVG;
-                        }
-                    });
-                    document.querySelector('.user_name > p').innerHTML += notuptodateSVG;
-                    document.querySelector('.user_name > p').classList.add('flex');
-                }
-                utils.updateSidebarLoaderState();
-            });
         }).catch(err => {
             console.log(err);
         });
+
 
         //######################################################################################################################
         //                                   AFFICHAGE DU STOCKAGE RESTANT SUR LE CLOUD PRIVÉ
@@ -350,6 +283,113 @@ socket.on('join', (data) => {
     }
 });
 
+//######################################################################################################################
+//                                             RÉCUPÉRATION DU BULLETIN DE NOTES
+//######################################################################################################################
+function getReportcard() {
+    sidebarItems.forEach(item => {
+        if (item.querySelector('span').innerText == 'Mon bulletin') {
+            item.classList.remove('hide')
+        }
+    });
+    fetch('/api/reportcard/get', {
+        method: 'GET',
+        headers: {
+            'Application-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        }
+    }).then(res => res.json()).then(data => {
+        sidebarItems.forEach(item => {
+            if (item.querySelector('span').innerText == 'Mon bulletin') {
+                item.classList.remove('hide')
+            }
+        });
+        if (data.status) {
+            reportcard = JSON.parse(data.reportcard);
+            let offset_mean = 4;
+            document.querySelector('.user_name > p').style.fontSize = ".8em";
+            let dist_mean = Math.round((reportcard.general_student - reportcard.general_class) * -100) / -100;
+            dist_mean > offset_mean ? dist_mean = offset_mean : dist_mean < -offset_mean ? dist_mean = -offset_mean : dist_mean = dist_mean;
+            let g_mean = Math.floor(((dist_mean + offset_mean) * 256 / (offset_mean * 2)) - 1);
+            let r_mean = Math.floor(256 - ((dist_mean + offset_mean) * 256 / (offset_mean * 2)));
+            document.querySelector('.user_name > p').style.color = "rgb(" + (r_mean) + ", " + (g_mean) + ", 0)";
+            document.querySelector('.user_name > p').innerText = reportcard.general_student.toString().replace('.', ',') + ' de moyenne';
+            utils.updateSidebarLoaderState();
+            if (document.querySelector('.sidebar_inner ul li.active').querySelector('span').innerText == "Mon bulletin") {
+                document.querySelector('.sidebar_inner ul li.active').click()
+            }
+
+        }
+        if (pronoteState == 0 || pronoteState == 2) {
+            let notuptodateSVG = `
+                    &nbsp;<svg class="notuptodate" uk-tooltip="title: Les données ne sont peut-être pas à jour" xmlns="http://www.w3.org/2000/svg" style="height:28px; width:24px;" fill="red" viewbox="0 0 44 44">
+                        <path d="M24 34q.7 0 1.175-.475.475-.475.475-1.175 0-.7-.475-1.175Q24.7 30.7 24 30.7q-.7 0-1.175.475-.475.475-.475 1.175 0 .7.475 1.175Q23.3 34 24 34Zm-1.35-7.65h3V13.7h-3ZM24 44q-4.1 0-7.75-1.575-3.65-1.575-6.375-4.3-2.725-2.725-4.3-6.375Q4 28.1 4 23.95q0-4.1 1.575-7.75 1.575-3.65 4.3-6.35 2.725-2.7 6.375-4.275Q19.9 4 24.05 4q4.1 0 7.75 1.575 3.65 1.575 6.35 4.275 2.7 2.7 4.275 6.35Q44 19.85 44 24q0 4.1-1.575 7.75-1.575 3.65-4.275 6.375t-6.35 4.3Q28.15 44 24 44Zm.05-3q7.05 0 12-4.975T41 23.95q0-7.05-4.95-12T24 7q-7.05 0-12.025 4.95Q7 16.9 7 24q0 7.05 4.975 12.025Q16.95 41 24.05 41ZM24 24Z" />
+                    </svg>`;
+            sidebarItems.forEach(item => {
+                if (item.querySelector('span').innerText == 'Mon bulletin') {
+                    item.querySelector('a').innerHTML += notuptodateSVG;
+                }
+            });
+            document.querySelector('.user_name > p').innerHTML += notuptodateSVG;
+            document.querySelector('.user_name > p').classList.add('flex');
+        } else {
+            sidebarItems.forEach(item => {
+                if (item.querySelector('span').innerText == 'Mon bulletin' && item.querySelector('a').querySelector('.notuptodate')) {
+                    item.querySelector('a').querySelector('.notuptodate').remove();
+                }
+            });
+        }
+    });
+}
+//######################################################################################################################
+//                                             RÉCUPÉRATION DE L'EMPLOIS DU TEMPS
+//######################################################################################################################
+function getSchedule() {
+    sidebarItems.forEach(item => {
+        if (item.querySelector('span').innerText == 'Emplois du temps') {
+            item.classList.remove('hide')
+        }
+    });
+    fetch('/api/schedule/get', {
+        method: 'GET',
+        headers: {
+            'Application-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        }
+    }).then(res => res.json()).then(data => {
+        sidebarItems.forEach(item => {
+            if (item.querySelector('span').innerText == 'Emplois du temps') {
+                item.classList.remove('hide')
+            }
+        });
+        if (data.status) {
+            schedule = JSON.parse(data.schedule);
+            utils.updateSidebarLoaderState();
+            if (document.querySelector('.sidebar_inner ul li.active').querySelector('span').innerText == "Emplois du temps") {
+                document.querySelector('.sidebar_inner ul li.active').click()
+            }
+        }
+        if (pronoteState == 0 || pronoteState == 2) {
+            let notuptodateSVG = `
+                    &nbsp;<svg class="notuptodate" uk-tooltip="title: Les données ne sont peut-être pas à jour" xmlns="http://www.w3.org/2000/svg" style="height:28px; width:24px;" fill="red" viewbox="0 0 44 44">
+                        <path d="M24 34q.7 0 1.175-.475.475-.475.475-1.175 0-.7-.475-1.175Q24.7 30.7 24 30.7q-.7 0-1.175.475-.475.475-.475 1.175 0 .7.475 1.175Q23.3 34 24 34Zm-1.35-7.65h3V13.7h-3ZM24 44q-4.1 0-7.75-1.575-3.65-1.575-6.375-4.3-2.725-2.725-4.3-6.375Q4 28.1 4 23.95q0-4.1 1.575-7.75 1.575-3.65 4.3-6.35 2.725-2.7 6.375-4.275Q19.9 4 24.05 4q4.1 0 7.75 1.575 3.65 1.575 6.35 4.275 2.7 2.7 4.275 6.35Q44 19.85 44 24q0 4.1-1.575 7.75-1.575 3.65-4.275 6.375t-6.35 4.3Q28.15 44 24 44Zm.05-3q7.05 0 12-4.975T41 23.95q0-7.05-4.95-12T24 7q-7.05 0-12.025 4.95Q7 16.9 7 24q0 7.05 4.975 12.025Q16.95 41 24.05 41ZM24 24Z" />
+                    </svg>`;
+            sidebarItems.forEach(item => {
+                if (item.querySelector('span').innerText == 'Emplois du temps') {
+                    item.querySelector('a').innerHTML += notuptodateSVG;
+                }
+            });
+            document.querySelector('.user_name > p').innerHTML += notuptodateSVG;
+            document.querySelector('.user_name > p').classList.add('flex');
+        } else {
+            sidebarItems.forEach(item => {
+                if (item.querySelector('span').innerText == 'Emplois du temps' && item.querySelector('a').querySelector('.notuptodate')) {
+                    item.querySelector('a').querySelector('.notuptodate').remove();
+                }
+            });
+        }
+    });
+}
 //######################################################################################################################
 //                                             RÉCÉPTION DES NOTIFICATIONS
 //######################################################################################################################
@@ -648,11 +688,11 @@ function launchPage(pageName) {
                 mainContainer.classList.add('hide');
                 mainContent.innerHTML = accueilHTMLpage;
                 let pronoteConnectInstanceCard = document.querySelector('.pronote-connect-instance');
-                if (pronoteState) {
+                if (pronoteState == 1) {
                     pronoteConnectInstanceCard.innerHTML = 'Connecté';
                     pronoteConnectInstanceCard.classList.add('text-green-500');
                     pronoteConnectInstanceCard.classList.remove('text-red-500');
-                } else {
+                } else if (pronoteState == 0) {
                     pronoteConnectInstanceCard.innerHTML = 'Fermé';
                     pronoteConnectInstanceCard.classList.add('text-red-500');
                     pronoteConnectInstanceCard.parentNode.parentNode.style.border = "solid 1px red";

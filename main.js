@@ -257,10 +257,12 @@ app.post('/api/\*', async(req, res) => {
                     if (userWithSameUsername.length > 0) {
                         //si oui, cela veux dire que l'utilisateur est déjà enregistré on le met donc à jour
                         let returnData = await login.updateUserSessionIdByUsername(username, sessionId);
-                        res.cookie('token', returnData.token, {
-                            expires: new Date(Number(new Date()) + 315360000000),
-                            httpOnly: process.argv.includes('--dev') ? false : true
-                        });
+                        res.cookie('token', returnData.token,
+                            //  {
+                            //     expires: new Date(Number(new Date()) + 315360000000),
+                            //     httpOnly: process.argv.includes('--dev') ? false : true
+                            // }
+                        );
                         let shibsessionReturnedData = await login.updateShibsessionByUsername(username, shibsession);
                         if (shibsessionReturnedData.status) {
                             res.status(200).send({
@@ -278,10 +280,12 @@ app.post('/api/\*', async(req, res) => {
                         let returnData = await login.createUser(username, sessionId);
                         if (returnData.status) {
                             cloud.createUserDataProfile(returnData.token);
-                            res.cookie('token', returnData.token, {
-                                expires: new Date(Number(new Date()) + 315360000000),
-                                httpOnly: process.argv.includes('--dev') ? false : true
-                            });
+                            res.cookie('token', returnData.token,
+                                //  {
+                                //     expires: new Date(Number(new Date()) + 315360000000),
+                                //     httpOnly: process.argv.includes('--dev') ? false : true
+                                // }
+                            );
                             let shibsessionReturnedData = await login.updateShibsessionByUsername(username, shibsession);
                             if (shibsessionReturnedData.status) {
                                 res.status(200).send({

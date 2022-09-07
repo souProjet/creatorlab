@@ -309,7 +309,7 @@ app.post('/api/\*', async(req, res) => {
                     //si l'id n'est pas valide, on renvoie une erreur
                     res.status(200).send({
                         status: false,
-                        message: 'Identifiant ou mot de passe incorrect'
+                        message: returnData.message
                     });
                 }
             } else {

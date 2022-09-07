@@ -43,6 +43,32 @@ let Login = class Login {
         });
     }
     loginToFranceConnect(page, counter, username, password) {
+        // return new Promise(async(resolve, reject) => {
+        //     this.fetch('https://cas3.e-lyco.fr/discovery/WAYF?entityID=https://cas3.e-lyco.fr/shibboleth&return=https://cas3.e-lyco.fr/Shibboleth.sso/Login?SAMLDS=1&', {
+        //         method: 'GET'
+        //     }).then(res => {
+        //         let JSESSIONID = res.headers.get('set-cookie').split('JSESSIONID=')[1].split(';')[0]
+        //         console.log('JSESSIONID : ' + JSESSIONID)
+
+        //         this.fetch('https://cas3.e-lyco.fr/Shibboleth.sso/Login?SAMLDS=1&entityID=https://educonnect.education.gouv.fr/idp', {
+        //             method: 'GET'
+        //         }).then(res2 => {
+        //             let JSESSIONID = res2.headers.get('set-cookie').split(',')[0].split('JSESSIONID=')[1].split(';')[0]
+        //             console.log('new JSESSIONID :' + JSESSIONID)
+
+        //     this.fetch('https://educonnect.education.gouv.fr/idp/profile/SAML2/Redirect/SSO?execution=e2s1', {
+        //             method: 'GET',
+        //             Cookie: 'JSESSIONID=' + JSESSIONID,
+        //             Referer: 'https://cas3.e-lyco.fr/'
+        //         }).then(res3 => res3.text())
+        //         .then(body => {
+        //             console.log(body)
+        //         })
+        //     resolve({
+        //         status: false,
+        //         message: 'Test en cours'
+        //     });
+        // });
         try {
 
             return new Promise(async(resolve, reject) => {
@@ -105,7 +131,6 @@ let Login = class Login {
                 status: false,
                 message: 'Une erreur est survenue'
             };
-
         }
     }
     getUserByUsername(username) {

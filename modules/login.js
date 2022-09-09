@@ -42,7 +42,7 @@ let Login = class Login {
             });
         });
     }
-    loginToFranceConnect(page, counter, username, password) {
+    loginToEduconnect(page, counter, username, password) {
         // return new Promise(async(resolve, reject) => {
         //     this.fetch('https://cas3.e-lyco.fr/discovery/WAYF?entityID=https://cas3.e-lyco.fr/shibboleth&return=https://cas3.e-lyco.fr/Shibboleth.sso/Login?SAMLDS=1&', {
         //         method: 'GET'
@@ -102,7 +102,7 @@ let Login = class Login {
 
                     shibsession = response.headers()['set-cookie'] ? response.headers()['set-cookie'].split(';')[0] : '';
                     if (shibsession.indexOf("_shibsession_") == -1) {
-                        return this.loginToFranceConnect(page, counter + 1, username, password);
+                        return this.loginToEduconnect(page, counter + 1, username, password);
                     }
                 }
                 await page.waitForTimeout(2000);

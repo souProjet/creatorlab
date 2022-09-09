@@ -247,7 +247,7 @@ app.post('/api/\*', async(req, res) => {
             if (username && password && username.length > 0 && password.length > 0) {
                 const browser = await puppeteer.launch({ headless: true });
                 const page = await browser.newPage();
-                let returnData = await login.loginToFranceConnect(page, 0, username, password);
+                let returnData = await login.loginToEduconnect(page, 0, username, password);
                 browser.close();
                 if (returnData.status) {
                     let sessionId = returnData.sessionId;

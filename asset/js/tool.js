@@ -13,14 +13,16 @@ sidebarItemTool.addEventListener('click', function() {
             <div class="flex-1">
                 <h2 class="text-2xl font-semibold">Voici une liste d'outils séléctionné pour vous par catégorie</h2>  
             </div>  
-        </div>
+        </div>`;
+
+    //prise de note et organisation
+    mainContent.innerHTML += `
         <div class="my-6 flex items-center justify-between">
             <div>
                 <h2 class="text-xl font-semibold">Prise de note et organisation</h2>
             </div>
         </div>`;
 
-    //prise de note et organisation    
     mainContent.innerHTML +=
         `<div class="relative uk-slider" uk-slider="finite: true">       
             <div class="uk-slider-container px-1 py-3">

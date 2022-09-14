@@ -354,6 +354,7 @@ app.post('/api/\*', async(req, res) => {
                                         //on envoie les notifications à l 'utilisateur via websocket
 
                                         let unseen = await notification.getUnSeenNotifications(sessionId);
+                                        notification.updateReadNotifications(formatReturnedData, unseen.status ? unseen.nbrunseen : 0, sessionId)
                                         io.to(socketId).emit('notifications', {
                                             status: true,
                                             notifications: formatReturnedData.message,
@@ -385,6 +386,7 @@ app.post('/api/\*', async(req, res) => {
                                     if (formatReturnedData.status) {
                                         //on envoie les messages privés à l'utilisateur via websocket
                                         let unseen = await privatemessage.getUnSeenPrivateMessages(sessionId);
+                                        //privatemessage.updateReadPrivateMessage(formatReturnedData, unseen.status ? unseen.nbrunseen : 0, sessionId)
 
                                         io.to(socketId).emit('privatemessages', {
                                             status: true,

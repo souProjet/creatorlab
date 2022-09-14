@@ -163,5 +163,21 @@ let Privatemessage = class Privatemessage {
             });
         return response;
     }
+
+    // updateReadPrivateMessage(formatedPrivateMessage, nbrunseen, sessionId) {
+    //     let idsUnSeenPrivate = '';
+    //     for (let i = 0; i < nbrunseen; i++) {
+    //         idsUnSeenNotifs += formatedPrivateMessage[formatedPrivateMessage.length - (i + 1)].id + (i != (nbrunseen - 1) ? ',' : null)
+    //     }
+    //     this.fetch('https://elyco.itslearning.com/restapi/notifications/updateReadMessages', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Cookie': `ASP.NET_SessionId=${sessionId}`
+    //         },
+    //         body: JSON.stringify({
+    //             messages: idsUnSeenNotifs
+    //         })
+    //     })
+    // }
 }
 module.exports = Privatemessage;

@@ -33,7 +33,6 @@ let Notification = class Notification {
 
     }
     formatNotifications(notifs) {
-        //console.log(notifs)
         let notifsResult = [];
         let notifsMatiereRegex = notifs.match(/(Nouveau message disponible dans <a title=".[^"]+)/gm) || [];
         let notifsMatiere = [];
@@ -61,13 +60,20 @@ let Notification = class Notification {
         notifsCourseIdRegex.forEach(courseId => {
             notifsCourseId.push(courseId.replace(/(\/ContentArea\/ContentArea\.aspx\?LocationType=1&amp;LocationID=)/gm, ''));
         });
+
+        let notifsIdRegex = notifs.match(/data-id="[0-9]{9}/gm) || []
+        let notifsId = []
+        notifsIdRegex.forEach(id => {
+            notifsId.push(id.replace('data-id="', ''));
+        })
         for (let i = 0; i < notifsAuthor.length; i++) {
             notifsResult.push({
                 matiere: notifsMatiere[i],
                 date: notifsDate[i],
                 author: notifsAuthor[i],
                 img: notifsImg[i],
-                courseId: notifsCourseId[i]
+                courseId: notifsCourseId[i],
+                id: notifsId[i]
             });
         }
         return {
@@ -98,6 +104,22 @@ let Notification = class Notification {
                 }
             });
         return response;
+    }
+
+    updateReadNotifications(formatedNotifs, nbrunseen, sessionId) {
+        let idsUnSeenNotifs = '';
+        for (let i = 0; i < nbrunseen; i++) {
+            idsUnSeenNotifs += formatedNotifs[formatedNotifs.length - (i + 1)].id + (i != (nbrunseen - 1) ? ',' : null)
+        }
+        this.fetch('https://elyco.itslearning.com/restapi/notifications/updateReadNotifications', {
+            method: 'POST',
+            headers: {
+                'Cookie': `ASP.NET_SessionId=${sessionId}`
+            },
+            body: JSON.stringify({
+                notifications: idsUnSeenNotifs
+            })
+        })
     }
 }
 module.exports = Notification;

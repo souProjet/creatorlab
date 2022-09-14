@@ -336,6 +336,7 @@ function getReportcard() {
             sidebarItems.forEach(item => {
                 if (item.querySelector('span').innerText == 'Mon bulletin' && item.querySelector('a').querySelector('.notuptodate')) {
                     item.querySelector('a').querySelector('.notuptodate').remove();
+                    document.querySelector('.user_name > p > .notuptodate').remove();
                 }
             });
         }
@@ -379,8 +380,6 @@ function getSchedule() {
                     item.querySelector('a').innerHTML += notuptodateSVG;
                 }
             });
-            document.querySelector('.user_name > p').innerHTML += notuptodateSVG;
-            document.querySelector('.user_name > p').classList.add('flex');
         } else {
             sidebarItems.forEach(item => {
                 if (item.querySelector('span').innerText == 'Emplois du temps' && item.querySelector('a').querySelector('.notuptodate')) {

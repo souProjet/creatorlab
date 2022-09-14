@@ -140,5 +140,28 @@ let Privatemessage = class Privatemessage {
                 console.log(err);
             });
     }
+
+    async getUnSeenPrivateMessages(sessionId) {
+        let response = await this.fetch(`https://elyco.itslearning.com/RestApi/keepalive/online/v1`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': `ASP.NET_SessionId=${sessionId}`
+                }
+            }).then(res => res.json())
+            .then(body => {
+                return {
+                    status: true,
+                    nbrunseen: body.UnreadMessages,
+                    message: 'Succès'
+                };
+            }).catch(err => {
+                return {
+                    status: false,
+                    message: err
+                }
+            });
+        return response;
+    }
 }
 module.exports = Privatemessage;

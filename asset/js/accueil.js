@@ -396,6 +396,9 @@ let notificationBox = document.querySelector('.notification-box');
 
 socket.on('notifications', (data) => {
     if (data.status) {
+        if (data.nbrunseen > 0) {
+            document.querySelector('.notif-count') ? document.querySelector('.notif-count').innerHTML = data.nbrunseen : document.querySelector('.notif-btn').innerHTML += `<span class="notif-count">${data.nbrunseen}</span>`;
+        }
         if (data.notifications.length > 0) {
             let notifsHTML = ``;
 
@@ -463,6 +466,9 @@ socket.on('privatemessages', (data) => {
     let messageBox = document.querySelector('.message-box');
     document.querySelector('.message-reply') ? document.querySelector('.message-reply').remove() : '';
     if (data.status) {
+        if (data.nbrunseen > 0) {
+            document.querySelector('.message-count') ? document.querySelector('.message-count').innerHTML = data.nbrunseen : document.querySelector('.message-btn').innerHTML += `<span class="notif-count">${data.nbrunseen}</span>`;
+        }
         if (data.privatemessages.length > 0) {
             let messagesHTML = ``;
             data.privatemessages.forEach(message => {

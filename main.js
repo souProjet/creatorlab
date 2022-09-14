@@ -255,12 +255,7 @@ app.post('/api/\*', async(req, res) => {
                     if (userWithSameUsername.length > 0) {
                         //si oui, cela veux dire que l'utilisateur est déjà enregistré on le met donc à jour
                         let returnData = await login.updateUserSessionIdByUsername(username, sessionId);
-                        res.cookie('token', returnData.token,
-                            //  {
-                            //     expires: new Date(Number(new Date()) + 315360000000),
-                            //     httpOnly: process.argv.includes('--dev') ? false : true
-                            // }
-                        );
+                        res.cookie('token', returnData.token);
                         let shibsessionReturnedData = await login.updateShibsessionByUsername(username, shibsession);
                         if (shibsessionReturnedData.status) {
                             res.status(200).send({
@@ -357,9 +352,12 @@ app.post('/api/\*', async(req, res) => {
                                     let formatReturnedData = notification.formatNotifications(notifications);
                                     if (formatReturnedData.status) {
                                         //on envoie les notifications à l 'utilisateur via websocket
+
+                                        let unseen = await notification.getUnSeenNotifications(sessionId);
                                         io.to(socketId).emit('notifications', {
                                             status: true,
-                                            notifications: formatReturnedData.message
+                                            notifications: formatReturnedData.message,
+                                            nbrunseen: unseen.status ? unseen.nbrunseen : 0
                                         });
 
                                     } else {
@@ -386,9 +384,12 @@ app.post('/api/\*', async(req, res) => {
                                     let formatReturnedData = privatemessage.formatPrivatemessages(privatemessages);
                                     if (formatReturnedData.status) {
                                         //on envoie les messages privés à l'utilisateur via websocket
+                                        let unseen = await privatemessage.getUnSeenPrivateMessages(sessionId);
+
                                         io.to(socketId).emit('privatemessages', {
                                             status: true,
-                                            privatemessages: formatReturnedData.privatemessages
+                                            privatemessages: formatReturnedData.privatemessages,
+                                            nbrunseen: unseen.status ? unseen.nbrunseen : 0
                                         });
                                     } else {
                                         io.to(socketId).emit('privatemessages', {

@@ -1,8 +1,10 @@
 let Login = class Login {
-    constructor(db, fetch, fs) {
+    constructor(db, fetch, fs, https, puppeteer) {
         this.db = db;
         this.fetch = fetch;
         this.fs = fs;
+        this.https = https;
+        this.puppeteer = puppeteer;
         this.checkSessionIdReturn = {
             status: false,
             message: 'Une erreur est survenue'
@@ -42,81 +44,126 @@ let Login = class Login {
             });
         });
     }
-    loginToEduconnect(page, counter, username, password) {
-        // return new Promise(async(resolve, reject) => {
-        //     this.fetch('https://cas3.e-lyco.fr/discovery/WAYF?entityID=https://cas3.e-lyco.fr/shibboleth&return=https://cas3.e-lyco.fr/Shibboleth.sso/Login?SAMLDS=1&', {
-        //         method: 'GET'
-        //     }).then(res => {
-        //         let JSESSIONID = res.headers.get('set-cookie').split('JSESSIONID=')[1].split(';')[0]
-        //         console.log('JSESSIONID : ' + JSESSIONID)
-
-        //         this.fetch('https://cas3.e-lyco.fr/Shibboleth.sso/Login?SAMLDS=1&entityID=https://educonnect.education.gouv.fr/idp', {
+    loginToEduconnect(counter, username, password) {
+        // try {
+        //     return new Promise((resolve, reject) => {
+        //         let https = this.https;
+        //         const req1 = https.request({
+        //             hostname: 'cas3.e-lyco.fr',
+        //             port: 443,
+        //             path: '/Shibboleth.sso/Login?SAMLDS=1&entityID=https%3A%2F%2Feduconnect.education.gouv.fr%2Fidp',
         //             method: 'GET'
-        //         }).then(res2 => {
-        //             let JSESSIONID = res2.headers.get('set-cookie').split(',')[0].split('JSESSIONID=')[1].split(';')[0]
-        //             console.log('new JSESSIONID :' + JSESSIONID)
+        //         }, async(res1) => {
+        //             let location = res1.headers.location;
+        //             const browser = await this.puppeteer.launch({ headless: true });
+        //             const page = await browser.newPage();
+        //             await page.goto(location);
+        //             let educonnectCookies = await page.cookies();
+        //             let JSESSIONID = educonnectCookies.find(c => c.name == 'JSESSIONID').value;
+        //             await page.$eval('#username', (el, username) => el.value = username, username);
+        //             await page.$eval('#password', (el, password) => el.value = password, password);
+        //             await page.evaluate((ids) => {
+        //                 document.querySelector('#username').value = ids.username;
+        //                 document.querySelector('#password').value = ids.password;
+        //                 document.querySelector('#bouton_valider').click();
+        //             }, { "username": username, "password": password })
+        //             await page.waitForTimeout(2000)
+        //             if (await page.url().indexOf('educonnect.education.gouv.fr') != -1) {
+        //                 //les identifiants sont incorrects
+        //                 reject({
+        //                     status: false,
+        //                     message: 'Identifiants incorrects'
+        //                 });
+        //             } else {
+        //                 let cookie = await page.cookies();
+        //                 let shibsession = cookie.find(c => c.name.indexOf('_shibsession_') != -1)
+        //                 shibsession = shibsession.name + '=' + shibsession.value;
+        //                 console.log(JSESSIONID)
 
-        //     this.fetch('https://educonnect.education.gouv.fr/idp/profile/SAML2/Redirect/SSO?execution=e2s1', {
-        //             method: 'GET',
-        //             Cookie: 'JSESSIONID=' + JSESSIONID,
-        //             Referer: 'https://cas3.e-lyco.fr/'
-        //         }).then(res3 => res3.text())
-        //         .then(body => {
-        //             console.log(body)
-        //         })
-        //     resolve({
-        //         status: false,
-        //         message: 'Test en cours'
+        //                 await page.goto('https://elyco.itslearning.com/DashboardMenu.aspx');
+        //                 await page.waitForTimeout(2000)
+        //                 console.log(await page.cookies())
+        //                 // const req2 = https.request({
+        //                 //     hostname: 'elyco.itslearning.com',
+        //                 //     port: 443,
+        //                 //     path: '/DashboardMenu.aspx',
+        //                 //     method: 'GET'
+        //                 // }, (res2) => {
+        //                 //     let sessionId = res2.headers['set-cookie'].find(c => c.indexOf('ASP.NET_SessionId=') != -1).split('ASP.NET_SessionId=')[1].split(';')[0]
+        //                 //         //if (res2.status == 200) {
+        //                 //     console.log(sessionId);
+        //                 //     console.log(shibsession)
+        //                 //     resolve({
+        //                 //         status: true,
+        //                 //         message: 'Connexion réussie',
+        //                 //         sessionId: sessionId,
+        //                 //         shibsession: shibsession
+        //                 //     });
+        //                 //     // } else {
+        //                 //     //     resolve({
+        //                 //     //         status: false,
+        //                 //     //         message: 'Une erreur est survenue'
+        //                 //     //     })
+        //                 //     // }
+
+        //                 // })
+        //                 // req2.on('error', (e) => {
+        //                 //     console.error(e);
+        //                 // });
+        //                 // req2.end();
+
+        //             }
+        //             await page.screenshot({ path: 'screenshot.png' });
+        //             browser.close();
+
+        //         });
+
+        //         req1.on('error', (e) => {
+        //             console.error(e);
+        //         });
+        //         req1.end();
         //     });
-        // });
+        // } catch (err) {
+        //     //console.error('[CREATOR LAB] Erreur de scraping', err);
+        //     return {
+        //         status: false,
+        //         message: 'Une erreur est survenue'
+        //     };
+        // }
         try {
 
             return new Promise(async(resolve, reject) => {
-                // if (counter == 3) {
-                //     reject({
-                //         status: false,
-                //         message: 'Une erreur est survenue'
-                //     });
-                // }
-                await page.goto('https://www.e-lyco.fr/');
-                await page.waitForTimeout(2000);
-                //await page.$eval('.menu > li > a', el => el.click());
+                const browser = await this.puppeteer.launch({ headless: true });
+                const page = await browser.newPage();
+
+                await page.goto('https://elyco.itslearning.com/elogin/autologin.aspx');
+                await page.waitForTimeout(1000);
                 await page.evaluate(() => {
-                    document.querySelector('.menu > li > a') ? document.querySelector('.menu > li > a').click() : null;
-                });
-
+                    document.querySelector('.champ').click();
+                    setTimeout(document.querySelector('#valider').click(), 500);
+                })
                 await page.waitForTimeout(1000);
-                await page.$eval('.champ', el => el.click());
-                await page.waitForTimeout(500);
-                await page.$eval('#valider', el => el.click());
-                await page.waitForTimeout(1000);
-                // await page.waitForSelector('#bouton_eleve', { visible: true });
-                await page.$eval('#bouton_eleve', el => el.click());
-                await page.$eval('#username', (el, username) => el.value = username, username);
-                await page.$eval('#password', (el, password) => el.value = password, password);
-                await page.click('#bouton_valider');
-                let shibsession = '';
-                if (counter != 3) {
-                    //écouter la réponse de la requête POST
-                    let response = await page.waitForResponse(response => response.url());
 
-                    shibsession = response.headers()['set-cookie'] ? response.headers()['set-cookie'].split(';')[0] : '';
-                    if (shibsession.indexOf("_shibsession_") == -1) {
-                        return this.loginToEduconnect(page, counter + 1, username, password);
-                    }
-                }
-                await page.waitForTimeout(2000);
+                await page.evaluate((ids) => {
+                    document.querySelector('#username').value = ids.username;
+                    document.querySelector('#password').value = ids.password;
+                    document.querySelector('#bouton_valider').click();
+                }, { "username": username, "password": password });
+                await page.waitForTimeout(1500);
 
-                if (await page.url() == 'https://educonnect.education.gouv.fr/idp/profile/SAML2/Redirect/SSO?execution=e1s2') {
+                if (await page.url().indexOf('educonnect.education.gouv.fr') != -1) {
                     //les identifiants sont incorrects
-                    resolve({
+                    reject({
                         status: false,
                         message: 'Identifiants incorrects'
                     });
                 } else {
-                    //les identifiants sont corrects
                     let cookie = await page.cookies();
                     let sessionId = cookie.find(c => c.name == 'ASP.NET_SessionId').value;
+                    await page.goto('https://cas3.e-lyco.fr');
+                    let cas3Cookies = await page.cookies();
+                    let shibsession = cas3Cookies.find(c => c.name.indexOf('_shibsession_') != -1)
+                    shibsession = shibsession.name + '=' + shibsession.value;
                     resolve({
                         status: true,
                         message: 'Connexion réussie',
@@ -124,6 +171,7 @@ let Login = class Login {
                         shibsession: shibsession
                     });
                 }
+                browser.close();
             });
         } catch (err) {
             //console.error('[CREATOR LAB] Erreur de scraping', err);

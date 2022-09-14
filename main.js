@@ -3,6 +3,7 @@ const fileupload = require('express-fileupload');
 const mysql = require('mysql');
 const app = express();
 const http = require('http');
+const https = require('https');
 const server = http.createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server);
@@ -55,7 +56,7 @@ const Reportcard = require('./modules/reportcard');
 //#############################################################################################################################
 //                                               INSTANCIATION DES MODULES
 //#############################################################################################################################
-const login = new Login(db, fetch, fs);
+const login = new Login(db, fetch, fs, https, puppeteer);
 const cloud = new Cloud(fs, utf8);
 const privatemessage = new Privatemessage(fetch);
 const user = new User(db);
@@ -245,10 +246,7 @@ app.post('/api/\*', async(req, res) => {
             let username = escapeHTML(req.body.username).toLowerCase();
             let password = escapeHTML(req.body.password);
             if (username && password && username.length > 0 && password.length > 0) {
-                const browser = await puppeteer.launch({ headless: true });
-                const page = await browser.newPage();
-                let returnData = await login.loginToEduconnect(page, 0, username, password);
-                browser.close();
+                let returnData = await login.loginToEduconnect(0, username, password);
                 if (returnData.status) {
                     let sessionId = returnData.sessionId;
                     let shibsession = returnData.shibsession;

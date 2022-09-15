@@ -851,30 +851,32 @@ app.get('/api/\*', async(req, res) => {
                         let courseID = escapeHTML(params[2]);
                         let planID = escapeHTML(params[3]);
                         if (courseID && planID) {
-                            // //on récupère le plan via E-lyco
-                            // planReturnedData = await course.getPlan(sessionId, courseID, planID);
-                            // if (planReturnedData.status) {
-                            //     //il faut formater le plan reçu pour avoir un beau JSON contenant le plan
-                            //     let plan = planReturnedData.message;
-                            //     let formatReturnedData = course.formatPlan(plan);
-                            //     if (formatReturnedData.status) {
-                            //         //on envoie le plan à l'utilisateur en response
-                            //         res.status(200).send({
-                            //             status: true,
-                            //             plan: formatReturnedData.plan
-                            //         });
-                            //     } else {
-                            //         res.status(200).send({
-                            //             status: false,
-                            //             message: 'Aucun plan disponible'
-                            //         });
-                            //     }
-                            // } else {
-                            //     res.status(200).send({
-                            //         status: false,
-                            //         message: 'Erreur lors de la récupération du plan'
-                            //     });
-                            // }
+                            //on récupère le plan via E-lyco
+                            planReturnedData = await course.getPlan(sessionId, courseID, planID);
+                            if (planReturnedData.status) {
+                                //il faut formater le plan reçu pour avoir un beau JSON contenant le plan
+                                let plan = planReturnedData.message.gridData;
+                                let formatReturnedData = course.formatPlan(plan);
+                                if (formatReturnedData.status) {
+                                    //on envoie le plan à l'utilisateur en response
+                                    res.status(200).send({
+                                        status: true,
+                                        plan: formatReturnedData.plan,
+                                        planId: planID,
+                                        courseId: courseID
+                                    });
+                                } else {
+                                    res.status(200).send({
+                                        status: false,
+                                        message: 'Aucun plan disponible'
+                                    });
+                                }
+                            } else {
+                                res.status(200).send({
+                                    status: false,
+                                    message: 'Erreur lors de la récupération du plan'
+                                });
+                            }
                         }
                     } else {
                         res.status(200).send({

@@ -48,7 +48,7 @@ sidebarItemCourse.addEventListener('click', function() {
                     }
                     if (i == data.courses.length - 1) {
                         for (let j = 0; j < 3 - count; j++) {
-                            coursesHTML += `<div class="w-full max-w-sm rounded overflow-hidden shadow-lg mb-10 mt-10"></div>`;
+                            coursesHTML += `<div style="opacity:0;" class="w-full max-w-sm rounded overflow-hidden shadow-lg mb-10 mt-10"></div>`;
                         }
                         if (!state) {
                             coursesHTML += '</div>';
@@ -72,7 +72,7 @@ sidebarItemCourse.addEventListener('click', function() {
     });
 });
 
-function viewCourse(id) {
+function viewCourse(id, isforplan = false) {
     mainContainer.classList.add('hide');
     fetch('./api/courses/details/' + id, {
             method: 'GET',
@@ -83,9 +83,11 @@ function viewCourse(id) {
         }).then(res => res.json()).then(data => {
             if (data.status) {
                 if (data.course) {
+
                     let course = data.course.course;
                     let courseId = data.course.courseId;
-                    //Ajout des actualitées au DOM
+
+                    //             //Ajout des actualitées au DOM
                     let actuHTML = ``;
                     if (course.actu.length != 0) {
                         actuHTML += `<div class="card divide-y divide-gray-100 sm:m-0 -mx-4 actu-bloc active">`;
@@ -93,20 +95,20 @@ function viewCourse(id) {
                             let actu = course.actu[i];
                             let actuDate = actu.created;
                             actuHTML += `
-                <div class="flex items-start flex-wrap p-7 sm:space-x-6 mb-10">
-                    <a style="cursor:pointer;" onclick="viewprofile(${parseInt(actu.authorId)}, '${(actu.authorAvatarUrl || './public/images/defaultAvatar.png')}', '${actu.authorName.replace('(44-BOUAYE)', '').replace('\'', '\\\'')}', false)" class="w-14 h-14 relative mt-1 order-1">
-                        <img src="${actu.authorAvatarUrl || './public/images/defaultAvatar.png'}" alt="" class="rounded-md">
-                    </a>
-                    <div class="flex-1 sm:order-2">
-                        <h4 class="text-base text-gray-500 font-medium mb-2">` + (actuDate != null ? (actuDate) : '') + `</h4>
-                        <a style="cursor:pointer;" onclick="viewprofile(${parseInt(actu.authorId)}, '${(actu.authorAvatarUrl || './public/images/defaultAvatar.png')}', '${actu.authorName.replace('(44-BOUAYE)', '').replace('\'', '\\\'')}', false)" >
-                            <h3 class="text-xl font-medium mb-4">${actu.authorName}</h3>
-                        </a>
-                        <p>
-                        ${actu.text ? utils.replaceURLWithHTMLLinks(actu.text.replace(/\n/g, '<br>')) : ''}
-                        </p>
-                    </div>
-                </div>`;
+                            <div class="flex items-start flex-wrap p-7 sm:space-x-6 mb-10">
+                                <a style="cursor:pointer;" onclick="viewprofile(${parseInt(actu.authorId)}, '${(actu.authorAvatarUrl || './public/images/defaultAvatar.png')}', '${actu.authorName.replace('(44-BOUAYE)', '').replace('\'', '\\\'')}', false)" class="w-14 h-14 relative mt-1 order-1">
+                                    <img src="${actu.authorAvatarUrl || './public/images/defaultAvatar.png'}" alt="" class="rounded-md">
+                                </a>
+                                <div class="flex-1 sm:order-2">
+                                    <h4 class="text-base text-gray-500 font-medium mb-2">` + (actuDate != null ? (actuDate) : '') + `</h4>
+                                    <a style="cursor:pointer;" onclick="viewprofile(${parseInt(actu.authorId)}, '${(actu.authorAvatarUrl || './public/images/defaultAvatar.png')}', '${actu.authorName.replace('(44-BOUAYE)', '').replace('\'', '\\\'')}', false)" >
+                                        <h3 class="text-xl font-medium mb-4">${actu.authorName}</h3>
+                                    </a>
+                                    <p>
+                                    ${actu.text ? utils.replaceURLWithHTMLLinks(actu.text.replace(/\n/g, '<br>')) : ''}
+                                    </p>
+                                </div>
+                            </div>`;
                         }
                         actuHTML += `</div>`;
                     }
@@ -131,15 +133,15 @@ function viewCourse(id) {
                             resHTML += `</div></div>`;
 
                             updateHTML += `
-                <li class="update-item">
-                    <div class="flex items-start flex-wrap p-7 sm:space-x-6">
-                    <div class="flex-1 sm:order-2">
-                        <a class="text-lg font-semibold">${update.authorName} à ajouter du contenu au cours</a>
-                        ` + resHTML +
+                            <li class="update-item">
+                                <div class="flex items-start flex-wrap p-7 sm:space-x-6">
+                                <div class="flex-1 sm:order-2">
+                                    <a class="text-lg font-semibold">${update.authorName} à ajouter du contenu au cours</a>
+                                    ` + resHTML +
                                 `
-                        <p class="text-sm text-gray-500">` + (updateDate != null ? (updateDate) : '') + `</p>
-                    </div>
-                </li>`;
+                                    <p class="text-sm text-gray-500">` + (updateDate != null ? (updateDate) : '') + `</p>
+                                </div>
+                            </li>`;
                         }
                         updateHTML += `</ul><br>`;
                     }
@@ -153,29 +155,29 @@ function viewCourse(id) {
                         for (let i = 0; i < course.plan.length; i++) {
                             let plan = course.plan[i];
                             planHTML += `
-                <li class="plan-item" ` + (plan.dates ? `onclick="viewPlan('${plan.id}', parseInt(${courseId}))"` : ``) + ` id="${plan.id}">
-                    <div class="flex items-center space-x-5 p-7">
-                        <img src="./public/images/courseicon/${utils.courseToIcon(course.courseName)}.png" alt="" class="w-12 h-12 rounded-full">
-                        <div class="flex-1">
-                            <a class="text-lg font-semibold">${plan.title}</a>
-                            <div class="flex space-x-3 text-sm pb-2 mt-1 flex-wrap font-medium"> 
-                                <div class="text-gray-500">${plan.dates || ''}</div>
-                                <div class="text-gray-500">${plan.nbrPlan || ''}</div>
-                            </div>
-                        </div>
-                    </div>
-                </li>`;
+                            <li class="plan-item" ` + (plan.dates ? `onclick="viewPlan('${plan.id}', parseInt(${courseId}))"` : ``) + ` id="${plan.id}">
+                                <div class="flex items-center space-x-5 p-7">
+                                    <img src="./public/images/courseicon/${utils.courseToIcon(course.courseName)}.png" alt="" class="w-12 h-12 rounded-full">
+                                    <div class="flex-1">
+                                        <a class="text-lg font-semibold">${plan.title}</a>
+                                        <div class="flex space-x-3 text-sm pb-2 mt-1 flex-wrap font-medium"> 
+                                            <div class="text-gray-500">${plan.dates || ''}</div>
+                                            <div class="text-gray-500">${plan.nbrPlan || ''}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>`;
                         }
                         planHTML += `</ul><br>`;
                     }
                     mainContent.innerHTML = `<h1 class="text-3xl font-semibold text-center">${course.courseName}</h1><br>` + (!(actuHTML == '' && planHTML == '' && updateHTML == '') ? `
-        <nav class="responsive-nav border-b md:m-0 -mx-4 nav-course">
-            <ul style="overflow:hidden;">
-                ` + (actuHTML != '' ? '<li class="active"><a style="cursor:pointer;" class="lg:px-2">Actualitées</a></li>' : '') + `
-                ` + (updateHTML != '' ? '<li ' + (actuHTML == '' ? 'class="active"' : '') + '><a style="cursor:pointer;" class="lg:px-2">Mises à jour</a></li>' : '') + `
-                ` + (planHTML != '' ? '<li ' + (actuHTML == '' && updateHTML == '' ? 'class="active"' : '') + '><a style="cursor:pointer;" class="lg:px-2">Plan</a></li>' : '') + `
-            </ul>
-        </nav><br>` : `<hr><br>`) + (actuHTML == '' && planHTML == '' && updateHTML == '' ? `<h2 class="text-xl  text-center">Aucun contenu dans cet espace de travail </h2>` : actuHTML + planHTML + updateHTML);
+                    <nav class="responsive-nav border-b md:m-0 -mx-4 nav-course">
+                        <ul style="overflow:hidden;">
+                            ` + (actuHTML != '' ? '<li class="active"><a style="cursor:pointer;" class="lg:px-2">Actualitées</a></li>' : '') + `
+                            ` + (updateHTML != '' ? '<li ' + (actuHTML == '' ? 'class="active"' : '') + '><a style="cursor:pointer;" class="lg:px-2">Mises à jour</a></li>' : '') + `
+                            ` + (planHTML != '' ? '<li ' + (actuHTML == '' && updateHTML == '' ? 'class="active"' : '') + '><a style="cursor:pointer;" class="lg:px-2">Plan</a></li>' : '') + `
+                        </ul>
+                    </nav><br>` : `<hr><br>`) + (actuHTML == '' && planHTML == '' && updateHTML == '' ? `<h2 class="text-xl  text-center">Aucun contenu dans cet espace de travail </h2>` : actuHTML + planHTML + updateHTML);
                     if (!(actuHTML == '' && planHTML == '' && updateHTML == '')) {
                         let actuBloc = document.querySelector('.actu-bloc');
                         let updateBloc = document.querySelector('.update-bloc');
@@ -215,6 +217,15 @@ function viewCourse(id) {
                 top: 0,
                 left: 0
             });
+            if (isforplan) {
+                let navCourseLi = document.querySelectorAll('.nav-course li');
+
+                for (let i = 0; i < navCourseLi.length; i++) {
+                    if (navCourseLi[i].querySelector('a').innerText == 'Plan') {
+                        navCourseLi[i].click();
+                    }
+                }
+            }
             mainContainer.classList.remove('hide');
         })
         .catch(err => {
@@ -222,83 +233,81 @@ function viewCourse(id) {
         });
 }
 
-// function viewPlan(id, courseId) {
-//     socket.emit('getplandetails', {
-//         token: token,
-//         courseId: courseId,
-//         planId: id
-//     });
-//     let planItems = document.querySelectorAll('.plan-item');
+function viewPlan(id, courseId) {
 
-//     planItems.forEach((item) => {
-//         if (item.id != id) {
-//             item.classList.add('hide');
-//         }
-//     });
-// }
+    fetch('./api/courses/plan/' + courseId + '/' + id, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(res => res.json()).then(data => {
+                if (data.status) {
+                    if (data.plan && data.plan.length != 0) {
+                        let planItems = document.querySelectorAll('.plan-item');
+                        planItems.forEach((item) => {
+                            if (item.id != data.planId) {
+                                item.remove();
+                            } else {
+                                item.removeAttribute('onclick')
+                                item.removeAttribute('class');
+                            }
+                        });
+                        let planContainer = document.querySelector('.plan-container');
+                        document.querySelector('h1').classList.add('flex')
+                        document.querySelector('h1').insertAdjacentHTML('afterbegin', `<img class="pr-10 back-plan-btn" style="height:30px;cursor:pointer;" src="./public/images/back.svg">`);
+                        document.querySelector('.back-plan-btn').addEventListener('click', () => {
+                            mainContainer.classList.add('hide');
+                            viewCourse(data.courseId, true);
+                        });
+                        for (let i = 0; i < data.plan.length; i++) {
+                            let planJSON = data.plan[i];
+                            let planHTML = `
+                                <li class="m-10">
+                                    <div class="flex items-start space-x-5 p-7">
+                                        <div class="flex-1"><a class="text-lg font-semibold line-clamp-1 mb-1">${planJSON.title}</a>
+                                        <p class="text-sm text-gray-400 mb-2">${planJSON.date}</p>
+                                        <p class="text-lg leading-6 line-clamp-2 mt-3 description">
+                                        ${utils.replaceURLWithHTMLLinks(planJSON.description || '')}${planJSON.res ? (planJSON.res.length != 0 ? `
+                                        <hr class="mt-5">
+                                        <p class="text-lg font-semibold line-clamp-1 mb-1 mt-5">
+                                            Ressource`+(planJSON.res.length > 1 ? 's' : '')+` :</p>` : ``) : ``}`;
 
-// socket.on('plandetails', (plan) => {
-//             if (plan.status) {
-//                 if (plan.plan.length != 0) {
-//                     let planItems = document.querySelectorAll('.plan-item');
-//                     planItems.forEach((item) => {
-//                         if (item.id != plan.planId) {
-//                             item.remove();
-//                         } else {
-//                             item.removeAttribute('onclick')
-//                             item.removeAttribute('class');
+                            let planJSONres = planJSON.res ? planJSON.res : [];
+                            planJSONres.forEach((res) => {
+                                planHTML += `<br>
+                                    <a style="cursor:pointer;" class="res-link flex text-sm font-semibold" action="${res.link}">${res.title}&nbsp;&nbsp;&nbsp;
+                                        <img class="w-5" src="${res.icon}" alt="">
+                                    </a>`;
+                            });
+                
+                            planHTML += `
+                                </p>
+                            </div>
+                            `+(planJSON.res ? `
+                                    <div class="sm:flex items-center space-x-4 hidden">
+                                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"></path>
+                                            <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"></path>
+                                        </svg>
+                                        <span class="text-xl">${planJSON.res.length}</span>
+                                    </div>`:``)+`
+                                </div>
+                            </li>`;
+                    planContainer.innerHTML += planHTML;
+                }
+            }
+        }
+    })
 
-//                         }
-//                     });
-//                     let planContainer = document.querySelector('.plan-container');
-//                     document.querySelector('h1').classList.add('flex')
-//                     document.querySelector('h1').insertAdjacentHTML('afterbegin', `<img class="pr-10 back-plan-btn" style="height:30px;cursor:pointer;" src="./public/images/back.svg">`);
-//                     document.querySelector('.back-plan-btn').addEventListener('click', () => {
-//                         mainContainer.classList.add('hide');
-//                         socket.emit('viewCourse', {
-//                             token: token,
-//                             courseId: plan.courseId
-//                         });
-//                     });
-//                     for (let i = 0; i < plan.plan.length; i++) {
-//                         let planJSON = plan.plan[i];
-//                         let planHTML = `
-//                         <li class="m-10">
-//                             <div class="flex items-start space-x-5 p-7">
-//                                 <div class="flex-1"><a class="text-lg font-semibold line-clamp-1 mb-1">${planJSON.title}</a>
-//                                 <p class="text-sm text-gray-400 mb-2">${planJSON.date}</p>
-//                                 <p class="text-lg leading-6 line-clamp-2 mt-3 description">
-//                                 ${replaceURLWithHTMLLinks(planJSON.description || '')}${planJSON.res ? (planJSON.res.length != 0 ? `
-//                                 <hr class="mt-5">
-//                                 <p class="text-lg font-semibold line-clamp-1 mb-1 mt-5">
-//                                     Ressource`+(planJSON.res.length > 1 ? 's' : '')+` :</p>` : ``) : ``}`;
+    let planItems = document.querySelectorAll('.plan-item');
 
-//                 let planJSONres = planJSON.res ? planJSON.res : [];
-//                 planJSONres.forEach((res) => {
-//                     planHTML += `<br>
-//                         <a style="cursor:pointer;" class="res-link flex text-sm font-semibold" action="${res.link}">${res.title}&nbsp;&nbsp;&nbsp;
-//                             <img class="w-5" src="${res.icon}" alt="">
-//                         </a>`;
-//                 });
-
-//                 planHTML += `
-//                             </p>
-//                         </div>
-//                         `+(planJSON.res ? `
-//                         <div class="sm:flex items-center space-x-4 hidden">
-//                             <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-//                                 <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"></path>
-//                                 <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"></path>
-//                             </svg>
-//                             <span class="text-xl">${planJSON.res.length}</span>
-//                         </div>`:``)+`
-//                     </div>
-//                 </li>`;
-//                 planContainer.innerHTML += planHTML;
-//             }
-//         }
-//     }
-// });
+    planItems.forEach((item) => {
+        if (item.id != id) {
+            item.classList.add('hide');
+        }
+    });
+}
 
 // function viewDoc(e, link){
 //     e.preventDefault();

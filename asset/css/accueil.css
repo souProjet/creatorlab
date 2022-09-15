@@ -10293,12 +10293,14 @@ h4.coursename {
 }
 
 .actu-bloc,
-.plan-bloc {
+.plan-bloc,
+.update-bloc {
     display: none;
 }
 
 .actu-bloc.active,
-.plan-bloc.active {
+.plan-bloc.active,
+.update-bloc.active {
     display: block;
 }
 

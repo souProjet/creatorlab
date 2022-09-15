@@ -251,5 +251,114 @@ let Course = class Course {
         }
     }
 
+    async getPlan(sessionId, courseId, planId) {
+        let response = await this.fetch('https://elyco.itslearning.com/RestApi/planner/plan/multiple/forTopic', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=UTF-8',
+                    'Cookie': `ASP.NET_SessionId=${sessionId}`
+                },
+                body: JSON.stringify({
+                    childId: "0",
+                    chunkNumber: 0,
+                    chunkSize: 15,
+                    courseId: courseId.toString(),
+                    currentDisplayMode: "0",
+                    dashboardHierarchyId: "0",
+                    dashboardName: "",
+                    end: "",
+                    filter: "",
+                    isSearching: false,
+                    pageNumber: 1,
+                    pageSize: 25,
+                    searchText: null,
+                    sort: "Order:asc",
+                    start: "",
+                    topicId: planId.replace('t', '')
+                })
+            })
+            .then(res => res.json())
+            .then(body => {
+                return {
+                    status: true,
+                    message: body
+                };
+            })
+            .catch(err => {
+                return {
+                    status: false,
+                    message: err
+                };
+            });
+        return response
+    }
+    formatPlan(plan) {
+        let planDetailsResult = [];
+        let titleRegex = plan.match(/(<span class="itsl-plan-title-label">.[^<]+)/gm);
+        let title = [];
+        titleRegex.forEach(plan => {
+            title.push(plan.replace(/(<span class="itsl-plan-title-label">)/gm, ''));
+        });
+        let dateRegex = plan.match(/(<span class="itsl-inline-date-picker-view">.[^<]+)/gm);
+        let date = [];
+        dateRegex.forEach(plan => {
+            date.push(plan.replace(/(<span class="itsl-inline-date-picker-view">)/gm, ''));
+        });
+        let descriptionRegex = plan.match(/(this, event, [0-9]*,[0-9]*\);">\s*.[^\n]+)/gm) || [];
+        let description = [];
+        descriptionRegex.forEach(planDescription => {
+            description.push(planDescription.replace(/(this, event, [0-9]*,[0-9]*\);">\s*)/gm, ''));
+            //     let planId = planDescription.split(',')[2].trim()
+            //     let columnId = planDescription.split(',')[3]
+            // let response = this.fetch('https://elyco.itslearning.com/RestApi/planner/column/getplanhtmltextcellcontent?courseId=' + courseId + '&planId=' + planId + '&columnId=' + columnId + '&childId=0&filterPersonId=0', {
+            //         method: 'GET',
+            //         headers: {
+            //             'Cookie': `ASP.NET_SessionId=${clientId}`
+            //         }
+            //     })
+            //     .then(response => response.text())
+            //     .then(response => {
+            //         return response;
+            //     })
+            //     .catch(error => {
+            //         console.log(error);
+            //     });
+            // let descriptionHTMLPart = response.match(/(<div class='h-userinput'>.[^<]+)/gm)[0]
+            // descriptionHTMLPart.replace(/(<div class='h-userinput'>)/gm, '');
+        });
+        let resBlocRegex = plan.match(/(<div class="gridcolumn-?1?-?1? ">(\s*.*){14})/gm);
+        resBlocRegex.shift();
+        let res = [];
+        resBlocRegex.forEach(plan => {
+            let resSpecBlocRegex = plan.match(/(<li.*)/gm);
+            let resSpec = [];
+            resSpecBlocRegex.forEach(resSpecBloc => {
+                let resTitleRegex = resSpecBloc.match(/(<span>.[^<]*)/gm) ? resSpecBloc.match(/(<span>.[^<]*)/gm)[0] : '';
+                let resTitle = resTitleRegex.replace(/(<span>)/gm, '');
+                let resLinkRegex = resSpecBloc.match(/(<a class="ccl-iconlink itsl-plan-elements-item-link" href=".[^"]*)/gm) ? resSpecBloc.match(/(<a class="ccl-iconlink itsl-plan-elements-item-link" href=".[^"]*)/gm)[0] : '';
+                let resLink = resLinkRegex.replace(/(<a class="ccl-iconlink itsl-plan-elements-item-link" href=")/gm, '');
+                let resIconRegex = resSpecBloc.match(/(<img src=".[^"]*)/gm) ? resSpecBloc.match(/(<img src=".[^"]*)/gm)[0] : '';
+                let resIcon = resIconRegex.replace(/(<img src=")/gm, '');
+                resSpec.push({
+                    title: resTitle,
+                    link: resLink,
+                    icon: resIcon
+                });
+            });
+            res.push(resSpec);
+        });
+        for (let i = 0; i < title.length; i++) {
+            planDetailsResult.push({
+                title: title[i],
+                date: date[i],
+                description: description[i],
+                res: res[i]
+            });
+        }
+        return {
+            status: true,
+            plan: planDetailsResult
+        };
+    }
 }
 module.exports = Course;

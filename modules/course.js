@@ -1,6 +1,7 @@
 let Course = class Course {
-    constructor(fetch) {
+    constructor(fetch, https) {
         this.fetch = fetch;
+        this.https = https;
     }
     async getCoursesPreview(sessionId) {
         let response = await this.fetch('https://elyco.itslearning.com/Course/AllCourses.aspx', {
@@ -359,6 +360,84 @@ let Course = class Course {
             status: true,
             plan: planDetailsResult
         };
+    }
+    async getdocurl(sessionId, LocationID, ElementID, ElementType, passStep1) {
+        try {
+            let iframeUrl = ''
+            if (!passStep1) {
+                let response = await this.fetch('https://elyco.itslearning.com/ContentArea/ContentArea.aspx?LocationType=1&LocationID=' + LocationID + '&ElementID=' + ElementID + '&ElementType=' + ElementType + '&FromNotification=True', {
+                        method: 'GET',
+                        headers: {
+                            'Cookie': `ASP.NET_SessionId=${sessionId}`
+                        }
+                    })
+                    .then(res => res.text())
+                    .then(data => {
+                        return data;
+                    })
+                let iframeUrlRegex = response.match(/<iframe src=".[^"]*/gm)[0]
+                iframeUrl = 'https://elyco.itslearning.com' + iframeUrlRegex.replace(/<iframe src="/gm, '');
+            } else {
+                iframeUrl = 'https://elyco.itslearning.com/LearningToolElement/ViewLearningToolElement.aspx?LearningToolElementId=' + LocationID
+            }
+            let response2 = await this.fetch(iframeUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Cookie': `ASP.NET_SessionId=${sessionId}`
+                    }
+                })
+                .then(res => res.text())
+                .then(data => {
+                    return data;
+                });
+
+            let iframeUrlRegex2 = response2.match(/<iframe src=".[^"]*/gm)[0]
+            let iframeUrl2 = iframeUrlRegex2.replace(/<iframe src="/gm, '');
+            iframeUrl2 = iframeUrl2.replaceAll('&amp;', '&');
+            const resultUrl = new Promise((resolve, reject) => {
+                const req3 = this.https.request({
+                    hostname: 'platform.itslearning.com',
+                    port: 443,
+                    path: iframeUrl2.split('https://platform.itslearning.com')[1],
+                    method: 'GET'
+                }, async(res) => {
+                    let cookies = res.headers['set-cookie'];
+                    cookies = cookies.map(c => c = c.split(';')[0] + ';');
+
+                    const req4 = this.https.request({
+                        hostname: 'platform.itslearning.com',
+                        port: 443,
+                        path: res.headers.location,
+                        method: 'GET',
+                        headers: {
+                            'Cookie': cookies.join(' ')
+                        }
+                    }, (res2) => {
+                        resolve(res2.headers.location)
+                    });
+                    req4.on('error', (e) => {
+                        console.error(e);
+                    });
+                    req4.end();
+                });
+
+                req3.on('error', (e) => {
+                    console.error(e);
+                });
+                req3.end();
+            });
+            return {
+                status: true,
+                url: await resultUrl
+            }
+
+        } catch (e) {
+            return {
+                status: false,
+                message: e
+            }
+        }
+
     }
 }
 module.exports = Course;

@@ -124,7 +124,7 @@ function viewCourse(id, isforplan = false) {
                             if (update.res) {
                                 for (let j = 0; j < update.res.length; j++) {
                                     let res = update.res[j];
-                                    resHTML += `<a style="cursor:pointer;" href onclick="viewDoc(event, '${res.link}')">${res.title}</a>`;
+                                    resHTML += `<a style="cursor:pointer;" href onclick="viewDoc(event, '${res.link}', '${res.title}')">${res.title}</a>`;
                                     if (j != update.res.length - 1) {
                                         resHTML += `, `;
                                     }
@@ -276,7 +276,7 @@ function viewPlan(id, courseId) {
                             let planJSONres = planJSON.res ? planJSON.res : [];
                             planJSONres.forEach((res) => {
                                 planHTML += `<br>
-                                    <a style="cursor:pointer;" class="res-link flex text-sm font-semibold" action="${res.link}">${res.title}&nbsp;&nbsp;&nbsp;
+                                    <a style="cursor:pointer;" class="res-link flex text-sm font-semibold" onclick="viewDoc(event, '${res.link}', '${res.title}')">${res.title}&nbsp;&nbsp;&nbsp;
                                         <img class="w-5" src="${res.icon}" alt="">
                                     </a>`;
                             });
@@ -309,21 +309,37 @@ function viewPlan(id, courseId) {
     });
 }
 
-// function viewDoc(e, link){
-//     e.preventDefault();
-//     link = "https://elyco.itslearning.com"+link;
-//     socket.emit('getdoc', {
-//         token: token,
-//         link: link
-//     });
-// }
-
-// socket.on('doc', (doc) => {
-//     if (doc.status) {
-//         let iframe = document.createElement('iframe');
-//         iframe.src = doc.iframeLink;
-//         mainContent.innerHTML = '';
-//         mainContent.appendChild(iframe);
-//     }
-// }
-// );
+function viewDoc(e, link, title){
+    e.preventDefault();
+        fetch('./api/courses/getdocurl/'+(link.split('LocationID=').length == 2 ? link.split('LocationID=')[1].split('&')[0]+'/'+link.split('ElementID=')[1].split('&')[0] +'/'+link.split('ElementType=')[1].split('&')[0] : link.split('LearningToolElementId=')[1]), {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        .then(res => res.json()).then(data => {
+            if (data.status) {
+                document.body.insertAdjacentHTML('afterbegin',  `
+                    <div class="uk-lightbox uk-overflow-hidden uk-lightbox-panel uk-open uk-active uk-transition-active visualisator-cloud">
+                        <ul class="uk-lightbox-items">
+                            <li class="uk-active uk-transition-active">
+                            <iframe allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" style="height:100%; width:100%; border:0;" src="${data.url}"></iframe>                        </li>
+                        </ul> 
+                        <div class="uk-lightbox-toolbar uk-position-top uk-text-right uk-transition-slide-top uk-transition-opaque">
+                            <button class="uk-lightbox-toolbar-icon uk-close-large uk-icon uk-close" type="button" uk-close="" onclick="closeMedia(this)">
+                                <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="close-large">
+                                    <line fill="none" stroke="#000" stroke-width="1.4" x1="1" y1="1" x2="19" y2="19"></line>
+                                    <line fill="none" stroke="#000" stroke-width="1.4" x1="19" y1="1" x2="1" y2="19"></line>
+                                </svg>
+                            </button>   
+                        </div>
+                        <div class="uk-lightbox-toolbar uk-lightbox-caption uk-position-bottom uk-text-center uk-transition-slide-bottom uk-transition-opaque">
+                        ${title}
+                        </div>
+                    </div>`);
+            }
+        });
+    
+   
+}

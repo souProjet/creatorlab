@@ -61,7 +61,7 @@ const cloud = new Cloud(fs, utf8);
 const privatemessage = new Privatemessage(fetch);
 const user = new User(db);
 const notification = new Notification(fetch);
-const course = new Course(fetch);
+const course = new Course(fetch, https);
 const note = new Note(db);
 const schedule = new Schedule(fs);
 const reportcard = new Reportcard(fs);
@@ -877,6 +877,33 @@ app.get('/api/\*', async(req, res) => {
                                     message: 'Erreur lors de la récupération du plan'
                                 });
                             }
+                        }
+                    } else if (subAction == 'getdocurl') {
+
+                        let LocationID = escapeHTML(params[2]);
+                        let ElementID = params[3] ? escapeHTML(params[3]) : false;
+                        let ElementType = params[4] ? escapeHTML(params[4]) : false;
+
+                        if (LocationID) {
+
+                            docReturnedData = await course.getdocurl(sessionId, LocationID, ElementID, ElementType, !params[3]);
+                            if (docReturnedData.status) {
+                                //on envoie le plan à l'utilisateur en response
+                                res.status(200).send({
+                                    status: true,
+                                    url: docReturnedData.url
+                                });
+                            } else {
+                                res.status(200).send({
+                                    status: false,
+                                    message: 'Aucun document trouvé'
+                                });
+                            }
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: 'Erreur lors de la récupération du document'
+                            });
                         }
                     } else {
                         res.status(200).send({

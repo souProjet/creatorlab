@@ -896,7 +896,7 @@ app.get('/api/\*', async(req, res) => {
                             } else {
                                 res.status(200).send({
                                     status: false,
-                                    message: 'Aucun document trouvé'
+                                    message: docReturnedData.message
                                 });
                             }
                         } else {

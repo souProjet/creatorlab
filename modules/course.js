@@ -432,9 +432,10 @@ let Course = class Course {
             }
 
         } catch (e) {
+            console.log(e)
             return {
                 status: false,
-                message: e
+                message: 'Une erreur est survenue'
             }
         }
 

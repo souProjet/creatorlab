@@ -393,7 +393,7 @@ let Course = class Course {
 
             let iframeUrlRegex2 = response2.match(/<iframe src=".[^"]*/gm)[0]
             let iframeUrl2 = iframeUrlRegex2.replace(/<iframe src="/gm, '');
-            iframeUrl2 = iframeUrl2.replaceAll('&amp;', '&');
+            iframeUrl2 = iframeUrl2.replace(/&amp;/igm, '&');
             const resultUrl = new Promise((resolve, reject) => {
                 const req3 = this.https.request({
                     hostname: 'platform.itslearning.com',

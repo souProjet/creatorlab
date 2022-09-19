@@ -130,9 +130,9 @@ let Login = class Login {
         //         message: 'Une erreur est survenue'
         //     };
         // }
-        try {
+        //try {
 
-            return new Promise(async(resolve, reject) => {
+        return new Promise(async(resolve, reject) => {
                 const browser = await this.puppeteer.launch({ headless: true });
                 const page = await browser.newPage();
 
@@ -148,7 +148,7 @@ let Login = class Login {
                     document.querySelector('#password').value = ids.password;
                     document.querySelector('#bouton_valider').click();
                 }, { "username": username, "password": password });
-                await page.waitForTimeout(2000);
+                await page.waitForTimeout(2500);
                 let pageUrl = await page.url();
                 if (pageUrl.indexOf('educonnect.education.gouv.fr') != -1) {
                     //les identifiants sont incorrects
@@ -171,14 +171,19 @@ let Login = class Login {
                     });
                 }
                 browser.close();
-            });
-        } catch (err) {
-            //console.error('[CREATOR LAB] Erreur de scraping', err);
-            return {
-                status: false,
-                message: 'Une erreur est survenue'
-            };
-        }
+            }).catch(e => {
+                reject({
+                    status: false,
+                    message: 'Une erreur est survenue'
+                })
+            })
+            // } catch (err) {
+            //     //console.error('[CREATOR LAB] Erreur de scraping', err);
+            //     return {
+            //         status: false,
+            //         message: 'Une erreur est survenue'
+            //     };
+            // }
     }
     getUserByUsername(username) {
         //retourne une promise contenant l'utilisateur correspondant à l'username

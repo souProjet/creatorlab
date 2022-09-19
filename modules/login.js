@@ -133,7 +133,7 @@ let Login = class Login {
         try {
 
             return new Promise(async(resolve, reject) => {
-                const browser = await this.puppeteer.launch({ headless: false });
+                const browser = await this.puppeteer.launch({ headless: true });
                 const page = await browser.newPage();
 
                 await page.goto('https://elyco.itslearning.com/elogin/autologin.aspx');

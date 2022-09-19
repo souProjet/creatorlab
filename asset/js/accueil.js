@@ -336,7 +336,7 @@ function getReportcard() {
             sidebarItems.forEach(item => {
                 if (item.querySelector('span').innerText == 'Mon bulletin' && item.querySelector('a').querySelector('.notuptodate')) {
                     item.querySelector('a').querySelector('.notuptodate').remove();
-                    document.querySelector('.user_name > p > .notuptodate').remove();
+                    //document.querySelector('.user_name > p > .notuptodate').remove();
                 }
             });
         }

@@ -7,35 +7,35 @@ sidebarItems.forEach((item) => {
 
 //si l'utilisateur clique sur l'item "cours" dans le menu 
 sidebarItemCourse.addEventListener('click', function() {
-    //effectuer une requête GET pour récupérer les cours de l'utilisateur
-    fetch('./api/courses/preview', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-        }
-    }).then(res => res.json()).then(data => {
-        if (data.status) {
-            if (data.courses) {
-                let coursesHTML = '';
-                let count = 0;
-                let state = false;
-                for (let i = 0; i < data.courses.length; i++) {
-                    let course = data.courses[i];
-                    if (i == 0) {
-                        coursesHTML += '<div class="divide-y -mt-3 card px-5 py-10 ">'
+            //effectuer une requête GET pour récupérer les cours de l'utilisateur
+            fetch('./api/courses/preview', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
                     }
-                    if (count == 0) {
-                        coursesHTML += `<div class="flex sm:flex-row flex-col sm:space-x-4 py-4 relative w-full">`;
-                    }
-                    coursesHTML += `
+                }).then(res => res.json()).then(data => {
+                        if (data.status) {
+                            if (data.courses) {
+                                let coursesHTML = '';
+                                let count = 0;
+                                let state = false;
+                                for (let i = 0; i < data.courses.length; i++) {
+                                    let course = data.courses[i];
+                                    if (i == 0) {
+                                        coursesHTML += '<div class="divide-y -mt-3 card px-5 py-10 ">'
+                                    }
+                                    if (count == 0) {
+                                        coursesHTML += `<div class="flex sm:flex-row flex-col sm:space-x-4 py-4 relative w-full">`;
+                                    }
+                                    coursesHTML += `
                         <div class="w-full max-w-sm rounded overflow-hidden shadow-lg mb-10 mt-10">
                             <a onclick="viewCourse(${course.id})" style="cursor:pointer;">
                                 <img src="./public/images/courseicon/${utils.courseToIcon(course.name)}.png" class="h-44 object-cover rounded-t-md shadow-sm w-full">
                             </a>
                             <div class="p-3">
                                 <h4 class="text-base font-semibold mb-0.5 coursename">${course.name}</h4>
-                                <p class="font-medium text-sm">modifié ${utils.calculateTimeBetweenDateAndToday(new Date(parseInt(course.date.split('/')[2].split(' ')[0]), parseInt(course.date.split('/')[1]) - 1, parseInt(course.date.split('/')[0]), parseInt(course.date.split(' ')[1].split(":")[0]), parseInt(course.date.split(":")[1])))}</p>
+                                <p class="font-medium text-sm">${course.date ? `modifié`+ utils.calculateTimeBetweenDateAndToday(new Date(parseInt(course.date.split('/')[2].split(' ')[0]), parseInt(course.date.split('/')[1]) - 1, parseInt(course.date.split('/')[0]), parseInt(course.date.split(' ')[1].split(":")[0]), parseInt(course.date.split(":")[1]))) : ''}</p>
                             </div>
                         </div>`;
                     count++;

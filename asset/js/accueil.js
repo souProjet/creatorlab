@@ -404,7 +404,7 @@ socket.on('notifications', (data) => {
 
             data.notifications.forEach(notif => {
                 notifsHTML += `<li>
-                <a style="cursor:pointer;" class="courseNotif" id="${notif.courseId}">
+                <a style="cursor:pointer;" class="courseNotif" onclick="viewCourse(${notif.courseId})" >
                     <div class="drop_avatar">
                         <img src="${notif.img}" alt="">
                     </div>
@@ -419,19 +419,6 @@ socket.on('notifications', (data) => {
             });
 
             notificationBox.innerHTML = notifsHTML;
-            notifsBox = document.querySelectorAll('.courseNotif');
-            notifsBox.forEach(notif => {
-                notif.addEventListener('click', (e) => {
-                    let courseId = notif.getAttribute('id');
-                    mainContainer.classList.add('hide');
-                    socket.emit('viewCourse', {
-                        token: token,
-                        courseId: parseInt(courseId)
-                    });
-                    sidebarItems.forEach(sidebarItem => sidebarItem.classList.remove('active'));
-                    sidebarItems[1].classList.add('active');
-                });
-            });
 
         } else {
             notificationBox.innerHTML = `<div class="drop_text"><p style="display:flex; justify-content:center;">Aucune notification</p></div>`;

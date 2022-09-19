@@ -290,7 +290,7 @@ let Login = class Login {
             .then(body => {
                 try {
                     let name = body.match(/<span class='h-va-middle h-is-not-mobile'>([^<]+)/gm)[0].replace(/<span class='h-va-middle h-is-not-mobile'>/, '');
-                    let avatar = body.match(/https:\/\/filerepository.itslearning.com\/([^"]+)/gm)[2];
+                    let avatar = body.match(/https:\/\/filerepository.itslearning.com\/([^"]+)/gm)[2] || "https://cdn.itslearning.com/v3.133.3.640/icons/generic_user_icon_64.png";
                     if (name && avatar && name != "" && avatar != "") {
                         this.checkSessionIdReturn = {
                             status: true,

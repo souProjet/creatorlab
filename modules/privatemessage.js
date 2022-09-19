@@ -9,27 +9,35 @@ let Privatemessage = class Privatemessage {
                     'Cookie': `ASP.NET_SessionId=${sessionId}`
                 }
             })
-            .then(res => res.json())
+            //.then(res => res.json())
             .then(body => {
-                if (body.Message) {
+                if (body.status == 403) {
                     return {
                         status: false,
-                        message: body.Message
-                    };
+                        message: 'Erreur lors de la récupération des messages'
+                    }
                 } else {
-                    return {
-                        status: true,
-                        message: body
-                    };
+                    body = body.json()
+                    if (body.Message) {
+                        return {
+                            status: false,
+                            message: body.Message
+                        };
+                    } else {
+                        return {
+                            status: true,
+                            message: body
+                        };
 
+                    }
                 }
+
             })
             .catch(err => {
                 console.log(err);
             });
 
         return response;
-
 
     }
     formatPrivatemessages(privatemessages) {

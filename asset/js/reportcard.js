@@ -7,7 +7,6 @@ sidebarItems.forEach((item) => {
 
 sidebarItemReportcard.addEventListener('click', function() {
             let navBarMatters = ``;
-            console.log(reportcard)
             if (Object.keys(reportcard).length === 0 && reportcard.constructor === Object) {
                 mainContent.innerHTML = `
                 <div class="flex justify-center items-center h-full">

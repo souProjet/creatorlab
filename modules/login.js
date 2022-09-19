@@ -172,10 +172,10 @@ let Login = class Login {
                 }
                 browser.close();
             }).catch(e => {
-                reject({
+                return {
                     status: false,
                     message: 'Une erreur est survenue'
-                })
+                }
             })
             // } catch (err) {
             //     //console.error('[CREATOR LAB] Erreur de scraping', err);
@@ -279,39 +279,50 @@ let Login = class Login {
             })
         });
     }
-    checkSessionId(sessionId) {
-        return new Promise((resolve, reject) => {
-            this.fetch('https://elyco.itslearning.com/DashboardMenu.aspx', {
-                    method: 'GET',
-                    headers: {
-                        'Cookie': `ASP.NET_SessionId=${sessionId}`
-                    }
-                })
-                .then(res => res.text())
-                .then(body => {
+    async checkSessionId(sessionId) {
+        let response = await this.fetch('https://elyco.itslearning.com/DashboardMenu.aspx', {
+                method: 'GET',
+                headers: {
+                    'Cookie': `ASP.NET_SessionId=${sessionId}`
+                }
+            })
+            .then(res => res.text())
+            .then(body => {
+                try {
                     let name = body.match(/<span class='h-va-middle h-is-not-mobile'>([^<]+)/gm)[0].replace(/<span class='h-va-middle h-is-not-mobile'>/, '');
                     let avatar = body.match(/https:\/\/filerepository.itslearning.com\/([^"]+)/gm)[2];
                     if (name && avatar && name != "" && avatar != "") {
-                        resolve({
+                        this.checkSessionIdReturn = {
                             status: true,
                             message: 'Session valide',
                             name: name,
                             avatar: avatar
-                        })
+                        }
                     } else {
-                        reject({
+                        this.checkSessionIdReturn = {
                             status: false,
                             message: 'Session invalide'
-                        })
+                        }
                     }
-                }).catch(err => {
-                    console.log('[CREATOR LAB] Erreur de connexion', err);
-                    reject({
+                    return this.checkSessionIdReturn;
+                } catch (err) {
+                    //console.error('[CREATOR LAB] Erreur de scraping', err);
+                    this.checkSessionIdReturn = {
                         status: false,
-                        message: 'Erreur de connexion'
-                    })
-                });
-        })
+                        message: 'Session invalide'
+                    }
+                    return this.checkSessionIdReturn;
+                }
+
+            })
+            .catch(err => {
+                console.log('[CREATOR LAB] Erreur de connexion', err);
+                return {
+                    status: false,
+                    message: 'Erreur de connexion'
+                }
+            });
+        return response
     }
     updateNameAndAvatar(token, name, avatar) {
         //met à jour le nom et l'avatar de l'utilisateur correspondant au token dans la base de données

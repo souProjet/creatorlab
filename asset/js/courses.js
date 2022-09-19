@@ -339,6 +339,8 @@ function viewDoc(e, link, title){
                 //         ${title}
                 //         </div>
                 //     </div>`);
+            }else{
+                utils.createModal('Impossible d\'ouvrir le document.', true);
             }
         });
     

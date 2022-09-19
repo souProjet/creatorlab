@@ -454,7 +454,7 @@ let Login = class Login {
                 path: '/',
             });
             // await page.reload();
-            await page.goto('https://pronote.lyc-orbigny-44.ac-nantes.fr/pronote/');
+            await page.goto('https://pronote.lyc-orbigny-44.ac-nantes.fr/pronote/eleve.html');
             await page.waitForTimeout(4000);
             await page.evaluate(() => {
                 document.querySelectorAll('.menu-principal_niveau1')[6].querySelector('li').click();

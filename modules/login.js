@@ -133,25 +133,24 @@ let Login = class Login {
         try {
 
             return new Promise(async(resolve, reject) => {
-                const browser = await this.puppeteer.launch({ headless: true });
+                const browser = await this.puppeteer.launch({ headless: false });
                 const page = await browser.newPage();
 
                 await page.goto('https://elyco.itslearning.com/elogin/autologin.aspx');
-                await page.waitForTimeout(1000);
+                await page.waitForTimeout(1500);
                 await page.evaluate(() => {
                     document.querySelector('.champ').click();
                     setTimeout(document.querySelector('#valider').click(), 500);
                 })
-                await page.waitForTimeout(1000);
-
+                await page.waitForTimeout(1500);
                 await page.evaluate((ids) => {
                     document.querySelector('#username').value = ids.username;
                     document.querySelector('#password').value = ids.password;
                     document.querySelector('#bouton_valider').click();
                 }, { "username": username, "password": password });
-                await page.waitForTimeout(1500);
-
-                if (await page.url().indexOf('educonnect.education.gouv.fr') != -1) {
+                await page.waitForTimeout(2000);
+                let pageUrl = await page.url();
+                if (pageUrl.indexOf('educonnect.education.gouv.fr') != -1) {
                     //les identifiants sont incorrects
                     reject({
                         status: false,
@@ -275,50 +274,39 @@ let Login = class Login {
             })
         });
     }
-    async checkSessionId(sessionId) {
-        let response = await this.fetch('https://elyco.itslearning.com/DashboardMenu.aspx', {
-                method: 'GET',
-                headers: {
-                    'Cookie': `ASP.NET_SessionId=${sessionId}`
-                }
-            })
-            .then(res => res.text())
-            .then(body => {
-                try {
+    checkSessionId(sessionId) {
+        return new Promise((resolve, reject) => {
+            this.fetch('https://elyco.itslearning.com/DashboardMenu.aspx', {
+                    method: 'GET',
+                    headers: {
+                        'Cookie': `ASP.NET_SessionId=${sessionId}`
+                    }
+                })
+                .then(res => res.text())
+                .then(body => {
                     let name = body.match(/<span class='h-va-middle h-is-not-mobile'>([^<]+)/gm)[0].replace(/<span class='h-va-middle h-is-not-mobile'>/, '');
                     let avatar = body.match(/https:\/\/filerepository.itslearning.com\/([^"]+)/gm)[2];
                     if (name && avatar && name != "" && avatar != "") {
-                        this.checkSessionIdReturn = {
+                        resolve({
                             status: true,
                             message: 'Session valide',
                             name: name,
                             avatar: avatar
-                        }
+                        })
                     } else {
-                        this.checkSessionIdReturn = {
+                        reject({
                             status: false,
                             message: 'Session invalide'
-                        }
+                        })
                     }
-                    return this.checkSessionIdReturn;
-                } catch (err) {
-                    //console.error('[CREATOR LAB] Erreur de scraping', err);
-                    this.checkSessionIdReturn = {
+                }).catch(err => {
+                    console.log('[CREATOR LAB] Erreur de connexion', err);
+                    reject({
                         status: false,
-                        message: 'Session invalide'
-                    }
-                    return this.checkSessionIdReturn;
-                }
-
-            })
-            .catch(err => {
-                console.log('[CREATOR LAB] Erreur de connexion', err);
-                return {
-                    status: false,
-                    message: 'Erreur de connexion'
-                }
-            });
-        return response
+                        message: 'Erreur de connexion'
+                    })
+                });
+        })
     }
     updateNameAndAvatar(token, name, avatar) {
         //met à jour le nom et l'avatar de l'utilisateur correspondant au token dans la base de données

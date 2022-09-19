@@ -10,14 +10,15 @@ let Privatemessage = class Privatemessage {
                 }
             })
             //.then(res => res.json())
-            .then(body => {
+            .then(async(body) => {
+
                 if (body.status == 403) {
                     return {
                         status: false,
                         message: 'Erreur lors de la récupération des messages'
                     }
                 } else {
-                    body = body.json()
+                    body = await body.json()
                     if (body.Message) {
                         return {
                             status: false,

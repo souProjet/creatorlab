@@ -56,7 +56,7 @@ const Reportcard = require('./modules/reportcard');
 //#############################################################################################################################
 //                                               INSTANCIATION DES MODULES
 //#############################################################################################################################
-const login = new Login(db, fetch, fs, https, puppeteer);
+const login = new Login(db, fetch, fs, puppeteer);
 const cloud = new Cloud(fs, utf8);
 const privatemessage = new Privatemessage(fetch);
 const user = new User(db);
@@ -240,39 +240,27 @@ app.post('/api/\*', async(req, res) => {
     for (let i = 2; i < req.url.split('/').length; i++) {
         params.push(req.url.split('/')[i]);
     }
-    switch (params[0]) {
-        case 'login':
-            //requête de connexion avec dans le body le login et le mot de passe
-            let username = escapeHTML(req.body.username).toLowerCase();
-            let password = escapeHTML(req.body.password);
-            if (username && password && username.length > 0 && password.length > 0) {
-                let returnData = await login.loginToEduconnect(0, username, password);
-                if (returnData.status) {
-                    let sessionId = returnData.sessionId;
-                    let shibsession = returnData.shibsession;
-                    //si l'id est valide, on regarde si l'utilisateur est déjà enregistré dans la base de données
-                    let userWithSameUsername = await login.getUserByUsername(username);
-                    if (userWithSameUsername.length > 0) {
-                        //si oui, cela veux dire que l'utilisateur est déjà enregistré on le met donc à jour
-                        let returnData = await login.updateUserSessionIdByUsername(username, sessionId);
-                        res.cookie('token', returnData.token);
-                        let shibsessionReturnedData = await login.updateShibsessionByUsername(username, shibsession);
-                        if (shibsessionReturnedData.status) {
-                            res.status(200).send({
-                                status: true,
-                                message: 'Connexion réussie'
-                            });
-                        } else {
-                            res.status(200).send({
-                                status: false,
-                                message: shibsessionReturnedData.message
-                            });
-                        }
-                    } else {
-                        //si non, cela veux dire que l'utilisateur n'est pas enregistré on l'enregistre
-                        let returnData = await login.createUser(username, sessionId);
-                        if (returnData.status) {
-                            cloud.createUserDataProfile(returnData.token);
+    if (!req.headers.authorization && !(params[0] == 'login')) {
+        res.status(200).send({
+            status: false,
+            message: 'Token manquant'
+        });
+    } else {
+        switch (params[0]) {
+            case 'login':
+                //requête de connexion avec dans le body le login et le mot de passe
+                let username = escapeHTML(req.body.username).toLowerCase();
+                let password = escapeHTML(req.body.password);
+                if (username && password && username.length > 0 && password.length > 0) {
+                    let returnData = await login.loginToEduconnect(0, username, password);
+                    if (returnData.status) {
+                        let sessionId = returnData.sessionId;
+                        let shibsession = returnData.shibsession;
+                        //si l'id est valide, on regarde si l'utilisateur est déjà enregistré dans la base de données
+                        let userWithSameUsername = await login.getUserByUsername(username);
+                        if (userWithSameUsername.length > 0) {
+                            //si oui, cela veux dire que l'utilisateur est déjà enregistré on le met donc à jour
+                            let returnData = await login.updateUserSessionIdByUsername(username, sessionId);
                             res.cookie('token', returnData.token);
                             let shibsessionReturnedData = await login.updateShibsessionByUsername(username, shibsession);
                             if (shibsessionReturnedData.status) {
@@ -287,107 +275,131 @@ app.post('/api/\*', async(req, res) => {
                                 });
                             }
                         } else {
-                            res.status(200).send({
-                                status: false,
-                                message: returnData.message
-                            });
+                            //si non, cela veux dire que l'utilisateur n'est pas enregistré on l'enregistre
+                            let returnData = await login.createUser(username, sessionId);
+                            if (returnData.status) {
+                                cloud.createUserDataProfile(returnData.token);
+                                res.cookie('token', returnData.token);
+                                let shibsessionReturnedData = await login.updateShibsessionByUsername(username, shibsession);
+                                if (shibsessionReturnedData.status) {
+                                    res.status(200).send({
+                                        status: true,
+                                        message: 'Connexion réussie'
+                                    });
+                                } else {
+                                    res.status(200).send({
+                                        status: false,
+                                        message: shibsessionReturnedData.message
+                                    });
+                                }
+                            } else {
+                                res.status(200).send({
+                                    status: false,
+                                    message: returnData.message
+                                });
+                            }
                         }
+                    } else {
+                        //si l'id n'est pas valide, on renvoie une erreur
+                        res.status(200).send({
+                            status: false,
+                            message: returnData.message
+                        });
                     }
                 } else {
-                    //si l'id n'est pas valide, on renvoie une erreur
+                    //si l'utilisateur n'a pas rentré de login ou de mot de passe, on renvoie une erreur
                     res.status(200).send({
                         status: false,
-                        message: returnData.message
+                        message: 'Veuillez entrer un login et un mot de passe'
                     });
                 }
-            } else {
-                //si l'utilisateur n'a pas rentré de login ou de mot de passe, on renvoie une erreur
-                res.status(200).send({
-                    status: false,
-                    message: 'Veuillez entrer un login et un mot de passe'
-                });
-            }
-            break;
-        case 'connect':
-            //récupérer le token dans l'entête de la requête
-            let token = escapeHTML(req.headers.authorization.split(' ')[1]);
-            let resultData = await login.getSessionIds(token);
-            if (resultData.status) {
-                let sessionId = resultData.sessionId;
-                let shibsession = resultData.shibsession;
-                //soit E-lyco (/api/connect/elyco) soit Pronote (/api/connect/pronote)
-                let instance = params[1];
-                if (instance == 'elyco') {
-                    //si c'est E-lyco, on récupère l'antiforgeryToken et on le met à jour dans la base de données
-                    let resultData = await login.updateAntiforgeryToken(token);
-                    if (resultData.status) {
+                break;
+            case 'connect':
+                //récupérer le token dans l'entête de la requête
+                let token = escapeHTML(req.headers.authorization.split(' ')[1]);
+                let resultData = await login.getSessionIds(token);
+                if (resultData.status) {
+                    let sessionId = resultData.sessionId;
+                    let shibsession = resultData.shibsession;
+                    //soit E-lyco (/api/connect/elyco) soit Pronote (/api/connect/pronote)
+                    let instance = params[1];
+                    if (instance == 'elyco') {
+                        //si c'est E-lyco, on récupère l'antiforgeryToken et on le met à jour dans la base de données
+                        let resultData = await login.updateAntiforgeryToken(token);
+                        if (resultData.status) {
 
 
-                        // //vérifier si on a accàs aux cours de l'utilisateur
-                        let coursesAccessReturnedData = await login.checkCoursesAccess(sessionId);
-                        if (coursesAccessReturnedData.status) {
-                            elycoState = true;
-                            res.status(200).send({
-                                status: true,
-                                message: 'Connexion à E-lyco réussie'
-                            });
-                            //Envoyer les notifications et les messages privés à l'utilisateur
-                            //On commence par récuperer le socketId de l'utilisateur pour pourvoir envoyer les notifications et les messages privés via websocket
-                            resultData = await user.getSocketIdByToken(token);
-                            if (resultData.status) {
-                                let socketId = resultData.socketId;
+                            // //vérifier si on a accàs aux cours de l'utilisateur
+                            let coursesAccessReturnedData = await login.checkCoursesAccess(sessionId);
+                            if (coursesAccessReturnedData.status) {
+                                elycoState = true;
+                                res.status(200).send({
+                                    status: true,
+                                    message: 'Connexion à E-lyco réussie'
+                                });
+                                //Envoyer les notifications et les messages privés à l'utilisateur
+                                //On commence par récuperer le socketId de l'utilisateur pour pourvoir envoyer les notifications et les messages privés via websocket
+                                resultData = await user.getSocketIdByToken(token);
+                                if (resultData.status) {
+                                    let socketId = resultData.socketId;
 
-                                //#############################################################################################################################
-                                //                                             RÉCUPÉRATION DES NOTIFICATIONS VIA E-LYCO
-                                //#############################################################################################################################
-                                notificationReturnedData = await notification.getNotifications(sessionId);
-                                if (notificationReturnedData.status) {
-                                    //il faut formater les notifications reçu pour avoir un beau JSON contenant les notifications
-                                    let notifications = notificationReturnedData.message;
-                                    let formatReturnedData = notification.formatNotifications(notifications);
-                                    if (formatReturnedData.status) {
-                                        //on envoie les notifications à l 'utilisateur via websocket
+                                    //#############################################################################################################################
+                                    //                                             RÉCUPÉRATION DES NOTIFICATIONS VIA E-LYCO
+                                    //#############################################################################################################################
+                                    notificationReturnedData = await notification.getNotifications(sessionId);
+                                    if (notificationReturnedData.status) {
+                                        //il faut formater les notifications reçu pour avoir un beau JSON contenant les notifications
+                                        let notifications = notificationReturnedData.message;
+                                        let formatReturnedData = notification.formatNotifications(notifications);
+                                        if (formatReturnedData.status) {
+                                            //on envoie les notifications à l 'utilisateur via websocket
 
-                                        let unseen = await notification.getUnSeenNotifications(sessionId);
-                                        notification.updateReadNotifications(formatReturnedData, unseen.status ? unseen.nbrunseen : 0, sessionId)
-                                        io.to(socketId).emit('notifications', {
-                                            status: true,
-                                            notifications: formatReturnedData.message,
-                                            nbrunseen: unseen.status ? unseen.nbrunseen : 0
-                                        });
+                                            let unseen = await notification.getUnSeenNotifications(sessionId);
+                                            notification.updateReadNotifications(formatReturnedData, unseen.status ? unseen.nbrunseen : 0, sessionId)
+                                            io.to(socketId).emit('notifications', {
+                                                status: true,
+                                                notifications: formatReturnedData.message,
+                                                nbrunseen: unseen.status ? unseen.nbrunseen : 0
+                                            });
 
+                                        } else {
+                                            io.to(socketId).emit('notifications', {
+                                                status: false,
+                                                message: 'Erreur lors de la récupération des notifications'
+                                            });
+                                        }
                                     } else {
                                         io.to(socketId).emit('notifications', {
                                             status: false,
                                             message: 'Erreur lors de la récupération des notifications'
                                         });
                                     }
-                                } else {
-                                    io.to(socketId).emit('notifications', {
-                                        status: false,
-                                        message: 'Erreur lors de la récupération des notifications'
-                                    });
-                                }
 
-                                //#############################################################################################################################
-                                //                                             RÉCUPÉRATION DES MESSAGES PRIVÉS VIA E-LYCO
-                                //#############################################################################################################################
-                                privatemessageReturnedData = await privatemessage.getPrivatemessages(sessionId);
-                                if (privatemessageReturnedData.status) {
-                                    //il faut formater les notifications reçu pour avoir un beau JSON contenant les notifications
-                                    let privatemessages = privatemessageReturnedData.message;
+                                    //#############################################################################################################################
+                                    //                                             RÉCUPÉRATION DES MESSAGES PRIVÉS VIA E-LYCO
+                                    //#############################################################################################################################
+                                    privatemessageReturnedData = await privatemessage.getPrivatemessages(sessionId);
+                                    if (privatemessageReturnedData.status) {
+                                        //il faut formater les notifications reçu pour avoir un beau JSON contenant les notifications
+                                        let privatemessages = privatemessageReturnedData.message;
 
-                                    let formatReturnedData = privatemessage.formatPrivatemessages(privatemessages);
-                                    if (formatReturnedData.status) {
-                                        //on envoie les messages privés à l'utilisateur via websocket
-                                        let unseen = await privatemessage.getUnSeenPrivateMessages(sessionId);
-                                        //privatemessage.updateReadPrivateMessage(formatReturnedData, unseen.status ? unseen.nbrunseen : 0, sessionId)
+                                        let formatReturnedData = privatemessage.formatPrivatemessages(privatemessages);
+                                        if (formatReturnedData.status) {
+                                            //on envoie les messages privés à l'utilisateur via websocket
+                                            let unseen = await privatemessage.getUnSeenPrivateMessages(sessionId);
+                                            //privatemessage.updateReadPrivateMessage(formatReturnedData, unseen.status ? unseen.nbrunseen : 0, sessionId)
 
-                                        io.to(socketId).emit('privatemessages', {
-                                            status: true,
-                                            privatemessages: formatReturnedData.privatemessages,
-                                            nbrunseen: unseen.status ? unseen.nbrunseen : 0
-                                        });
+                                            io.to(socketId).emit('privatemessages', {
+                                                status: true,
+                                                privatemessages: formatReturnedData.privatemessages,
+                                                nbrunseen: unseen.status ? unseen.nbrunseen : 0
+                                            });
+                                        } else {
+                                            io.to(socketId).emit('privatemessages', {
+                                                status: false,
+                                                message: 'Erreur lors de la récupération des messages privés'
+                                            });
+                                        }
                                     } else {
                                         io.to(socketId).emit('privatemessages', {
                                             status: false,
@@ -395,367 +407,361 @@ app.post('/api/\*', async(req, res) => {
                                         });
                                     }
                                 } else {
-                                    io.to(socketId).emit('privatemessages', {
-                                        status: false,
-                                        message: 'Erreur lors de la récupération des messages privés'
-                                    });
+                                    //Il y a eu une erreur lors de la récupération du socketId de l'utilisateur
                                 }
                             } else {
-                                //Il y a eu une erreur lors de la récupération du socketId de l'utilisateur
+                                res.status(200).send({
+                                    status: false,
+                                    message: 'Connxion  à E-lyco échouée'
+                                });
                             }
                         } else {
                             res.status(200).send({
                                 status: false,
-                                message: 'Connxion  à E-lyco échouée'
+                                message: 'Connexion à E-lyco échouée'
+                            });
+                        }
+                    } else if (instance == 'pronote') {
+                        //si c'est Pronote, on lance un scraping puppeteer pour récupérer les informations de l'utilisateur comme l'emploi du temps et les notes
+                        const browser = await puppeteer.launch({ headless: true });
+                        const page = await browser.newPage();
+                        let resultData = await login.connectToPronote(page, shibsession, sessionId);
+                        browser.close();
+                        if (resultData.status) {
+                            pronoteState = true;
+                            let scheduleSuccess = resultData.schedule;
+                            let reportcardSuccess = resultData.reportcard;
+
+                            let isSucess = schedule.updateSchedule(token, scheduleSuccess);
+                            if (isSucess) {
+                                isSucess = reportcard.updateReportcard(token, reportcardSuccess);
+
+                                if (isSucess) {
+                                    res.status(200).send({
+                                        status: true,
+                                        schedule: (scheduleSuccess != '' && scheduleSuccess) ? true : false,
+                                        reportcard: (reportcardSuccess != '' && reportcardSuccess) ? true : false,
+                                        message: 'Connexion à Pronote réussie'
+                                    });
+                                } else {
+                                    res.status(200).send({
+                                        status: false,
+                                        message: 'Erreur lors de la récupération du bulletin de notes'
+                                    });
+                                }
+                            } else {
+                                res.status(200).send({
+                                    status: false,
+                                    message: 'Erreur lors de la récupération de l\'emploi du temps'
+                                });
+                            }
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: 'Connexion à Pronote échouée'
                             });
                         }
                     } else {
                         res.status(200).send({
                             status: false,
-                            message: 'Connexion à E-lyco échouée'
+                            message: 'Instance inconnue'
                         });
                     }
-                } else if (instance == 'pronote') {
-                    //si c'est Pronote, on lance un scraping puppeteer pour récupérer les informations de l'utilisateur comme l'emploi du temps et les notes
-                    const browser = await puppeteer.launch({ headless: true });
-                    const page = await browser.newPage();
-                    let resultData = await login.connectToPronote(page, shibsession, sessionId);
-                    browser.close();
-                    if (resultData.status) {
-                        pronoteState = true;
-                        let scheduleSuccess = resultData.schedule;
-                        let reportcardSuccess = resultData.reportcard;
-
-                        let isSucess = schedule.updateSchedule(token, scheduleSuccess);
-                        if (isSucess) {
-                            isSucess = reportcard.updateReportcard(token, reportcardSuccess);
-
-                            if (isSucess) {
+                } else {
+                    res.status(200).send({
+                        status: false,
+                        message: 'Token invalide'
+                    });
+                }
+                break;
+            case 'cloud':
+                //récupérer le token dans l'entête de la requête
+                let token2 = escapeHTML(req.headers.authorization.split(' ')[1]);
+                let resultData2 = await login.getSessionIds(token2);
+                if (resultData2.status) {
+                    let sessionId = resultData2.sessionId;
+                    //déterminer la sous-action de la requête
+                    let subAction = params[1];
+                    if (subAction == 'get') {
+                        let filter = req.body.filter;
+                        if (filter == false) {
+                            let dataReturnedData = cloud.get(token2, false);
+                            if (dataReturnedData.status) {
                                 res.status(200).send({
                                     status: true,
-                                    schedule: (scheduleSuccess != '' && scheduleSuccess) ? true : false,
-                                    reportcard: (reportcardSuccess != '' && reportcardSuccess) ? true : false,
-                                    message: 'Connexion à Pronote réussie'
+                                    data: dataReturnedData.data
                                 });
                             } else {
                                 res.status(200).send({
                                     status: false,
-                                    message: 'Erreur lors de la récupération du bulletin de notes'
+                                    message: dataReturnedData.message
                                 });
                             }
                         } else {
                             res.status(200).send({
                                 status: false,
-                                message: 'Erreur lors de la récupération de l\'emploi du temps'
+                                message: 'Filtre non supporté pour l\'instant'
                             });
                         }
-                    } else {
-                        res.status(200).send({
-                            status: false,
-                            message: 'Connexion à Pronote échouée'
-                        });
-                    }
-                } else {
-                    res.status(200).send({
-                        status: false,
-                        message: 'Instance inconnue'
-                    });
-                }
-            } else {
-                res.status(200).send({
-                    status: false,
-                    message: 'Token invalide'
-                });
-            }
-            break;
-        case 'cloud':
-            //récupérer le token dans l'entête de la requête
-            let token2 = escapeHTML(req.headers.authorization.split(' ')[1]);
-            let resultData2 = await login.getSessionIds(token2);
-            if (resultData2.status) {
-                let sessionId = resultData2.sessionId;
-                //déterminer la sous-action de la requête
-                let subAction = params[1];
-                if (subAction == 'get') {
-                    let filter = req.body.filter;
-                    if (filter == false) {
-                        let dataReturnedData = cloud.get(token2, false);
-                        if (dataReturnedData.status) {
+                    } else if (subAction == 'getfile') {
+                        let fileId = req.body.fileId ? escapeHTML(req.body.fileId) : null;
+
+                        let file = cloud.getFile(token2, fileId);
+                        if (file.status) {
                             res.status(200).send({
                                 status: true,
-                                data: dataReturnedData.data
+                                file: file.file
                             });
                         } else {
                             res.status(200).send({
                                 status: false,
-                                message: dataReturnedData.message
+                                message: file.message
                             });
                         }
-                    } else {
-                        res.status(200).send({
-                            status: false,
-                            message: 'Filtre non supporté pour l\'instant'
-                        });
-                    }
-                } else if (subAction == 'getfile') {
-                    let fileId = req.body.fileId ? escapeHTML(req.body.fileId) : null;
 
-                    let file = cloud.getFile(token2, fileId);
-                    if (file.status) {
+                    } else if (subAction == 'createfolder') {
+                        let path = req.body.path ? escapeHTML(req.body.path) : null;
+                        let isSuccess = cloud.createFolder(token2, path);
                         res.status(200).send({
-                            status: true,
-                            file: file.file
-                        });
-                    } else {
-                        res.status(200).send({
-                            status: false,
-                            message: file.message
-                        });
-                    }
-
-                } else if (subAction == 'createfolder') {
-                    let path = req.body.path ? escapeHTML(req.body.path) : null;
-                    let isSuccess = cloud.createFolder(token2, path);
-                    res.status(200).send({
-                        status: isSuccess,
-                        message: isSuccess ? 'Dossier créé' : 'Erreur lors de la création du dossier'
-                    });
-                } else if (subAction == 'delete') {
-                    let id = req.body.id ? escapeHTML(req.body.id) : null;
-                    let isFile = !!req.body.isFile;
-                    let ext = req.body.ext ? escapeHTML(req.body.ext) : null;
-                    let isUploadedFile = req.body.isUploadedFile ? JSON.parse(req.body.isUploadedFile) : null;
-                    let isSuccess = cloud.delete(token2, id, isFile, isUploadedFile, ext);
-                    res.status(200).send({
-                        status: isSuccess,
-                        message: isSuccess ? 'suppression effectuée' : 'Erreur lors de la suppression'
-                    });
-                } else if (subAction == 'createfile') {
-                    let parentId = req.body.parentId ? escapeHTML(req.body.parentId) : null;
-                    let fileId = cloud.createFile(token2, parentId);
-                    if (fileId.status) {
-                        res.status(200).send({
-                            status: true,
-                            fileId: fileId.fileId
-                        });
-                    } else {
-                        res.status(200).send({
-                            status: false,
-                            message: fileId.message
-                        });
-                    }
-                } else if (subAction == 'rename') {
-                    let id = req.body.id ? escapeHTML(req.body.id) : null;
-                    let newName = req.body.newName ? escapeHTML(req.body.newName) : null;
-                    let isUploadedFile = req.body.isUploadedFile ? JSON.parse(req.body.isUploadedFile) : null;
-                    let isFile = !!req.body.isFile;
-                    if (newName) {
-                        let isSuccess = cloud.rename(token2, id, newName, isFile, isUploadedFile);
-                        res.send({
                             status: isSuccess,
-                            message: isSuccess ? 'Renommage effectué' : 'Erreur lors du renommage'
+                            message: isSuccess ? 'Dossier créé' : 'Erreur lors de la création du dossier'
                         });
-                    } else {
-                        res.send({
-                            status: false,
-                            message: 'Nom de fichier invalide'
+                    } else if (subAction == 'delete') {
+                        let id = req.body.id ? escapeHTML(req.body.id) : null;
+                        let isFile = !!req.body.isFile;
+                        let ext = req.body.ext ? escapeHTML(req.body.ext) : null;
+                        let isUploadedFile = req.body.isUploadedFile ? JSON.parse(req.body.isUploadedFile) : null;
+                        let isSuccess = cloud.delete(token2, id, isFile, isUploadedFile, ext);
+                        res.status(200).send({
+                            status: isSuccess,
+                            message: isSuccess ? 'suppression effectuée' : 'Erreur lors de la suppression'
                         });
-                    }
-                } else if (subAction == 'savefile') {
-                    let fileId = req.body.fileId ? escapeHTML(req.body.fileId) : null;
-                    let content = req.body.content
-                    if (content) {
-                        if (fileId) {
-                            let isSuccess = cloud.saveFile(token2, fileId, content);
+                    } else if (subAction == 'createfile') {
+                        let parentId = req.body.parentId ? escapeHTML(req.body.parentId) : null;
+                        let fileId = cloud.createFile(token2, parentId);
+                        if (fileId.status) {
+                            res.status(200).send({
+                                status: true,
+                                fileId: fileId.fileId
+                            });
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: fileId.message
+                            });
+                        }
+                    } else if (subAction == 'rename') {
+                        let id = req.body.id ? escapeHTML(req.body.id) : null;
+                        let newName = req.body.newName ? escapeHTML(req.body.newName) : null;
+                        let isUploadedFile = req.body.isUploadedFile ? JSON.parse(req.body.isUploadedFile) : null;
+                        let isFile = !!req.body.isFile;
+                        if (newName) {
+                            let isSuccess = cloud.rename(token2, id, newName, isFile, isUploadedFile);
                             res.send({
                                 status: isSuccess,
-                                message: isSuccess ? 'Sauvegarde effectuée' : 'Erreur lors de la sauvegarde'
+                                message: isSuccess ? 'Renommage effectué' : 'Erreur lors du renommage'
                             });
                         } else {
                             res.send({
                                 status: false,
-                                message: 'Id de fichier invalide'
+                                message: 'Nom de fichier invalide'
                             });
                         }
-                    }
-                } else if (subAction == 'upload') {
-                    let parentId = req.body.parentId ? escapeHTML(req.body.parentId) : null;
-                    let filesUpload = req.files;
-                    let nbrFiles = req.body.nbrFiles;
-
-                    if (filesUpload) {
-                        let success = true;
-                        let error = '';
-                        for (let i = 0; i < nbrFiles; i++) {
-                            let file = filesUpload["file" + i];
-                            file.name = utf8.decode(file.name);
-
-                            if (file.size < 100000000) {
-                                let totalSize = cloud.getTotalSize(token2).size + file.size;
-                                //5Go = 5000000000 octets
-                                if (totalSize <= 5000000000) {
-                                    let returnState = cloud.upload(token2, parentId, file);
-                                    success = returnState.status;
-                                    error += (returnState.message != null ? returnState.message + "\n" : "");
-                                } else {
-                                    success = false;
-                                    error += "Vous ne pouvez pas dépasser 5Go de stockage total";
-                                }
+                    } else if (subAction == 'savefile') {
+                        let fileId = req.body.fileId ? escapeHTML(req.body.fileId) : null;
+                        let content = req.body.content
+                        if (content) {
+                            if (fileId) {
+                                let isSuccess = cloud.saveFile(token2, fileId, content);
+                                res.send({
+                                    status: isSuccess,
+                                    message: isSuccess ? 'Sauvegarde effectuée' : 'Erreur lors de la sauvegarde'
+                                });
                             } else {
-                                success = false;
-                                error += "Sorry, 100Mo max pour " + file.name + "\n";
+                                res.send({
+                                    status: false,
+                                    message: 'Id de fichier invalide'
+                                });
                             }
                         }
+                    } else if (subAction == 'upload') {
+                        let parentId = req.body.parentId ? escapeHTML(req.body.parentId) : null;
+                        let filesUpload = req.files;
+                        let nbrFiles = req.body.nbrFiles;
+
+                        if (filesUpload) {
+                            let success = true;
+                            let error = '';
+                            for (let i = 0; i < nbrFiles; i++) {
+                                let file = filesUpload["file" + i];
+                                file.name = utf8.decode(file.name);
+
+                                if (file.size < 100000000) {
+                                    let totalSize = cloud.getTotalSize(token2).size + file.size;
+                                    //5Go = 5000000000 octets
+                                    if (totalSize <= 5000000000) {
+                                        let returnState = cloud.upload(token2, parentId, file);
+                                        success = returnState.status;
+                                        error += (returnState.message != null ? returnState.message + "\n" : "");
+                                    } else {
+                                        success = false;
+                                        error += "Vous ne pouvez pas dépasser 5Go de stockage total";
+                                    }
+                                } else {
+                                    success = false;
+                                    error += "Sorry, 100Mo max pour " + file.name + "\n";
+                                }
+                            }
+                            res.send({
+                                status: success,
+                                message: error
+                            });
+                        } else {
+                            res.send({
+                                status: false,
+                                message: 'Aucun fichier n\'a été uploadé'
+                            });
+                        }
+                    } else if (subAction == 'uploadthumbnail') {
+                        let file = req.body.file;
+                        let fileId = req.body.fileId ? escapeHTML(req.body.fileId) : null;
+                        let base64Data = new Buffer.from(file.replace(/^data:image\/\w+;base64,/, ""), 'base64');
+                        let isSuccess = cloud.uploadThumbnail(token2, fileId, base64Data);
                         res.send({
-                            status: success,
-                            message: error
+                            status: isSuccess,
+                            message: isSuccess ? 'Upload effectué' : 'Erreur lors de l\'upload'
                         });
-                    } else {
+                    } else if (subAction == 'getthumbnail') {
+                        let fileId = req.body.fileId ? escapeHTML(req.body.fileId) : null;
+                        let isSuccess = cloud.getThumbnail(token2, fileId);
+                        if (isSuccess.status) {
+                            res.status(200).send({
+                                status: true,
+                                thumbnail: isSuccess.thumbnail
+                            });
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: isSuccess.message
+                            });
+                        }
+
+                    } else if (subAction == 'totalsize') {
+                        let totalSize = cloud.getTotalSize(token2);
                         res.send({
-                            status: false,
-                            message: 'Aucun fichier n\'a été uploadé'
-                        });
-                    }
-                } else if (subAction == 'uploadthumbnail') {
-                    let file = req.body.file;
-                    let fileId = req.body.fileId ? escapeHTML(req.body.fileId) : null;
-                    let base64Data = new Buffer.from(file.replace(/^data:image\/\w+;base64,/, ""), 'base64');
-                    let isSuccess = cloud.uploadThumbnail(token2, fileId, base64Data);
-                    res.send({
-                        status: isSuccess,
-                        message: isSuccess ? 'Upload effectué' : 'Erreur lors de l\'upload'
-                    });
-                } else if (subAction == 'getthumbnail') {
-                    let fileId = req.body.fileId ? escapeHTML(req.body.fileId) : null;
-                    let isSuccess = cloud.getThumbnail(token2, fileId);
-                    if (isSuccess.status) {
-                        res.status(200).send({
                             status: true,
-                            thumbnail: isSuccess.thumbnail
+                            size: totalSize.size
                         });
                     } else {
                         res.status(200).send({
                             status: false,
-                            message: isSuccess.message
+                            message: subAction + ' method inconnue'
                         });
                     }
-
-                } else if (subAction == 'totalsize') {
-                    let totalSize = cloud.getTotalSize(token2);
-                    res.send({
-                        status: true,
-                        size: totalSize.size
-                    });
                 } else {
                     res.status(200).send({
                         status: false,
-                        message: subAction + ' method inconnue'
+                        message: 'Token invalide'
                     });
                 }
-            } else {
-                res.status(200).send({
-                    status: false,
-                    message: 'Token invalide'
-                });
-            }
-            break;
-        case 'note':
-            //récupérer le token présent dans l'entête de la requête
-            let token3 = escapeHTML(req.headers.authorization.split(' ')[1]);
+                break;
+            case 'note':
+                //récupérer le token présent dans l'entête de la requête
+                let token3 = escapeHTML(req.headers.authorization.split(' ')[1]);
 
-            let resultData3 = await login.getSessionIds(token3);
-            if (resultData3.status) {
-                let sessionId = resultData3.sessionId;
+                let resultData3 = await login.getSessionIds(token3);
+                if (resultData3.status) {
+                    let sessionId = resultData3.sessionId;
+                    //déterminer la sous-action de la requête
+                    let subAction = params[1];
+                    if (subAction == 'add') {
+                        let content = req.body.content ? escapeHTML(req.body.content) : null;
+                        let date = req.body.date ? escapeHTML(req.body.date) : null;
+                        if (content && date && content.length > 0 && date.length > 0) {
+                            let isSuccess = note.add(token3, content, date);
+                            res.send({
+                                status: isSuccess.status,
+                                message: isSuccess.status ? 'Note ajoutée' : 'Erreur lors de l\'ajout de la note',
+                                noteId: isSuccess.noteId
+                            });
+                        } else {
+                            res.send({
+                                status: false,
+                                message: 'Données invalides'
+                            });
+                        }
+                    } else if (subAction == 'get') {
+                        let isSuccess = await note.get(token3);
+                        res.send({
+                            status: isSuccess.status,
+                            message: isSuccess.status ? 'Notes récupérées' : 'Erreur lors de la récupération des notes',
+                            notes: isSuccess.notes
+                        });
+                    } else if (subAction == 'delete') {
+                        let noteId = req.body.noteId ? escapeHTML(req.body.noteId) : null;
+                        if (noteId) {
+                            let isSuccess = note.delete(token3, noteId);
+                            res.send({
+                                status: isSuccess.status,
+                                message: isSuccess.status ? 'Note supprimée' : 'Erreur lors de la suppression de la note'
+                            });
+                        } else {
+                            res.send({
+                                status: false,
+                                message: 'Id de note invalide'
+                            });
+                        }
+                    } else {
+                        res.status(200).send({
+                            status: false,
+                            message: subAction + ' method inconnue'
+                        });
+                    }
+                } else {
+                    res.status(200).send({
+                        status: false,
+                        message: 'Token invalide'
+                    });
+                }
+
+
+                break;
+            case 'privatemessage':
+                //récupérer le token dans l'entête de la requête
+                let token4 = escapeHTML(req.headers.authorization.split(' ')[1]);
+
                 //déterminer la sous-action de la requête
-                let subAction = params[1];
-                if (subAction == 'add') {
-                    let content = req.body.content ? escapeHTML(req.body.content) : null;
-                    let date = req.body.date ? escapeHTML(req.body.date) : null;
-                    if (content && date && content.length > 0 && date.length > 0) {
-                        let isSuccess = note.add(token3, content, date);
-                        res.send({
-                            status: isSuccess.status,
-                            message: isSuccess.status ? 'Note ajoutée' : 'Erreur lors de l\'ajout de la note',
-                            noteId: isSuccess.noteId
-                        });
+                let subAction4 = params[1];
+                let resultData4 = await login.getSessionIds(token4);
+                if (resultData4.status) {
+                    let sessionId = resultData4.sessionId;
+                    let antiforgeryToken = resultData4.antiforgeryToken
+                    if (subAction4 == 'send') {
+                        let convId = parseInt(req.body.convId);
+                        let text = escapeHTML(req.body.text);
+                        if (convId && text) {
+                            let sendReturnedData = await privatemessage.send(sessionId, antiforgeryToken, convId, text);
+                            res.status(200).send({
+                                status: sendReturnedData.status,
+                                message: sendReturnedData.message
+                            })
+                        }
+
                     } else {
-                        res.send({
-                            status: false,
-                            message: 'Données invalides'
-                        });
-                    }
-                } else if (subAction == 'get') {
-                    let isSuccess = await note.get(token3);
-                    res.send({
-                        status: isSuccess.status,
-                        message: isSuccess.status ? 'Notes récupérées' : 'Erreur lors de la récupération des notes',
-                        notes: isSuccess.notes
-                    });
-                } else if (subAction == 'delete') {
-                    let noteId = req.body.noteId ? escapeHTML(req.body.noteId) : null;
-                    if (noteId) {
-                        let isSuccess = note.delete(token3, noteId);
-                        res.send({
-                            status: isSuccess.status,
-                            message: isSuccess.status ? 'Note supprimée' : 'Erreur lors de la suppression de la note'
-                        });
-                    } else {
-                        res.send({
-                            status: false,
-                            message: 'Id de note invalide'
-                        });
-                    }
-                } else {
-                    res.status(200).send({
-                        status: false,
-                        message: subAction + ' method inconnue'
-                    });
-                }
-            } else {
-                res.status(200).send({
-                    status: false,
-                    message: 'Token invalide'
-                });
-            }
-
-
-            break;
-        case 'privatemessage':
-            //récupérer le token dans l'entête de la requête
-            let token4 = escapeHTML(req.headers.authorization.split(' ')[1]);
-
-            //déterminer la sous-action de la requête
-            let subAction4 = params[1];
-            let resultData4 = await login.getSessionIds(token4);
-            if (resultData4.status) {
-                let sessionId = resultData4.sessionId;
-                let antiforgeryToken = resultData4.antiforgeryToken
-                if (subAction4 == 'send') {
-                    let convId = parseInt(req.body.convId);
-                    let text = escapeHTML(req.body.text);
-                    if (convId && text) {
-                        let sendReturnedData = await privatemessage.send(sessionId, antiforgeryToken, convId, text);
                         res.status(200).send({
-                            status: sendReturnedData.status,
-                            message: sendReturnedData.message
-                        })
+                            status: false,
+                            message: subAction3 + ' : methode inconnue'
+                        });
                     }
-
                 } else {
                     res.status(200).send({
                         status: false,
-                        message: subAction3 + ' : methode inconnue'
+                        message: 'Token invalide'
                     });
                 }
-            } else {
-                res.status(200).send({
-                    status: false,
-                    message: 'Token invalide'
-                });
-            }
-            break;
+                break;
+        }
     }
-
 
 });
 //requêtes en GET sur l'API
@@ -764,63 +770,32 @@ app.get('/api/\*', async(req, res) => {
     for (let i = 2; i < req.url.split('/').length; i++) {
         params.push(req.url.split('/')[i]);
     }
-    switch (params[0]) {
-        case 'courses':
-            if (elycoState) {
+    if (req.headers.authorization) {
+        switch (params[0]) {
+            case 'courses':
+                if (elycoState) {
 
-                //récupérer le token dans l'entête de la requête
-                let token = escapeHTML(req.headers.authorization.split(' ')[1]);
+                    //récupérer le token dans l'entête de la requête
+                    let token = escapeHTML(req.headers.authorization.split(' ')[1]);
 
-                //déterminer la sous-action de la requête
-                let subAction = params[1];
-                let resultData = await login.getSessionIds(token);
-                if (resultData.status) {
-                    let sessionId = resultData.sessionId;
-                    if (subAction == 'preview') {
+                    //déterminer la sous-action de la requête
+                    let subAction = params[1];
+                    let resultData = await login.getSessionIds(token);
+                    if (resultData.status) {
+                        let sessionId = resultData.sessionId;
+                        if (subAction == 'preview') {
 
-                        //on récupère les cours via E-lyco
-                        coursesReturnedData = await course.getCoursesPreview(sessionId);
-                        if (coursesReturnedData.status) {
-                            //il faut formater les cours reçu pour avoir un beau JSON contenant les cours
-                            let courses = coursesReturnedData.message;
-                            let formatReturnedData = course.formatCoursesPreview(courses);
-                            if (formatReturnedData.status) {
-                                //on envoie les cours à l'utilisateur en response
-                                res.status(200).send({
-                                    status: true,
-                                    courses: formatReturnedData.courses
-                                });
-                            } else {
-                                res.status(200).send({
-                                    status: false,
-                                    message: 'Aucun cours disponible'
-                                });
-                            }
-                        } else {
-                            res.status(200).send({
-                                status: false,
-                                message: 'Erreur lors de la récupération des cours'
-                            });
-                        }
-
-                    } else if (subAction == 'details') {
-                        let courseID = escapeHTML(params[2]);
-                        //on récupère les détails des cours via E-lyco
-                        if (courseID) {
-                            coursesReturnedData = await course.getCourseDetail(sessionId, courseID);
-
+                            //on récupère les cours via E-lyco
+                            coursesReturnedData = await course.getCoursesPreview(sessionId);
                             if (coursesReturnedData.status) {
                                 //il faut formater les cours reçu pour avoir un beau JSON contenant les cours
                                 let courses = coursesReturnedData.message;
-                                let formatReturnedData = course.formatCourseDetail(courses);
+                                let formatReturnedData = course.formatCoursesPreview(courses);
                                 if (formatReturnedData.status) {
                                     //on envoie les cours à l'utilisateur en response
                                     res.status(200).send({
                                         status: true,
-                                        course: {
-                                            course: formatReturnedData.data,
-                                            courseId: courseID
-                                        }
+                                        courses: formatReturnedData.courses
                                     });
                                 } else {
                                     res.status(200).send({
@@ -834,76 +809,156 @@ app.get('/api/\*', async(req, res) => {
                                     message: 'Erreur lors de la récupération des cours'
                                 });
                             }
-                        } else {
-                            res.status(200).send({
-                                status: false,
-                                message: 'Identifiant de cours manquant'
-                            });
-                        }
 
+                        } else if (subAction == 'details') {
+                            let courseID = escapeHTML(params[2]);
+                            //on récupère les détails des cours via E-lyco
+                            if (courseID) {
+                                coursesReturnedData = await course.getCourseDetail(sessionId, courseID);
 
-                    } else if (subAction == 'plan') {
-                        let courseID = escapeHTML(params[2]);
-                        let planID = escapeHTML(params[3]);
-                        if (courseID && planID) {
-                            //on récupère le plan via E-lyco
-                            planReturnedData = await course.getPlan(sessionId, courseID, planID);
-                            if (planReturnedData.status) {
-                                //il faut formater le plan reçu pour avoir un beau JSON contenant le plan
-                                let plan = planReturnedData.message.gridData;
-                                let formatReturnedData = course.formatPlan(plan);
-                                if (formatReturnedData.status) {
-                                    //on envoie le plan à l'utilisateur en response
-                                    res.status(200).send({
-                                        status: true,
-                                        plan: formatReturnedData.plan,
-                                        planId: planID,
-                                        courseId: courseID
-                                    });
+                                if (coursesReturnedData.status) {
+                                    //il faut formater les cours reçu pour avoir un beau JSON contenant les cours
+                                    let courses = coursesReturnedData.message;
+                                    let formatReturnedData = course.formatCourseDetail(courses);
+                                    if (formatReturnedData.status) {
+                                        //on envoie les cours à l'utilisateur en response
+                                        res.status(200).send({
+                                            status: true,
+                                            course: {
+                                                course: formatReturnedData.data,
+                                                courseId: courseID
+                                            }
+                                        });
+                                    } else {
+                                        res.status(200).send({
+                                            status: false,
+                                            message: 'Aucun cours disponible'
+                                        });
+                                    }
                                 } else {
                                     res.status(200).send({
                                         status: false,
-                                        message: 'Aucun plan disponible'
+                                        message: 'Erreur lors de la récupération des cours'
                                     });
                                 }
                             } else {
                                 res.status(200).send({
                                     status: false,
-                                    message: 'Erreur lors de la récupération du plan'
+                                    message: 'Identifiant de cours manquant'
                                 });
                             }
-                        }
-                    } else if (subAction == 'getdocurl') {
 
-                        let LocationID = escapeHTML(params[2]);
-                        let ElementID = params[3] ? escapeHTML(params[3]) : false;
-                        let ElementType = params[4] ? escapeHTML(params[4]) : false;
 
-                        if (LocationID) {
+                        } else if (subAction == 'plan') {
+                            let courseID = escapeHTML(params[2]);
+                            let planID = escapeHTML(params[3]);
+                            if (courseID && planID) {
+                                //on récupère le plan via E-lyco
+                                planReturnedData = await course.getPlan(sessionId, courseID, planID);
+                                if (planReturnedData.status) {
+                                    //il faut formater le plan reçu pour avoir un beau JSON contenant le plan
+                                    let plan = planReturnedData.message.gridData;
+                                    let formatReturnedData = course.formatPlan(plan);
+                                    if (formatReturnedData.status) {
+                                        //on envoie le plan à l'utilisateur en response
+                                        res.status(200).send({
+                                            status: true,
+                                            plan: formatReturnedData.plan,
+                                            planId: planID,
+                                            courseId: courseID
+                                        });
+                                    } else {
+                                        res.status(200).send({
+                                            status: false,
+                                            message: 'Aucun plan disponible'
+                                        });
+                                    }
+                                } else {
+                                    res.status(200).send({
+                                        status: false,
+                                        message: 'Erreur lors de la récupération du plan'
+                                    });
+                                }
+                            }
+                        } else if (subAction == 'getdocurl') {
 
-                            docReturnedData = await course.getdocurl(sessionId, LocationID, ElementID, ElementType, !params[3]);
-                            if (docReturnedData.status) {
-                                //on envoie le plan à l'utilisateur en response
-                                res.status(200).send({
-                                    status: true,
-                                    url: docReturnedData.url
-                                });
+                            let LocationID = escapeHTML(params[2]);
+                            let ElementID = params[3] ? escapeHTML(params[3]) : false;
+                            let ElementType = params[4] ? escapeHTML(params[4]) : false;
+
+                            if (LocationID) {
+
+                                docReturnedData = await course.getdocurl(sessionId, LocationID, ElementID, ElementType, !params[3]);
+                                if (docReturnedData.status) {
+                                    //on envoie le plan à l'utilisateur en response
+                                    res.status(200).send({
+                                        status: true,
+                                        url: docReturnedData.url
+                                    });
+                                } else {
+                                    res.status(200).send({
+                                        status: false,
+                                        message: docReturnedData.message
+                                    });
+                                }
                             } else {
                                 res.status(200).send({
                                     status: false,
-                                    message: docReturnedData.message
+                                    message: 'Erreur lors de la récupération du document'
                                 });
                             }
                         } else {
                             res.status(200).send({
                                 status: false,
-                                message: 'Erreur lors de la récupération du document'
+                                message: subAction + ' : methode inconnue'
                             });
                         }
                     } else {
                         res.status(200).send({
                             status: false,
-                            message: subAction + ' : methode inconnue'
+                            message: 'Token invalide'
+                        });
+                    }
+                } else {
+                    res.status(200).send({
+                        status: false,
+                        message: 'Vous n\'êtes pas connecté à E-lyco'
+                    });
+                }
+                break;
+            case 'schedule':
+                //récupérer le token dans l'entête de la requête
+                let token2 = escapeHTML(req.headers.authorization.split(' ')[1]);
+
+                //déterminer la sous-action de la requête
+                let subAction2 = params[1];
+                let resultData2 = await login.getSessionIds(token2);
+                if (resultData2.status) {
+                    if (subAction2 == 'get') {
+                        let scheduleReturnedData = schedule.get(token2);
+                        if (scheduleReturnedData.status) {
+                            if (scheduleReturnedData.schedule != '{}') {
+                                res.send({
+                                    status: true,
+                                    message: scheduleReturnedData.message,
+                                    schedule: scheduleReturnedData.schedule
+                                });
+                            } else {
+                                res.status(200).send({
+                                    status: false,
+                                    message: "Aucun emplois du temps trouvé"
+                                });
+                            }
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: scheduleReturnedData.message
+                            })
+                        }
+                    } else {
+                        res.status(200).send({
+                            status: false,
+                            message: subAction2 + ' : methode inconnue'
                         });
                     }
                 } else {
@@ -912,102 +967,55 @@ app.get('/api/\*', async(req, res) => {
                         message: 'Token invalide'
                     });
                 }
-            } else {
-                res.status(200).send({
-                    status: false,
-                    message: 'Vous n\'êtes pas connecté à E-lyco'
-                });
-            }
-            break;
-        case 'schedule':
-            //récupérer le token dans l'entête de la requête
-            let token2 = escapeHTML(req.headers.authorization.split(' ')[1]);
+                break;
+            case 'reportcard':
+                //récupérer le token dans l'entête de la requête
+                let token3 = escapeHTML(req.headers.authorization.split(' ')[1]);
 
-            //déterminer la sous-action de la requête
-            let subAction2 = params[1];
-            let resultData2 = await login.getSessionIds(token2);
-            if (resultData2.status) {
-                if (subAction2 == 'get') {
-                    let scheduleReturnedData = schedule.get(token2);
-                    if (scheduleReturnedData.status) {
-                        if (scheduleReturnedData.schedule != '{}') {
-                            res.send({
-                                status: true,
-                                message: scheduleReturnedData.message,
-                                schedule: scheduleReturnedData.schedule
-                            });
+                //déterminer la sous-action de la requête
+                let subAction3 = params[1];
+                let resultData3 = await login.getSessionIds(token3);
+                if (resultData3.status) {
+                    if (subAction3 == 'get') {
+                        let reportcardReturnedData = reportcard.get(token3);
+                        if (reportcardReturnedData.status) {
+                            if (reportcardReturnedData.reportcard != '{}') {
+                                res.send({
+                                    status: true,
+                                    message: reportcardReturnedData.message,
+                                    reportcard: reportcardReturnedData.reportcard
+                                });
+                            } else {
+                                res.status(200).send({
+                                    status: false,
+                                    message: "Aucun bulletin de note trouvé"
+                                });
+                            }
                         } else {
                             res.status(200).send({
                                 status: false,
-                                message: "Aucun emplois du temps trouvé"
-                            });
+                                message: reportcardReturnedData.message
+                            })
                         }
                     } else {
                         res.status(200).send({
                             status: false,
-                            message: scheduleReturnedData.message
-                        })
+                            message: subAction3 + ' : methode inconnue'
+                        });
                     }
                 } else {
                     res.status(200).send({
                         status: false,
-                        message: subAction2 + ' : methode inconnue'
+                        message: 'Token invalide'
                     });
                 }
-            } else {
-                res.status(200).send({
-                    status: false,
-                    message: 'Token invalide'
-                });
-            }
-            break;
-        case 'reportcard':
-            //récupérer le token dans l'entête de la requête
-            let token3 = escapeHTML(req.headers.authorization.split(' ')[1]);
-
-            //déterminer la sous-action de la requête
-            let subAction3 = params[1];
-            let resultData3 = await login.getSessionIds(token3);
-            if (resultData3.status) {
-                if (subAction3 == 'get') {
-                    let reportcardReturnedData = reportcard.get(token3);
-                    if (reportcardReturnedData.status) {
-                        if (reportcardReturnedData.reportcard != '{}') {
-                            res.send({
-                                status: true,
-                                message: reportcardReturnedData.message,
-                                reportcard: reportcardReturnedData.reportcard
-                            });
-                        } else {
-                            res.status(200).send({
-                                status: false,
-                                message: "Aucun bulletin de note trouvé"
-                            });
-                        }
-                    } else {
-                        res.status(200).send({
-                            status: false,
-                            message: reportcardReturnedData.message
-                        })
-                    }
-                } else {
-                    res.status(200).send({
-                        status: false,
-                        message: subAction3 + ' : methode inconnue'
-                    });
-                }
-            } else {
-                res.status(200).send({
-                    status: false,
-                    message: 'Token invalide'
-                });
-            }
-            break;
-
-            // case 'notification':
-            //     break;
-        case 'user':
-            break;
+                break;
+        }
+    } else {
+        res.status(200).send({
+            status: false,
+            message: 'Token manquant'
+        })
     }
 });
 

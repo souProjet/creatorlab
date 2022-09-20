@@ -1,9 +1,8 @@
 let Login = class Login {
-    constructor(db, fetch, fs, https, puppeteer) {
+    constructor(db, fetch, fs, puppeteer) {
         this.db = db;
         this.fetch = fetch;
         this.fs = fs;
-        this.https = https;
         this.puppeteer = puppeteer;
         this.checkSessionIdReturn = {
             status: false,

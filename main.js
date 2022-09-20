@@ -419,7 +419,7 @@ app.post('/api/\*', async(req, res) => {
                     //si c'est Pronote, on lance un scraping puppeteer pour récupérer les informations de l'utilisateur comme l'emploi du temps et les notes
                     const browser = await puppeteer.launch({ headless: true });
                     const page = await browser.newPage();
-                    let resultData = await login.connectToPronote(page, shibsession);
+                    let resultData = await login.connectToPronote(page, shibsession, sessionId);
                     browser.close();
                     if (resultData.status) {
                         pronoteState = true;

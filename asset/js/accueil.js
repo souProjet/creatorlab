@@ -299,12 +299,13 @@ function getReportcard() {
             'Authorization': 'Bearer ' + token
         }
     }).then(res => res.json()).then(data => {
-        sidebarItems.forEach(item => {
-            if (item.querySelector('span').innerText == 'Mon bulletin') {
-                item.classList.remove('hide')
-            }
-        });
+
         if (data.status) {
+            sidebarItems.forEach(item => {
+                if (item.querySelector('span').innerText == 'Mon bulletin') {
+                    item.classList.remove('hide')
+                }
+            });
             reportcard = JSON.parse(data.reportcard);
             let offset_mean = 4;
             document.querySelector('.user_name > p').style.fontSize = ".8em";
@@ -319,6 +320,12 @@ function getReportcard() {
                 document.querySelector('.sidebar_inner ul li.active').click()
             }
 
+        } else {
+            sidebarItems.forEach(item => {
+                if (item.querySelector('span').innerText == 'Mon bulletin') {
+                    item.classList.add('hide')
+                }
+            });
         }
         if (pronoteState == 0 || pronoteState == 2) {
             let notuptodateSVG = `
@@ -358,17 +365,24 @@ function getSchedule() {
             'Authorization': 'Bearer ' + token
         }
     }).then(res => res.json()).then(data => {
-        sidebarItems.forEach(item => {
-            if (item.querySelector('span').innerText == 'Emplois du temps') {
-                item.classList.remove('hide')
-            }
-        });
+
         if (data.status) {
+            sidebarItems.forEach(item => {
+                if (item.querySelector('span').innerText == 'Emplois du temps') {
+                    item.classList.remove('hide')
+                }
+            });
             schedule = JSON.parse(data.schedule);
             utils.updateSidebarLoaderState();
             if (document.querySelector('.sidebar_inner ul li.active').querySelector('span').innerText == "Emplois du temps") {
                 document.querySelector('.sidebar_inner ul li.active').click()
             }
+        } else {
+            sidebarItems.forEach(item => {
+                if (item.querySelector('span').innerText == 'Emplois du temps') {
+                    item.classList.add('hide')
+                }
+            });
         }
         if (pronoteState == 0 || pronoteState == 2) {
             let notuptodateSVG = `

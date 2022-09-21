@@ -24,7 +24,20 @@
     <script>
         window.addEventListener('load', () => {
             if ("serviceWorker" in navigator) {
-                navigator.serviceWorker.register('/sw.js');
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        // On a réussi ! Youpi !
+                        console.log(
+                            "App: Service Worker lancé."
+                        );
+                    })
+                    .catch(error => {
+                        // Il y a eu un problème
+                        console.error(
+                            "App: Crash de Service Worker",
+                            error
+                        );
+                    });
             }
         });
     </script>

@@ -1,5 +1,5 @@
 const BASE = location.protocol + '//' + location.host;
-const PREFIX = 'V2';
+const PREFIX = 'V1';
 const CACHED_FILES = [
     'https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css',
     BASE + '/public/css/accueil.css',
@@ -14,8 +14,6 @@ self.addEventListener('install', (event) => {
     })());
     console.log(`${PREFIX}: Service Worker installed`);
 });
-
-
 self.addEventListener('activate', (event) => {
     clients.claim();
     event.waitUntil((async() => {

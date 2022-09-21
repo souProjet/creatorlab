@@ -139,7 +139,7 @@ let Course = class Course {
                 dernModifDate.push(course.replace(/(<span class='itsl-widget-extrainfo'[\s]+title=")/gm, ''));
             });
 
-            let resBlocRegex = preview.match(/(<li>(\s*.*){13})/gm);
+            let resBlocRegex = preview.match(/(<li>(\s*.*){13})/gm) || [];
             let res = [];
             resBlocRegex.forEach(plan => {
                 let resSpecBlocRegex = plan.match(/(<a href=".[^<]*.[^<]*)/gm) || [];
@@ -191,6 +191,30 @@ let Course = class Course {
             actuTextRegex.forEach(course => {
                 actuText.push(course.replace(/(data-text=")/gm, ''));
             });
+            let resActuBlocRegex = preview.match(/(<div data-ccl-textexpander-innercontainer(\s*.*){26})/gm) || [];
+            let resActu = [];
+
+            resActuBlocRegex.forEach(ulBloc => {
+
+                let resActuLiRegex = ulBloc.match(/(<li class="itsl-light-bulletins-elementlink-list-item(\s*.*){15})/gm) || [];
+                let resActuLi = [];
+                resActuLiRegex.forEach(li => {
+                    let resActuLinkRegex = li.match(/(<a href=".[^"]*)/gm) ? li.match(/(<a href=".[^"]*)/gm)[0] : '';
+                    let resActuLink = resActuLinkRegex.replace(/(<a href=")/gm, '');
+                    let resActuTitleRegex = li.match(/(data-element-link-list-item-sort-expression=".[^"]*)/gm) ? li.match(/(data-element-link-list-item-sort-expression=".[^"]*)/gm)[0] : '';
+                    let resActuTitle = resActuTitleRegex.replace(/(data-element-link-list-item-sort-expression=")/gm, '');
+                    let resActuIconRegex = li.match(/(<img src=".[^"]*)/gm) ? li.match(/(<img src=".[^"]*)/gm)[0] : '';
+                    let resActuIcon = resActuIconRegex.replace(/(<img src=")/gm, '').replace(/&amp;/igm, '&');
+
+                    resActuLi.push({
+                        title: resActuTitle,
+                        icon: resActuIcon,
+                        link: resActuLink,
+                    });
+                });
+
+                resActu.push(resActuLi);
+            });
 
             let actuCreatedRegex = preview.match(/(<div title=".[^"]+)/gm) || [];
             let actuCreated = [];
@@ -203,6 +227,7 @@ let Course = class Course {
                     authorId: actuAuthorId[i],
                     authorAvatarUrl: actuAuthorAvatarUrl[i],
                     text: actuText[i],
+                    res: resActu[i],
                     created: actuCreated[i]
                 });
             }
@@ -413,7 +438,27 @@ let Course = class Course {
                             'Cookie': cookies.join(' ')
                         }
                     }, (res2) => {
-                        resolve(res2.headers.location)
+                        if (res2.headers.location.indexOf('page.itslearning.com') != -1) {
+                            let cookies2 = res.headers['set-cookie'];
+                            cookies2 = cookies2.map(c => c = c.split(';')[0] + ';');
+                            const req5 = this.https.request({
+                                hostname: 'page.itslearning.com',
+                                port: 443,
+                                path: res2.headers.location.split('page.itslearning.com')[1],
+                                method: 'GET',
+                                headers: {
+                                    'Cookie': cookies2.join(' ')
+                                }
+                            }, (res3) => {
+                                resolve(res3.headers.location)
+                            });
+                            req5.on('error', (e) => {
+                                console.error(e);
+                            });
+                            req5.end();
+                        } else {
+                            resolve(res2.headers.location)
+                        }
                     });
                     req4.on('error', (e) => {
                         console.error(e);

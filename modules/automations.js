@@ -41,34 +41,34 @@ let Infos = class Infos {
         });
     }
     async ping() {
-        this.io.of('/').sockets.forEach(async socket => {
-            let userInfoBdd = await this.bdd.getUserBySocketId(socket.id);
-            if (userInfoBdd) {
-                if (userInfoBdd.length > 0) {
-                    try {
-                        this.fetch('https://eu1realtime.itslearning.com/signalr/hubs/ping', {
-                                method: 'GET',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Cookie': `ASP.NET_SessionId=${userInfoBdd[0].clientId}`
-                                }
-                            }).then(res => res.json())
-                            .then(body => {
-                                if (body.Response != "pong") {
-                                    socket.emit('disconnected');
-                                }
+        // this.io.of('/').sockets.forEach(async socket => {
+        //     let userInfoBdd = await this.bdd.getUserBySocketId(socket.id);
+        //     if (userInfoBdd) {
+        //         if (userInfoBdd.length > 0) {
+        //             try {
+        //                 this.fetch('https://eu1realtime.itslearning.com/signalr/hubs/ping', {
+        //                         method: 'GET',
+        //                         headers: {
+        //                             'Content-Type': 'application/json',
+        //                             'Cookie': `ASP.NET_SessionId=${userInfoBdd[0].clientId}`
+        //                         }
+        //                     }).then(res => res.json())
+        //                     .then(body => {
+        //                         if (body.Response != "pong") {
+        //                             socket.emit('disconnected');
+        //                         }
 
-                            })
-                            .catch(err => {
-                                console.log(err);
-                            });
-                    } catch (err) {
-                        console.log(err);
-                    }
+        //                     })
+        //                     .catch(err => {
+        //                         console.log(err);
+        //                     });
+        //             } catch (err) {
+        //                 console.log(err);
+        //             }
 
-                }
-            }
-        });
+        //         }
+        //     }
+        // });
     }
 }
 module.exports = {

@@ -87,13 +87,21 @@ function viewCourse(id, isforplan = false) {
                     let course = data.course.course;
                     let courseId = data.course.courseId;
 
-                    //             //Ajout des actualitées au DOM
+                    //   Ajout des actualitées au DOM
                     let actuHTML = ``;
                     if (course.actu.length != 0) {
                         actuHTML += `<div class="card divide-y divide-gray-100 sm:m-0 -mx-4 actu-bloc active">`;
                         for (let i = 0; i < course.actu.length; i++) {
                             let actu = course.actu[i];
                             let actuDate = actu.created;
+                            let actuRes = ``;
+                            for(let n = 0; n<actu.res.length; n++){
+                                actuRes+= `
+                                <a style="cursor:pointer;background-color: #f9f5f6;border-radius: 4px; padding:2%;width:fit-content;" class="res-link flex text-sm font-semibold" onclick="viewDoc(event, '/LearningToolElement/ViewLearningToolElement.aspx?LearningToolElementId=${actu.res[n].link.match(/(ElementID=[0-9]{8})/gm)[0].replace('ElementID=', '')}')">${actu.res[n].title}x&nbsp;&nbsp;&nbsp;
+                                    <img class="w-5" src="${actu.res[n].icon}" alt="">
+                                </a>
+                                `
+                            }
                             actuHTML += `
                             <div class="flex items-start flex-wrap p-7 sm:space-x-6 mb-10">
                                 <a style="cursor:pointer;" onclick="viewprofile(${parseInt(actu.authorId)}, '${(actu.authorAvatarUrl || './public/images/defaultAvatar.png')}', '${actu.authorName.replace('(44-BOUAYE)', '').replace('\'', '\\\'')}', false)" class="w-14 h-14 relative mt-1 order-1">
@@ -106,6 +114,7 @@ function viewCourse(id, isforplan = false) {
                                     </a>
                                     <p>
                                     ${actu.text ? utils.replaceURLWithHTMLLinks(actu.text.replace(/\n/g, '<br>')) : ''}
+                                    ${actuRes}
                                     </p>
                                 </div>
                             </div>`;
@@ -124,9 +133,11 @@ function viewCourse(id, isforplan = false) {
                             if (update.res) {
                                 for (let j = 0; j < update.res.length; j++) {
                                     let res = update.res[j];
-                                    resHTML += `<a style="cursor:pointer;" href onclick="viewDoc(event, '${res.link}', '${res.title}')">${res.title}</a>`;
-                                    if (j != update.res.length - 1) {
-                                        resHTML += `, `;
+                                    if(res.link !== ''){
+                                        resHTML += `<a style="cursor:pointer;" href onclick="viewDoc(event, '${res.link}', '${res.title}')">${res.title}</a>`;
+                                        if (j != update.res.length - 1) {
+                                            resHTML += `, `;
+                                        }
                                     }
                                 }
                             }
@@ -275,10 +286,12 @@ function viewPlan(id, courseId) {
 
                             let planJSONres = planJSON.res ? planJSON.res : [];
                             planJSONres.forEach((res) => {
-                                planHTML += `<br>
-                                    <a style="cursor:pointer;" class="res-link flex text-sm font-semibold" onclick="viewDoc(event, '${res.link}', '${res.title}')">${res.title}&nbsp;&nbsp;&nbsp;
-                                        <img class="w-5" src="${res.icon}" alt="">
-                                    </a>`;
+                                if(res.link !== ''){
+                                    planHTML += `<br>
+                                        <a style="cursor:pointer;" class="res-link flex text-sm font-semibold" onclick="viewDoc(event, '${res.link}', '${res.title}')">${res.title}&nbsp;&nbsp;&nbsp;
+                                            <img class="w-5" src="${res.icon}" alt="">
+                                        </a>`;
+                                }
                             });
                 
                             planHTML += `
@@ -320,7 +333,8 @@ function viewDoc(e, link, title){
         })
         .then(res => res.json()).then(data => {
             if (data.status) {
-                window.open(data.url, '_blank');
+                
+                window.open(data.url.indexOf('resource.itslearning.com') == -1 ? 'https://page.itslearning.com'+data.url : data.url, '_blank');
                 // document.body.insertAdjacentHTML('afterbegin',  `
                 //     <div class="uk-lightbox uk-overflow-hidden uk-lightbox-panel uk-open uk-active uk-transition-active visualisator-cloud">
                 //         <ul class="uk-lightbox-items">

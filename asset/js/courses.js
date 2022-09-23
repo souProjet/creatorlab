@@ -28,6 +28,9 @@ sidebarItemCourse.addEventListener('click', function() {
                                     if (count == 0) {
                                         coursesHTML += `<div class="flex sm:flex-row flex-col sm:space-x-4 py-4 relative w-full">`;
                                     }
+                                    if (course.date) {
+                                        course.date = course.date.replace(/&nbsp;/igm, '');
+                                    }
                                     coursesHTML += `
                         <div class="w-full max-w-sm rounded overflow-hidden shadow-lg mb-10 mt-10">
                             <a onclick="viewCourse(${course.id})" style="cursor:pointer;">

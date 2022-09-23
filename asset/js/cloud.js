@@ -531,7 +531,7 @@ function enterInEditor(fileId, parentFolderId){
 
                 });
             } else{
-                utils.createModal('Ce fichier n\'existe pas');
+                utils.createModal('Ce fichier n\'existe pas', true);
             }
         
         });

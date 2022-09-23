@@ -23,7 +23,7 @@ let Cloud = class Cloud {
                 type: 'folder',
                 name: 'Nouveau dossier',
                 parent: path,
-                id: this.generateToken()
+                id: 'id-' + this.generateToken()
             });
             this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json', JSON.stringify(arch), (error) => {
                 if (error) {
@@ -41,7 +41,7 @@ let Cloud = class Cloud {
         try {
             let arch = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json');
             arch = JSON.parse(arch);
-            let fileId = this.generateToken();
+            let fileId = 'id-' + this.generateToken();
             arch.push({
                 type: 'file',
                 name: 'Nouveau fichier',
@@ -242,7 +242,7 @@ let Cloud = class Cloud {
 
     upload(token, parentId, file) {
         try {
-            let fileId = this.generateToken();
+            let fileId = 'id-' + this.generateToken();
             let fileExtension = file.name.split('.')[file.name.split('.').length - 1];
             let acceptedExtensions = ['aac', 'json', 'png', 'jpg', 'jpeg', 'gif', 'txt', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'zip', 'rar', '7z', 'bz2', 'mp4', 'mp3', 'avi', 'flv', 'mpg', 'mpeg', 'mkv', 'mov', 'wmv', '3gp', '3g2', 'webm', 'ogg'];
             if (acceptedExtensions.indexOf(fileExtension) == -1) {

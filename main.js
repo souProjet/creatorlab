@@ -17,21 +17,20 @@ const fetch = require('node-fetch')
 const fs = require('fs');
 const utf8 = require('utf8');
 
-if (!process.argv.includes('--dev')) {
-    class Webhook {
-        constructor(url) {
-            this.url = url;
-        }
-        send(message) {
-            fetch(this.url, {
-                "method": "POST",
-                "headers": { "content-type": "application/json" },
-                "body": JSON.stringify(message)
-            })
-        }
+class Webhook {
+    constructor(url) {
+        this.url = url;
     }
-    const webhook = new Webhook(config.webhook);
+    send(message) {
+        fetch(this.url, {
+            "method": "POST",
+            "headers": { "content-type": "application/json" },
+            "body": JSON.stringify(message)
+        })
+    }
 }
+const webhook = new Webhook(config.webhook);
+
 
 //#############################################################################################################################
 //                                               CONNEXION A LA BASE DE DONNEES

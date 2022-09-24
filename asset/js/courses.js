@@ -8,7 +8,7 @@ sidebarItems.forEach((item) => {
 //si l'utilisateur clique sur l'item "cours" dans le menu 
 sidebarItemCourse.addEventListener('click', function() {
             //effectuer une requête GET pour récupérer les cours de l'utilisateur
-            fetch('./api/courses/preview', {
+            fetch('/api/courses/preview', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ sidebarItemCourse.addEventListener('click', function() {
 
 function viewCourse(id, isforplan = false) {
     mainContainer.classList.add('hide');
-    fetch('./api/courses/details/' + id, {
+    fetch('/api/courses/details/' + id, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -249,7 +249,7 @@ function viewCourse(id, isforplan = false) {
 
 function viewPlan(id, courseId) {
 
-    fetch('./api/courses/plan/' + courseId + '/' + id, {
+    fetch('/api/courses/plan/' + courseId + '/' + id, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -327,7 +327,7 @@ function viewPlan(id, courseId) {
 
 function viewDoc(e, link, title){
     e.preventDefault();
-        fetch('./api/courses/getdocurl/'+(link.split('LocationID=').length == 2 ? link.split('LocationID=')[1].split('&')[0]+'/'+link.split('ElementID=')[1].split('&')[0] +'/'+link.split('ElementType=')[1].split('&')[0] : link.split('LearningToolElementId=')[1]), {
+        fetch('/api/courses/getdocurl/'+(link.split('LocationID=').length == 2 ? link.split('LocationID=')[1].split('&')[0]+'/'+link.split('ElementID=')[1].split('&')[0] +'/'+link.split('ElementType=')[1].split('&')[0] : link.split('LearningToolElementId=')[1]), {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

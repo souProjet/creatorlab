@@ -291,6 +291,23 @@ let Cloud = class Cloud {
         }
     }
 
+    move(token, target, newparent) {
+        try {
+            let arch = this.fs.readFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json');
+            arch = JSON.parse(arch);
+            let objTarget = arch.find(el => el.id == target);
+            arch[arch.indexOf(objTarget)].parent = newparent;
+            this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/arch.json', JSON.stringify(arch), { encoding: "utf8" }, (error) => {
+                if (error) {
+                    return false
+                }
+            });
+            return true
+        } catch (err) {
+            return false
+        }
+    }
+
     uploadThumbnail(token, fileId, base64Data) {
         try {
             this.fs.writeFileSync(HOME_USERDATA + '/userdata/' + token + '/thumbnails/' + fileId + '.png', base64Data, (err) => {

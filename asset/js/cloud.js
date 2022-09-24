@@ -8,6 +8,7 @@ sidebarItems.forEach((item) => {
 let contextFolderState = false;
 let main;
 let headerPath;
+let flagDraggedState = false;
 
 function initcloudApp() {
     mainContent.innerHTML = `
@@ -83,8 +84,9 @@ function initcloudApp() {
     document.querySelector('.app-cloud').addEventListener('dragenter', (e) => {
         e.preventDefault();
         e.stopPropagation();
-
-        document.querySelector('.main-cloud').style.backgroundImage = 'url(/public/images/dropfile.png)';
+        if (!flagDraggedState) {
+            document.querySelector('.main-cloud').style.backgroundImage = 'url(/public/images/dropfile.png)';
+        }
 
     });
     document.querySelector('.app-cloud').addEventListener('dragleave', (e) => {
@@ -100,8 +102,10 @@ function initcloudApp() {
     document.querySelector('.app-cloud').addEventListener('drop', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        document.querySelector('.main-cloud').style.backgroundImage = 'none';
-        fileDropedCloud(e);
+        if (!flagDraggedState) {
+            document.querySelector('.main-cloud').style.backgroundImage = 'none';
+            fileDropedCloud(e);
+        }
     });
 
 }
@@ -114,6 +118,7 @@ function clearContextMenu() {
     document.querySelectorAll('.contextmenu').forEach(menu => menu.remove());
     contextFolderState = false;
 }
+
 
 async function enterInFolder(path, reload = false) {
     let parentFolderPath = headerPath.querySelectorAll('span')[headerPath.querySelectorAll('span').length - 1].getAttribute('onclick') != "enterInFolder()" ? headerPath.querySelectorAll('span')[headerPath.querySelectorAll('span').length - 1].getAttribute('onclick').split('\(\'')[1].replace('\'\)', '') : null;
@@ -138,7 +143,7 @@ async function enterInFolder(path, reload = false) {
             if (path) {
                 let actualId = path;
                 while (actualId != null) {
-                    let newHeaderPlus = new DOMParser().parseFromString(`<i class="material-icons arrow-for-cloud">arrow_forward_ios</i><span onclick="enterInFolder('${actualId}')">${file.filter(f => f.id == actualId)[0].name}</span>`, 'text/html');
+                    let newHeaderPlus = new DOMParser().parseFromString(`<i class="material-icons arrow-for-cloud">arrow_forward_ios</i><span class="nav-item-for-cloud" onclick="enterInFolder('${actualId}')">${file.filter(f => f.id == actualId)[0].name}</span>`, 'text/html');
                     let newHeaderPlusFirstChild = newHeaderPlus.body.firstChild;
                     let newHeaderPlusLastChild = newHeaderPlus.body.lastChild;
                     let dernHeader = document.querySelector('.arrow-for-cloud');
@@ -155,8 +160,8 @@ async function enterInFolder(path, reload = false) {
 
             for (let i = 0; i < folders.length; i++) {
                 main.innerHTML +=
-                    `<div id="${folders[i].id}" type="${folders[i].type}" class="folder" onclick="enterInFolder('${folders[i].id}')">
-                    <i class="material-icons">folder</i>
+                    `<div draggable="true" id="${folders[i].id}" type="${folders[i].type}" class="folder" onclick="enterInFolder('${folders[i].id}')">
+                    <i  class="material-icons">folder</i>
                     <p class="cooltip">${file.filter(fileItem => fileItem.type == "folder").filter(fileItem => fileItem.parent == folders[i].id).length} folder${(file.filter(fileItem => fileItem.type == "folder").filter(fileItem => fileItem.parent == folders[i].id).length > 1) ? `s` : ``} / ${file.filter(fileItem => fileItem.type == "file").filter(fileItem => fileItem.parent == folders[i].id).length} file${(file.filter(fileItem => fileItem.type == "file").filter(fileItem => fileItem.parent == folders[i].id).length > 1) ? `s` : ``}</p>
 
                     <h1>${folders[i].name}</h1>
@@ -164,7 +169,7 @@ async function enterInFolder(path, reload = false) {
             }
             for (let i = 0; i < files.length; i++) {
                 main.innerHTML +=
-                `<div id="${files[i].id}" type="${files[i].type}" isuploadedfile="${files[i].isUploadedFile}" class="folder" onclick="enterInEditor('${files[i].id}', '${files[i].parent}')">
+                `<div draggable="true" id="${files[i].id}" type="${files[i].type}" isuploadedfile="${files[i].isUploadedFile}" class="folder" onclick="enterInEditor('${files[i].id}', '${files[i].parent}')">
                     <i class="material-icons">description</i>
                     <p class="cooltip">${utils.octetToString(files[i].size) || "non défini"}</p>
                     <h1>${files[i].name}</h1>
@@ -229,6 +234,119 @@ async function enterInFolder(path, reload = false) {
                     contextmenu.style.left = e.pageX + 'px';
                     mainContent.appendChild(contextmenu);
                 });
+
+                folder.addEventListener('drag', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    flagDraggedState = true;
+                    e.target.style.opacity="0";
+                });
+                folder.addEventListener('dragend', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    flagDraggedState = false;
+
+                    document.querySelectorAll('.folder').forEach(f => {
+                        if(f.getAttribute('type') == 'folder'){
+                            if(f.querySelector('i').innerText == 'folder_open'){
+                                fetch('/api/cloud/move', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': 'Bearer ' + token
+                                    },
+                                    body:JSON.stringify({
+                                        target:e.target.id,
+                                        newparent: f.id
+                                    })
+                                }).then(res => res.json())
+                                .then(res => {
+                                    if(res.status){
+                                        e.target.remove();
+                                        f.querySelector('i').innerText = "folder";
+                                    }
+                                })
+                            }
+                        }
+                    });
+                    if(document.querySelector('.title-for-cloud').style.color=='green'){
+                        fetch('/api/cloud/move', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + token
+                            },
+                            body:JSON.stringify({
+                                target:e.target.id,
+                                newparent: null
+                            })
+                        }).then(res => res.json())
+                        .then(res => {
+                            if(res.status){
+                                e.target.remove();
+                                document.querySelector('.title-for-cloud').style.color='black'
+                            }
+                        })
+                    }
+                    document.querySelectorAll('.nav-item-for-cloud').forEach(nav => {
+                        if(nav.style.color=='green'){
+                            fetch('/api/cloud/move', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': 'Bearer ' + token
+                                },
+                                body:JSON.stringify({
+                                    target:e.target.id,
+                                    newparent: nav.getAttribute('onclick').split('\'')[1]
+                                })
+                            }).then(res => res.json())
+                            .then(res => {
+                                if(res.status){
+                                    e.target.remove();
+                                    nav.style.color='black'
+                                }
+                            })
+                        }
+                    });
+                    e.target.style.opacity="1";
+                })
+                if(folder.getAttribute('type') == 'folder'){
+                    folder.querySelector('i').addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.target.innerText = "folder_open";  
+                    });
+                    folder.querySelector('i').addEventListener('dragleave', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.target.innerText = "folder"
+                    })
+                }
+
+                document.querySelector('.title-for-cloud').addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.target.style.color="green";
+                });
+                document.querySelector('.title-for-cloud').addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.target.style.color="black";
+                })
+
+                document.querySelectorAll('.nav-item-for-cloud').forEach(nav => {
+                    nav.addEventListener('dragover', e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.target.style.color="green";
+                    });
+                    nav.addEventListener('dragleave', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.target.style.color="black";
+                    })
+                })
             });
         }else{
             console.log(data.message)
@@ -623,7 +741,7 @@ function deleteElement(id, type) {
             console.log(error);
         });
     }else{
-        createModal("Cet élément contient des fichiers, vous devez les supprimer avant de pouvoir supprimer cet élément", true);
+        utils.createModal("Cet élément contient des fichiers, vous devez les supprimer avant de pouvoir supprimer cet élément", true);
     }
 }
 
@@ -690,7 +808,7 @@ function fileDropedCloud(e) {
             document.querySelector('.file-input-upload-cloud').value = '';
             utils.createModal("Fichier uploadé");
         }else{
-           utils.createModal(data.message, true);
+            utils.createModal(data.message, true);
         }
         enterInFolder(parentFolderPath, true);
     }).catch(error => {

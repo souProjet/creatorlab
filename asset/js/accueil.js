@@ -78,7 +78,7 @@ socket.on('join', (data) => {
         //######################################################################################################################
         //                                              CONNEXION À E-LYCO
         //######################################################################################################################
-        fetch('./api/connect/elyco', {
+        fetch('/api/connect/elyco', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -128,7 +128,7 @@ socket.on('join', (data) => {
         //######################################################################################################################
         //                                             CONNEXION À PRONOTE
         //######################################################################################################################
-        fetch('./api/connect/pronote', {
+        fetch('/api/connect/pronote', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -167,7 +167,7 @@ socket.on('join', (data) => {
         //######################################################################################################################
         //                                   AFFICHAGE DU STOCKAGE RESTANT SUR LE CLOUD PRIVÉ
         //######################################################################################################################
-        fetch('./api/cloud/totalsize', {
+        fetch('/api/cloud/totalsize', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -210,7 +210,7 @@ socket.on('join', (data) => {
         //######################################################################################################################
         //                                             AFFICHAGE DES NOTES
         //######################################################################################################################
-        fetch('./api/note/get', {
+        fetch('/api/note/get', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -412,6 +412,20 @@ socket.on('notifications', (data) => {
     if (data.status) {
         if (data.nbrunseen > 0) {
             document.querySelector('.notif-count') ? document.querySelector('.notif-count').innerHTML = data.nbrunseen : document.querySelector('.notif-btn').innerHTML += `<span class="notif-count">${data.nbrunseen}</span>`;
+            document.querySelector('.notif-btn').addEventListener('click', () => {
+                fetch('/api/notifications/updateunread', {
+                        method: 'GET',
+                        headers: {
+                            'Application-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        }
+                    }).then(res => res.json())
+                    .then(res => {
+                        if (res.status) {
+                            document.querySelector('.notif-count') ? document.querySelector('.notif-count').remove() : null
+                        }
+                    })
+            })
         }
         if (data.notifications.length > 0) {
             let notifsHTML = ``;
@@ -572,7 +586,7 @@ socket.on('privatemessageconv', (data) => {
                     let message = document.querySelector('.message-reply > textarea').value;
                     if (message.trim() != '') {
 
-                        fetch('./api/privatemessage/send', {
+                        fetch('/api/privatemessage/send', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -720,7 +734,7 @@ function createNote(e) {
         if (e.keyCode == 13) {
             if (e.target.value.length > 0) {
                 let content = utils.escapeHTML(e.target.value);
-                fetch('./api/note/add', {
+                fetch('/api/note/add', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -795,7 +809,7 @@ function createNote(e) {
 function deleteNote(e, noteId) {
     e.preventDefault();
     e.stopPropagation();
-    fetch('./api/note/delete', {
+    fetch('/api/note/delete', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

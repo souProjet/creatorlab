@@ -355,7 +355,7 @@ app.post('/api/\*', async(req, res) => {
                                             //on envoie les notifications à l 'utilisateur via websocket
 
                                             let unseen = await notification.getUnSeenNotifications(sessionId);
-                                            notification.updateReadNotifications(formatReturnedData, unseen.status ? unseen.nbrunseen : 0, sessionId)
+                                            //notification.updateReadNotifications(formatReturnedData, unseen.status ? unseen.nbrunseen : 0, sessionId)
                                             io.to(socketId).emit('notifications', {
                                                 status: true,
                                                 notifications: formatReturnedData.message,
@@ -622,6 +622,22 @@ app.post('/api/\*', async(req, res) => {
                                 message: 'Aucun fichier n\'a été uploadé'
                             });
                         }
+                    } else if (subAction == 'move') {
+                        let target = req.body.target ? escapeHTML(req.body.target) : null;
+                        let newparent = req.body.newparent ? escapeHTML(req.body.newparent) : null;
+
+                        if (target) {
+                            let isSuccess = cloud.move(token2, target, newparent);
+                            res.send({
+                                status: isSuccess,
+                                message: isSuccess ? 'Déplacement effectué' : 'Erreur lors du déplacement'
+                            });
+                        } else {
+                            res.send({
+                                status: false,
+                                message: 'Erreur lors du déplacement'
+                            });
+                        }
                     } else if (subAction == 'uploadthumbnail') {
                         let file = req.body.file;
                         let fileId = req.body.fileId ? escapeHTML(req.body.fileId) : null;
@@ -772,6 +788,59 @@ app.get('/api/\*', async(req, res) => {
     }
     if (req.headers.authorization) {
         switch (params[0]) {
+            case 'notifications':
+                if (elycoState) {
+                    let token = escapeHTML(req.headers.authorization.split(' ')[1]);
+                    let subAction = params[1];
+                    let resultData = await login.getSessionIds(token);
+                    if (resultData.status) {
+                        let sessionId = resultData.sessionId;
+                        if (subAction == 'updateunread') {
+                            notificationReturnedData = await notification.getNotifications(sessionId);
+                            if (notificationReturnedData.status) {
+                                //il faut formater les notifications reçu pour avoir un beau JSON contenant les notifications
+                                let notifications = notificationReturnedData.message;
+                                let formatReturnedData = notification.formatNotifications(notifications);
+                                if (formatReturnedData.status) {
+                                    //on envoie les notifications à l 'utilisateur via websocket
+
+                                    let unseen = await notification.getUnSeenNotifications(sessionId);
+                                    notification.updateReadNotifications(formatReturnedData, unseen.status ? unseen.nbrunseen : 0, sessionId)
+                                    res.status(200).send({
+                                        status: true,
+                                        message: 'Notification non lu mis à jour'
+                                    });
+                                } else {
+                                    res.status(200).send({
+                                        status: false,
+                                        message: 'Erreur lors de la récupération des notifications'
+                                    });
+                                }
+                            } else {
+                                res.status(200).send({
+                                    status: false,
+                                    message: 'Erreur lors de la récupération des notifications'
+                                });
+                            }
+                        } else {
+                            res.status(200).send({
+                                status: false,
+                                message: subAction + ' : methode inconnue'
+                            });
+                        }
+                    } else {
+                        res.status(200).send({
+                            status: false,
+                            message: 'Token invalide'
+                        });
+                    }
+                } else {
+                    res.status(200).send({
+                        status: false,
+                        message: 'Vous n\'êtes pas connecté à E-lyco'
+                    });
+                }
+                break;
             case 'courses':
                 if (elycoState) {
 

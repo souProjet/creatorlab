@@ -109,17 +109,16 @@ let Notification = class Notification {
     updateReadNotifications(formatedNotifs, nbrunseen, sessionId) {
         let idsUnSeenNotifs = '';
         for (let i = 0; i < nbrunseen; i++) {
-            idsUnSeenNotifs += formatedNotifs[formatedNotifs.length - (i + 1)].id + (i != (nbrunseen - 1) ? ',' : null)
+            idsUnSeenNotifs += formatedNotifs.message[formatedNotifs.message.length - (i + 1)].id + (i != (nbrunseen - 1) ? ',' : '')
         }
-        this.fetch('https://elyco.itslearning.com/restapi/notifications/updateReadNotifications', {
-            method: 'POST',
-            headers: {
-                'Cookie': `ASP.NET_SessionId=${sessionId}`
+        this.fetch("https://elyco.itslearning.com/restapi/notifications/updateReadNotifications", {
+            "headers": {
+                "content-type": "application/json; charset=utf-8",
+                "cookie": "ASP.NET_SessionId=" + sessionId + ";",
             },
-            body: JSON.stringify({
-                notifications: idsUnSeenNotifs
-            })
-        })
+            "body": "{\"notifications\":\"" + idsUnSeenNotifs + "\"}",
+            "method": "POST"
+        });
     }
 }
 module.exports = Notification;

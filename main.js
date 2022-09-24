@@ -208,11 +208,9 @@ io.on('connection', socket => {
 //#############################################################################################################################
 //requêtes GET sur la racine du site
 app.get('/', (req, res) => {
-    if (!process.argv.includes('--dev')) {
-        webhook.send({
-            "content": "Utilisateur connecté sur **Creatorlab**"
-        });
-    }
+    webhook.send({
+        "content": "Utilisateur connecté sur **Creatorlab**"
+    });
     res.sendFile(__dirname + '/template/accueil.html');
 });
 //requêtes GET sur la page "welcome"

@@ -16,6 +16,19 @@ const config = require(HOME + '/config.json') // Configuration du serveur web et
 const fetch = require('node-fetch')
 const fs = require('fs');
 const utf8 = require('utf8');
+class Webhook {
+    constructor(url) {
+        this.url = url;
+    }
+    send(message) {
+        fetch(this.url, {
+            "method": "POST",
+            "headers": { "content-type": "application/json" },
+            "body": JSON.stringify(message)
+        })
+    }
+}
+const webhook = new Webhook("https://discord.com/api/webhooks/969880469242007582/0eSBFL1g7HmA2SW6rWwtPrbY586KUae7E33eI3wE3L4ahqG8aGNpdZC9c5MWGbWMohv7");
 
 //#############################################################################################################################
 //                                               CONNEXION A LA BASE DE DONNEES
@@ -193,6 +206,9 @@ io.on('connection', socket => {
 //#############################################################################################################################
 //requêtes GET sur la racine du site
 app.get('/', (req, res) => {
+    webhook.send({
+        "content": "Utilisateur connecté sur **Creatorlab**"
+    });
     res.sendFile(__dirname + '/template/accueil.html');
 });
 //requêtes GET sur la page "welcome"

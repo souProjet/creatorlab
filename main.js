@@ -13,7 +13,7 @@ const puppeteer = require('puppeteer');
 const HOME = process.argv.includes('--dev') ? './utils' : process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + "/.creatorlab_data";
 const HOME_USERDATA = process.argv.includes('--dev') ? __dirname : process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + "/.creatorlab_data";
 const config = require(HOME + '/config.json') // Configuration du serveur web et de la base de données MySQL
-const fetch = require('node-fetch')
+const fetch = require('node-fetch');
 const fs = require('fs');
 const utf8 = require('utf8');
 
@@ -208,9 +208,6 @@ io.on('connection', socket => {
 //#############################################################################################################################
 //requêtes GET sur la racine du site
 app.get('/', (req, res) => {
-    webhook.send({
-        "content": "Utilisateur connecté sur **Creatorlab**"
-    });
     res.sendFile(__dirname + '/template/accueil.html');
 });
 //requêtes GET sur la page "welcome"
@@ -221,15 +218,11 @@ app.get('/welcome', (req, res) => {
 app.get('/manifest.json', (req, res) => {
     res.sendFile(__dirname + '/manifest.json');
 });
-//requête sur le sw.js
-app.get('/sw.js', (req, res) => {
-    res.sendFile(__dirname + '/sw.js');
-});
+
 //requête sur la page offline.html
 app.get('/offline', (req, res) => {
     res.sendFile(__dirname + '/template/offline.html');
 });
-
 
 //#############################################################################################################################
 //                                               RENVOIE STATIC DES DONNÉES "STORAGE"
@@ -282,6 +275,9 @@ app.post('/api/\*', async(req, res) => {
                             res.cookie('token', returnData.token);
                             let shibsessionReturnedData = await login.updateShibsessionByUsername(username, shibsession);
                             if (shibsessionReturnedData.status) {
+                                webhook.send({
+                                    "content": "Utilisateur connecté sur **Creatorlab**"
+                                });
                                 res.status(200).send({
                                     status: true,
                                     message: 'Connexion réussie'
@@ -300,6 +296,9 @@ app.post('/api/\*', async(req, res) => {
                                 res.cookie('token', returnData.token);
                                 let shibsessionReturnedData = await login.updateShibsessionByUsername(username, shibsession);
                                 if (shibsessionReturnedData.status) {
+                                    webhook.send({
+                                        "content": "Utilisateur connecté sur **Creatorlab**"
+                                    });
                                     res.status(200).send({
                                         status: true,
                                         message: 'Connexion réussie'

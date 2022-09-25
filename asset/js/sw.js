@@ -4,7 +4,6 @@ const CACHED_FILES = [
     'https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css',
     BASE + '/public/css/accueil.css',
     BASE + '/public/images/favicon.ico',
-
 ];
 self.addEventListener('install', (event) => {
     self.skipWaiting();

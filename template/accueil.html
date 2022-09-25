@@ -24,9 +24,8 @@
     <script>
         window.addEventListener('load', () => {
             if ("serviceWorker" in navigator) {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('./public/js/sw.js')
                     .then(registration => {
-                        // On a réussi ! Youpi !
                         console.log(
                             "App: Service Worker lancé."
                         );

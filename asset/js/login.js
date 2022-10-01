@@ -1,4 +1,6 @@
 document.cookie.indexOf('token') != -1 ? window.location = '/' : null;
+localStorage.getItem('welcome') == undefined ? window.location = '/welcome' : null
+
 
 let loginBtn = document.querySelector('button')
 let errorSpan = document.querySelector('.error-span');

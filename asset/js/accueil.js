@@ -1,4 +1,5 @@
-document.cookie.indexOf('token') == -1 ? window.location = '/welcome' : null;
+document.cookie.indexOf('token') == -1 ? window.location = '/login' : null;
+localStorage.getItem('welcome') == undefined ? window.location = '/welcome' : null
 
 let socket = io(); //on se connecte au websocket
 

@@ -1,4 +1,5 @@
-document.cookie.indexOf('token') != -1 ? window.location = '/' : null;
+localStorage.getItem('welcome') == 'true' ? window.location = '/' : localStorage.setItem('welcome', true);
+
 !(function($) {
     'use strict';
     // Go to Top

@@ -244,7 +244,7 @@ let Cloud = class Cloud {
         try {
             let fileId = 'id-' + this.generateToken();
             let fileExtension = file.name.split('.')[file.name.split('.').length - 1];
-            let acceptedExtensions = ['aac', 'json', 'png', 'jpg', 'jpeg', 'gif', 'txt', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'zip', 'rar', '7z', 'bz2', 'mp4', 'mp3', 'avi', 'flv', 'mpg', 'mpeg', 'mkv', 'mov', 'wmv', '3gp', '3g2', 'webm', 'ogg'];
+            let acceptedExtensions = ['aac', 'json', 'png', 'jpg', 'jpeg', 'gif', 'txt', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'zip', 'rar', '7z', 'bz2', 'mp4', 'mp3', 'avi', 'flv', 'mpg', 'mpeg', 'mkv', 'mov', 'wmv', '3gp', '3g2', 'webm', 'ogg', 'py', 'html', 'js', 'css'];
             if (acceptedExtensions.indexOf(fileExtension) == -1) {
                 return {
                     success: false,

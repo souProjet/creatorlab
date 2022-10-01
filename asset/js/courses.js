@@ -336,8 +336,11 @@ function viewDoc(e, link, title){
         })
         .then(res => res.json()).then(data => {
             if (data.status) {
-                
-                window.open(data.url.indexOf('resource.itslearning.com') == -1 ? 'https://page.itslearning.com'+data.url : data.url, '_blank');
+                // let a = document.createElement('a');
+                // a.href = data.url.indexOf('resource.itslearning.com') == -1 ? (data.url.indexOf('assignment.itslearning.com') == -1 ?'https://page.itslearning.com'+data.url : data.url): data.url;
+                // a.target = '_blank';
+                // a.click();
+                window.open(data.url.indexOf('resource.itslearning.com') == -1 ? (data.url.indexOf('assignment.itslearning.com') == -1 ?'https://page.itslearning.com'+data.url : data.url): data.url, '_blank');
                 // document.body.insertAdjacentHTML('afterbegin',  `
                 //     <div class="uk-lightbox uk-overflow-hidden uk-lightbox-panel uk-open uk-active uk-transition-active visualisator-cloud">
                 //         <ul class="uk-lightbox-items">

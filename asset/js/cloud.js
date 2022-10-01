@@ -1,4 +1,10 @@
 let sidebarItemCloud;
+
+let acceptedExtensionsImages = ['png', 'jpg', 'jpeg', 'gif'];
+let acceptedExtensionsVideos = ['mp4', 'webm', 'ogg'];
+let acceptedExtensionsAudios = ['mp3', 'wav', 'ogg'];
+let acceptedExtensionsDoc = ['odt', 'docx', 'xlsx', 'pptx', 'pdf', 'ppt', 'doc', 'ods', 'odp']
+
 sidebarItems.forEach((item) => {
     if (item.querySelector('span').innerHTML === 'Mon cloud') {
         sidebarItemCloud = item;
@@ -180,7 +186,7 @@ async function enterInFolder(path, reload = false) {
                 //     <p class="cooltip">${utils.octetToString(files[i].size) || "non défini"}</p>
                 //     <h1>${files[i].name}</h1>
                 // </a>`;
-
+                let ext = (files[i].name.split('.')[files[i].name.split('.').length - 1])
                 if(!files[i].isUploadedFile) {    
                     fetch('/api/cloud/getthumbnail', {
                         method: 'POST',
@@ -214,6 +220,13 @@ async function enterInFolder(path, reload = false) {
                     .catch(error => {
                         console.log(error);
                     });
+                }else if(acceptedExtensionsImages.includes(ext) || acceptedExtensionsAudios.includes(ext) || acceptedExtensionsVideos.includes(ext) || acceptedExtensionsDoc.includes(ext)){
+                    let thumbnailElement = document.getElementById(files[i].id).querySelector('.material-icons');
+                    thumbnailElement.innerHTML = '';
+                    thumbnailElement.style.backgroundImage = `url(./public/images/${acceptedExtensionsImages.includes(ext) ? 'image' : (acceptedExtensionsAudios.includes(ext) ? 'audio' : (acceptedExtensionsVideos.includes(ext) ? 'video' : 'doc'))}.png)`;
+                    thumbnailElement.style.backgroundSize = 'contain';
+                    thumbnailElement.style.backgroundPosition = 'center';
+                    thumbnailElement.style.backgroundRepeat = 'no-repeat';
                 }
             }
     
@@ -373,10 +386,6 @@ function enterInEditor(fileId, parentFolderId){
     if(isUploadedFile){
         let ext = document.getElementById(fileId) ? document.getElementById(fileId).querySelector('h1').innerHTML.split('.').length > 1 ? (document.getElementById(fileId).querySelector('h1').innerHTML.split('.')[document.getElementById(fileId).querySelector('h1').innerHTML.split('.').length - 1]) : null : null;
         let url = '/storage/'+token+'/'+fileId+'/'+ext;
-
-        let acceptedExtensionsImages = ['png', 'jpg', 'jpeg', 'gif'];
-        let acceptedExtensionsVideos = ['mp4', 'webm', 'ogg'];
-        let acceptedExtensionsAudios = ['mp3', 'wav', 'ogg'];
 
         if(!inDlOrAction){
             if(acceptedExtensionsImages.includes(ext)){

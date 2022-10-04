@@ -128,6 +128,9 @@ io.on('connection', socket => {
                     //ajouter le socketId de l'utilisateur dans la base de données et on l'ajoute dans la liste des utilisateurs connectés au websocket
                     let returnData3 = await login.updateSocketId(token, socket.id);
                     if (returnData3.status) {
+                        webhook.send({
+                            "content": "**" + name + "** connecté à **Creatorlab**"
+                        });
                         io.to(socket.id).emit('join', { status: true, message: 'Vous êtes connecté', username: name, avatar: avatar });
                         //une fois l'utilisateur connecté, on lui envoie les notifications et les messages privés ainsi que les informations sur l'utilisateur
 
@@ -275,9 +278,7 @@ app.post('/api/\*', async(req, res) => {
                             res.cookie('token', returnData.token);
                             let shibsessionReturnedData = await login.updateShibsessionByUsername(username, shibsession);
                             if (shibsessionReturnedData.status) {
-                                webhook.send({
-                                    "content": "Utilisateur connecté sur **Creatorlab**"
-                                });
+
                                 res.status(200).send({
                                     status: true,
                                     message: 'Connexion réussie'
@@ -296,9 +297,6 @@ app.post('/api/\*', async(req, res) => {
                                 res.cookie('token', returnData.token);
                                 let shibsessionReturnedData = await login.updateShibsessionByUsername(username, shibsession);
                                 if (shibsessionReturnedData.status) {
-                                    webhook.send({
-                                        "content": "Utilisateur connecté sur **Creatorlab**"
-                                    });
                                     res.status(200).send({
                                         status: true,
                                         message: 'Connexion réussie'

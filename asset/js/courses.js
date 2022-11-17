@@ -187,7 +187,7 @@ function viewCourse(id, isforplan = false) {
                     mainContent.innerHTML = `<h1 class="text-3xl font-semibold text-center">${course.courseName}</h1><br>` + (!(actuHTML == '' && planHTML == '' && updateHTML == '') ? `
                     <nav class="responsive-nav border-b md:m-0 -mx-4 nav-course">
                         <ul style="overflow:hidden;">
-                            ` + (actuHTML != '' ? '<li class="active"><a style="cursor:pointer;" class="lg:px-2">Actualitées</a></li>' : '') + `
+                            ` + (actuHTML != '' ? '<li class="active"><a style="cursor:pointer;" class="lg:px-2">Actualités</a></li>' : '') + `
                             ` + (updateHTML != '' ? '<li ' + (actuHTML == '' ? 'class="active"' : '') + '><a style="cursor:pointer;" class="lg:px-2">Mises à jour</a></li>' : '') + `
                             ` + (planHTML != '' ? '<li ' + (actuHTML == '' && updateHTML == '' ? 'class="active"' : '') + '><a style="cursor:pointer;" class="lg:px-2">Plan</a></li>' : '') + `
                         </ul>
@@ -209,7 +209,7 @@ function viewCourse(id, isforplan = false) {
                                 }
                                 this.classList.add('active');
 
-                                if (this.querySelector('a').innerText == 'Actualitées') {
+                                if (this.querySelector('a').innerText == 'Actualités') {
                                     actuBloc ? actuBloc.classList.add('active') : null;
                                     updateBloc ? updateBloc.classList.remove('active') : null;
                                     planBloc ? planBloc.classList.remove('active') : null;
